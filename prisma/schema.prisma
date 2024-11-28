@@ -1,93 +1,111 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// This is your Prisma schema file.
+// It defines your database structure and is used by Prisma to generate a type-safe client.
+// Learn more in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client-js" // Generates the Prisma Client for JavaScript/TypeScript.
 }
 
+// Datasource block: Configures the database connection.
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+// Resume model: Represents resumes created by users.
 model Resume {
-  id     String @id @default(cuid())
-  userId String
+  id     String @id @default(cuid()) // Primary key with a default value generated using a globally unique ID.
+  userId String                      // Foreign key to associate the resume with a user.
 
-  title       String?
-  description String?
+  // Optional fields for resume metadata.
+  title       String?  // Title of the resume (optional).
+  description String?  // Description of the resume (optional).
 
-  photoUrl    String?
-  colorHex    String  @default("#000000")
-  borderStyle String  @default("squircle")
-  summary     String?
-  firstName   String?
-  lastName    String?
-  jobTitle    String?
-  city        String?
-  country     String?
-  phone       String?
-  email       String?
+  // Visual customization fields.
+  photoUrl    String?  // URL to the user's photo (optional).
+  colorHex    String   @default("#000000")  // Hexadecimal color for resume styling, defaults to black.
+  borderStyle String   @default("squircle") // Border style for the resume, defaults to "squircle".
 
-  workExperiences WorkExperience[]
-  educations      Education[]
-  skills          String[]
+  // User information fields.
+  summary     String?  // Summary or objective statement (optional).
+  firstName   String?  // User's first name (optional).
+  lastName    String?  // User's last name (optional).
+  jobTitle    String?  // User's job title (optional).
+  city        String?  // User's city (optional).
+  country     String?  // User's country (optional).
+  phone       String?  // User's phone number (optional).
+  email       String?  // User's email address (optional).
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Relationships.
+  workExperiences WorkExperience[] // A resume can have multiple work experiences.
+  educations      Education[]      // A resume can have multiple education entries.
+  skills          String[]         // A list of skills associated with the resume.
 
-  @@map("resumes")
+  // Timestamps.
+  createdAt DateTime @default(now())  // Automatically set when the resume is created.
+  updatedAt DateTime @updatedAt       // Automatically updated whenever the resume is modified.
+
+  @@map("resumes") // Maps this model to the `resumes` table in the database.
 }
 
+// WorkExperience model: Represents work experience entries for resumes.
 model WorkExperience {
-  id String @id @default(cuid())
+  id String @id @default(cuid()) // Primary key with a default globally unique ID.
 
-  position    String?
-  company     String?
-  startDate   DateTime?
-  endDate     DateTime?
-  description String?
+  // Work experience details.
+  position    String?    // Job position or title (optional).
+  company     String?    // Company name (optional).
+  startDate   DateTime?  // Start date of the work experience (optional).
+  endDate     DateTime?  // End date of the work experience (optional).
+  description String?    // Description of responsibilities or achievements (optional).
 
+  // Foreign key and relationship to the Resume model.
   resumeId String
   resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  // `resumeId` links this entry to a specific resume. Deleting the resume will delete related work experiences.
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Timestamps.
+  createdAt DateTime @default(now()) // Automatically set when created.
+  updatedAt DateTime @updatedAt      // Automatically updated on modification.
 
-  @@map("work_experiences")
+  @@map("work_experiences") // Maps this model to the `work_experiences` table in the database.
 }
 
+// Education model: Represents education entries for resumes.
 model Education {
-  id String @id @default(cuid())
+  id String @id @default(cuid()) // Primary key with a default globally unique ID.
 
-  degree    String?
-  school    String?
-  startDate DateTime?
-  endDate   DateTime?
+  // Education details.
+  degree    String?    // Degree or certification earned (optional).
+  school    String?    // Institution name (optional).
+  startDate DateTime?  // Start date of the education (optional).
+  endDate   DateTime?  // End date of the education (optional).
 
+  // Foreign key and relationship to the Resume model.
   resumeId String
   resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  // Links this entry to a specific resume. Deleting the resume will delete related education entries.
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Timestamps.
+  createdAt DateTime @default(now()) // Automatically set when created.
+  updatedAt DateTime @updatedAt      // Automatically updated on modification.
 
-  @@map("educations")
+  @@map("educations") // Maps this model to the `educations` table in the database.
 }
 
+// UserSubscription model: Represents subscription details for a user.
 model UserSubscription {
-  id                      String   @id @default(cuid())
-  userId                  String   @unique
-  stripeCustomerId        String   @unique
-  stripeSubscriptionId    String   @unique
-  stripePriceId           String
-  stripeCurrentPeriodEnd  DateTime
-  stripeCancelAtPeriodEnd Boolean  @default(false)
+  id                      String   @id @default(cuid()) // Primary key with a default globally unique ID.
+  userId                  String   @unique             // Unique identifier linking the subscription to a user.
+  stripeCustomerId        String   @unique             // Unique Stripe customer ID.
+  stripeSubscriptionId    String   @unique             // Unique Stripe subscription ID.
+  stripePriceId           String                      // ID of the Stripe pricing plan.
+  stripeCurrentPeriodEnd  DateTime                    // End date of the current billing period.
+  stripeCancelAtPeriodEnd Boolean  @default(false)    // Indicates whether the subscription will be canceled at the end of the current period.
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Timestamps.
+  createdAt DateTime @default(now()) // Automatically set when created.
+  updatedAt DateTime @updatedAt      // Automatically updated on modification.
 
-  @@map("user_subscriptions")
+  @@map("user_subscriptions") // Maps this model to the `user_subscriptions` table in the database.
 }
