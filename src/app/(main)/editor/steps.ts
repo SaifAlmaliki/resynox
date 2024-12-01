@@ -1,28 +1,35 @@
-import { EditorFormProps } from "@/lib/types";
-import EducationForm from "./forms/EducationForm";
-import GeneralInfoForm from "./forms/GeneralInfoForm";
-import PersonalInfoForm from "./forms/PersonalInfoForm";
-import SkillsForm from "./forms/SkillsForm";
-import SummaryForm from "./forms/SummaryForm";
-import WorkExperienceForm from "./forms/WorkExperienceForm";
+// Importing the `EditorFormProps` type definition, which defines the expected props for each form component.
+import { EditorFormProps } from "@/lib/types"; 
 
+// Importing individual form components that represent different sections of the editor or resume form.
+import EducationForm from "./forms/EducationForm"; // Component for education details form.
+import GeneralInfoForm from "./forms/GeneralInfoForm"; // Component for general information form.
+import PersonalInfoForm from "./forms/PersonalInfoForm"; // Component for personal information form.
+import SkillsForm from "./forms/SkillsForm"; // Component for skills form.
+import SummaryForm from "./forms/SummaryForm"; // Component for summary or overview form.
+import WorkExperienceForm from "./forms/WorkExperienceForm"; // Component for work experience form.
+
+// `steps` is an array that defines the different sections (or steps) of the form editor process.
+// Each step includes a title, the corresponding React component to render, and a unique key to identify the step.
 export const steps: {
-  title: string;
-  component: React.ComponentType<EditorFormProps>;
-  key: string;
+  title: string;  // Title of the step, displayed in the UI (e.g., "General info").
+  component: React.ComponentType<EditorFormProps>; // React component to render for this step, accepts `EditorFormProps`.
+  key: string;    // Unique identifier for the step, used for tracking or navigation.
 }[] = [
-  { title: "General info", component: GeneralInfoForm, key: "general-info" },
+  // First step: General Information form
+  {
+    title: "General info",      // Step title displayed to the user.
+    component: GeneralInfoForm, // Component responsible for rendering the general information form.
+    key: "general-info",        // Unique key for identifying this step in logic or navigation.
+  },
+  // Second step: Personal Information form
   { title: "Personal info", component: PersonalInfoForm, key: "personal-info" },
-  {
-    title: "Work experience",
-    component: WorkExperienceForm,
-    key: "work-experience",
-  },
-  { title: "Education", component: EducationForm, key: "education" },
-  { title: "Skills", component: SkillsForm, key: "skills" },
-  {
-    title: "Summary",
-    component: SummaryForm,
-    key: "summary",
-  },
+  // Third step: Work Experience form
+  { title: "Work experience", component: WorkExperienceForm, key: "work-experience"},
+  // Fourth step: Education details form
+  { title: "Education", component: EducationForm, key: "education"},
+  // Fifth step: Skills form
+  { title: "Skills", component: SkillsForm, key: "skills"},
+  // Final step: Summary form
+  { title: "Summary", component: SummaryForm, key: "summary"},
 ];

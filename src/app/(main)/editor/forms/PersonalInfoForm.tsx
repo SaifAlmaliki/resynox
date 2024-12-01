@@ -1,26 +1,19 @@
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { EditorFormProps } from "@/lib/types";
-import { personalInfoSchema, PersonalInfoValues } from "@/lib/validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+// Importing necessary components and hooks from the project and external libraries.
+import { Button } from "@/components/ui/button"; // Button UI component.
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // Form-related components for structured and styled forms.
+import { Input } from "@/components/ui/input"; // Input field UI component.
+import { EditorFormProps } from "@/lib/types"; // Type definitions for form props.
+import { personalInfoSchema, PersonalInfoValues } from "@/lib/validation"; // Validation schema and type definitions for form data.
+import { zodResolver } from "@hookform/resolvers/zod"; // Zod resolver for integrating validation schema with React Hook Form.
+import { useEffect, useRef } from "react"; // React hooks for lifecycle management and references.
+import { useForm } from "react-hook-form"; // React Hook Form library for form state management.
 
-export default function PersonalInfoForm({
-  resumeData,
-  setResumeData,
-}: EditorFormProps) {
+export default function PersonalInfoForm({resumeData, setResumeData}: EditorFormProps) {
+  // Initialize the form using `useForm` hook with validation schema and default values.
   const form = useForm<PersonalInfoValues>({
-    resolver: zodResolver(personalInfoSchema),
+    resolver: zodResolver(personalInfoSchema), // Integrates Zod schema for validation.
     defaultValues: {
+      // Set default values from `resumeData` or fallback to empty strings.
       firstName: resumeData.firstName || "",
       lastName: resumeData.lastName || "",
       jobTitle: resumeData.jobTitle || "",
@@ -31,61 +24,72 @@ export default function PersonalInfoForm({
     },
   });
 
+  // Synchronize form state with `resumeData` using `useEffect`.
   useEffect(() => {
     const { unsubscribe } = form.watch(async (values) => {
-      const isValid = await form.trigger();
-      if (!isValid) return;
+      const isValid = await form.trigger(); // Validates the form fields.
+      if (!isValid) return; // If form validation fails, exit early.
+
+      // Merge `resumeData` with updated form values (`values`) and update the state.
       setResumeData({ ...resumeData, ...values });
     });
-    return unsubscribe;
-  }, [form, resumeData, setResumeData]);
 
+    return unsubscribe; // Cleanup form watcher when component unmounts.
+  }, [form, resumeData, setResumeData]); // Dependencies to trigger this effect.
+
+  // Reference for the photo input field.
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
+      {/* Form header section with a title and description */}
       <div className="space-y-1.5 text-center">
         <h2 className="text-2xl font-semibold">Personal info</h2>
         <p className="text-sm text-muted-foreground">Tell us about yourself.</p>
       </div>
+      {/* Form component initialized with `form` */}
       <Form {...form}>
         <form className="space-y-3">
+          {/* Photo input field */}
           <FormField
-            control={form.control}
-            name="photo"
+            control={form.control} // Connects the field to form control.
+            name="photo" // Field name.
             render={({ field: { value, ...fieldValues } }) => (
               <FormItem>
                 <FormLabel>Your photo</FormLabel>
                 <div className="flex items-center gap-2">
                   <FormControl>
                     <Input
-                      {...fieldValues}
-                      type="file"
-                      accept="image/*"
+                      {...fieldValues} // Pass form field props.
+                      type="file"      // Input type for file upload.
+                      accept="image/*" // Accept only image files.
                       onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        fieldValues.onChange(file);
+                        const file = e.target.files?.[0]; // Get the selected file.
+                        fieldValues.onChange(file);       // Update field value.
                       }}
-                      ref={photoInputRef}
+                      ref={photoInputRef} // Attach input field to the reference.
                     />
                   </FormControl>
+                  {/* Button to clear the photo input */}
                   <Button
                     variant="secondary"
                     type="button"
                     onClick={() => {
-                      fieldValues.onChange(null);
+                      fieldValues.onChange(null); // Clear the form value.
                       if (photoInputRef.current) {
-                        photoInputRef.current.value = "";
+                        photoInputRef.current.value = ""; // Reset the input field.
                       }
                     }}
                   >
                     Remove
                   </Button>
                 </div>
-                <FormMessage />
+                <FormMessage /> {/* Displays validation error messages. */}
               </FormItem>
             )}
           />
+
+          {/* First and Last Name fields in a two-column grid */}
           <div className="grid grid-cols-2 gap-3">
             <FormField
               control={form.control}
@@ -94,9 +98,9 @@ export default function PersonalInfoForm({
                 <FormItem>
                   <FormLabel>First name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} /> {/* First name input field */}
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage /> {/* Error messages */}
                 </FormItem>
               )}
             />
@@ -107,13 +111,15 @@ export default function PersonalInfoForm({
                 <FormItem>
                   <FormLabel>Last name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} /> {/* Last name input field */}
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage /> {/* Error messages */}
                 </FormItem>
               )}
             />
           </div>
+
+          {/* Job Title field */}
           <FormField
             control={form.control}
             name="jobTitle"
@@ -121,12 +127,14 @@ export default function PersonalInfoForm({
               <FormItem>
                 <FormLabel>Job title</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} /> {/* Job title input field */}
                 </FormControl>
-                <FormMessage />
+                <FormMessage /> {/* Error messages */}
               </FormItem>
             )}
           />
+
+          {/* City and Country fields in a two-column grid */}
           <div className="grid grid-cols-2 gap-3">
             <FormField
               control={form.control}
@@ -135,9 +143,9 @@ export default function PersonalInfoForm({
                 <FormItem>
                   <FormLabel>City</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} /> {/* City input field */}
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage /> {/* Error messages */}
                 </FormItem>
               )}
             />
@@ -148,13 +156,15 @@ export default function PersonalInfoForm({
                 <FormItem>
                   <FormLabel>Country</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} /> {/* Country input field */}
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage /> {/* Error messages */}
                 </FormItem>
               )}
             />
           </div>
+
+          {/* Phone field */}
           <FormField
             control={form.control}
             name="phone"
@@ -162,12 +172,13 @@ export default function PersonalInfoForm({
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input {...field} type="tel" />
+                  <Input {...field} type="tel" /> {/* Phone input field */}
                 </FormControl>
-                <FormMessage />
+                <FormMessage /> {/* Error messages */}
               </FormItem>
             )}
           />
+          {/* Email field */}
           <FormField
             control={form.control}
             name="email"
@@ -175,9 +186,9 @@ export default function PersonalInfoForm({
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input {...field} type="email" />
+                  <Input {...field} type="email" /> {/* Email input field */}
                 </FormControl>
-                <FormMessage />
+                <FormMessage /> {/* Error messages */}
               </FormItem>
             )}
           />

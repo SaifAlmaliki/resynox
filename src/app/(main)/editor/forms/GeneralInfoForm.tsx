@@ -1,37 +1,34 @@
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { EditorFormProps } from "@/lib/types";
-import { generalInfoSchema, GeneralInfoValues } from "@/lib/validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import { Input } from "@/components/ui/input"; // Import Input component
+import { EditorFormProps } from "@/lib/types"; // Type for form props
+import { generalInfoSchema, GeneralInfoValues } from "@/lib/validation"; // Validation schema and type
+import { zodResolver } from "@hookform/resolvers/zod"; // Resolver for Zod validation
+import { useEffect } from "react"; // React hook for side effects
+import { useForm } from "react-hook-form"; // Hook for managing form state
 
-export default function GeneralInfoForm({
-  resumeData,
-  setResumeData,
-}: EditorFormProps) {
+// Component for editing general information
+// resumeData: Resume data to populate the form
+// setResumeData: Callback to update resume data
+
+export default function GeneralInfoForm({resumeData, setResumeData}: EditorFormProps) {
+  // Initialize the form with validation and default values
   const form = useForm<GeneralInfoValues>({
-    resolver: zodResolver(generalInfoSchema),
+    resolver: zodResolver(generalInfoSchema), // Apply Zod validation schema
     defaultValues: {
-      title: resumeData.title || "",
-      description: resumeData.description || "",
+      title: resumeData.title || "", // Default title or empty string
+      description: resumeData.description || "", // Default description or empty string
     },
   });
 
+  // Effect to watch form values and update resume data when the form is valid
   useEffect(() => {
+    // Subscribe to form value changes
     const { unsubscribe } = form.watch(async (values) => {
-      const isValid = await form.trigger();
-      if (!isValid) return;
+      const isValid = await form.trigger(); // Validate form values
+      if (!isValid) return; // Do not update data if validation fails
       setResumeData({ ...resumeData, ...values });
     });
+
     return unsubscribe;
   }, [form, resumeData, setResumeData]);
 
@@ -43,8 +40,11 @@ export default function GeneralInfoForm({
           This will not appear on your resume.
         </p>
       </div>
+
+      {/* Main Form */}
       <Form {...form}>
         <form className="space-y-3">
+          {/* Field for project title */}
           <FormField
             control={form.control}
             name="title"
@@ -58,6 +58,8 @@ export default function GeneralInfoForm({
               </FormItem>
             )}
           />
+
+          {/* Field for project description */}
           <FormField
             control={form.control}
             name="description"
@@ -67,10 +69,8 @@ export default function GeneralInfoForm({
                 <FormControl>
                   <Input {...field} placeholder="A resume for my next job" />
                 </FormControl>
-                <FormDescription>
-                  Describe what this resume is for.
-                </FormDescription>
-                <FormMessage />
+                <FormDescription>Describe what this resume is for.</FormDescription>
+                <FormMessage /> {/* Display validation error message */}
               </FormItem>
             )}
           />

@@ -58,15 +58,12 @@ model WorkExperience {
   startDate   DateTime?  // Start date of the work experience (optional).
   endDate     DateTime?  // End date of the work experience (optional).
   description String?    // Description of responsibilities or achievements (optional).
-
-  // Foreign key and relationship to the Resume model.
-  resumeId String
-  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  // `resumeId` links this entry to a specific resume. Deleting the resume will delete related work experiences.
-
-  // Timestamps.
   createdAt DateTime @default(now()) // Automatically set when created.
   updatedAt DateTime @updatedAt      // Automatically updated on modification.
+
+  resumeId String        // Foreign key and relationship to the Resume model.
+  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  // `resumeId` links this entry to a specific resume. Deleting the resume will delete related work experiences.
 
   @@map("work_experiences") // Maps this model to the `work_experiences` table in the database.
 }

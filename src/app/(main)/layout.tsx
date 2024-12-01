@@ -4,11 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import Navbar from "./Navbar";
 import SubscriptionLevelProvider from "./SubscriptionLevelProvider";
 
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function Layout({children}: {children: React.ReactNode;}) {
   const { userId } = await auth();
 
   if (!userId) {
