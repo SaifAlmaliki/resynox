@@ -48,8 +48,8 @@ export default function Footer({ currentStep, setCurrentStep, showSmResumePrevie
 
         {/* Toggle button for small resume preview, hidden on larger screens */}
         <Button
-          variant="outline" // Outline style for the button
-          size="icon" // Icon size for compact button
+          variant="outline"
+          size="icon"
           onClick={() => setShowSmResumePreview(!showSmResumePreview)} // Toggle preview visibility
           className="md:hidden" // Hidden on medium and larger screens
           title={

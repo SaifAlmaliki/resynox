@@ -42,8 +42,8 @@ export default function WorkExperienceForm({resumeData, setResumeData }: EditorF
 
   // Manage dynamic fields using `useFieldArray`
   const { fields, append, remove, move } = useFieldArray({
-    control: form.control, // Hook form control object
-    name: "workExperiences", // Path to dynamic fields in the form state
+    control: form.control,    // Hook form control object
+    name: "workExperiences",  // Path to dynamic fields in the form state
   });
 
   // Set up drag-and-drop sensors for reordering work experiences

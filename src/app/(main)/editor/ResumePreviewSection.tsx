@@ -6,17 +6,13 @@ import ColorPicker from "./ColorPicker"; // Color picker component for selecting
 
 // Type definition for the component's props
 interface ResumePreviewSectionProps {
-  resumeData: ResumeValues; // Resume data object
-  setResumeData: (data: ResumeValues) => void; // Function to update resume data
-  className?: string; // Optional additional className for styling
+  resumeData: ResumeValues;
+  setResumeData: (data: ResumeValues) => void;
+  className?: string;
 }
 
 // Component to display the resume preview with customization options
-export default function ResumePreviewSection({
-  resumeData,
-  setResumeData,
-  className
-}: ResumePreviewSectionProps) {
+export default function ResumePreviewSection({resumeData, setResumeData, className}: ResumePreviewSectionProps) {
   return (
     <div
       className={cn(
@@ -28,7 +24,7 @@ export default function ResumePreviewSection({
       <div className="absolute left-1 top-1 flex flex-none flex-col gap-3 opacity-50 transition-opacity group-hover:opacity-100 lg:left-3 lg:top-3 xl:opacity-100">
         {/* Color Picker to customize resume color */}
         <ColorPicker
-          color={resumeData.colorHex} // Current color
+          color={resumeData.colorHex}
           onChange={(color) =>
             setResumeData({ ...resumeData, colorHex: color.hex }) // Update color in resume data
           }
