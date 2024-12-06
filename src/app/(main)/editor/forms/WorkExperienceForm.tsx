@@ -17,10 +17,7 @@ import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import GenerateWorkExperienceButton from "./GenerateWorkExperienceButton";
 
 // Main component for Work Experience Form
-export default function WorkExperienceForm({
-  resumeData,
-  setResumeData,
-}: EditorFormProps) {
+export default function WorkExperienceForm({resumeData, setResumeData }: EditorFormProps) {
   // Initialize the form using react-hook-form and set default values
   const form = useForm<WorkExperienceValues>({
     resolver: zodResolver(workExperienceSchema), // Use Zod schema for validation
@@ -96,10 +93,10 @@ export default function WorkExperienceForm({
               {/* Render individual work experience items */}
               {fields.map((field, index) => (
                 <WorkExperienceItem
-                  id={field.id} // Unique ID for drag-and-drop
-                  key={field.id} // React key
-                  index={index} // Item index
-                  form={form} // Form control
+                  id={field.id}   // Unique ID for drag-and-drop
+                  key={field.id}  // React key
+                  index={index}   // Item index
+                  form={form}     // Form control
                   remove={remove} // Remove handler
                 />
               ))}
@@ -137,12 +134,7 @@ interface WorkExperienceItemProps {
   remove: (index: number) => void; // Function to remove the item
 }
 
-function WorkExperienceItem({
-  id,
-  form,
-  index,
-  remove,
-}: WorkExperienceItemProps) {
+function WorkExperienceItem({id, form, index, remove}: WorkExperienceItemProps) {
   // Manage drag-and-drop sorting for the item
   const {
     attributes,
@@ -168,8 +160,7 @@ function WorkExperienceItem({
       {/* Header with drag handle and item label */}
       <div className="flex justify-between gap-2">
         <span className="font-semibold">Work experience {index + 1}</span>
-        <GripHorizontal
-          className="size-5 cursor-grab text-muted-foreground focus:outline-none"
+        <GripHorizontal className="size-5 cursor-grab text-muted-foreground focus:outline-none"
           {...attributes} // Drag handle attributes
           {...listeners} // Drag handle event listeners
         />
@@ -223,10 +214,7 @@ function WorkExperienceItem({
             <FormItem>
               <FormLabel>Start date</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="date"
-                  value={field.value?.slice(0, 10)} // Format date value
+                <Input {...field} type="date" value={field.value?.slice(0, 10)} // Format date value
                 />
               </FormControl>
               <FormMessage />
@@ -240,10 +228,7 @@ function WorkExperienceItem({
             <FormItem>
               <FormLabel>End date</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="date"
-                  value={field.value?.slice(0, 10)} // Format date value
+                <Input {...field} type="date" value={field.value?.slice(0, 10)} // Format date value
                 />
               </FormControl>
               <FormMessage />

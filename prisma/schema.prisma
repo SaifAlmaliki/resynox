@@ -51,8 +51,6 @@ model Resume {
 // WorkExperience model: Represents work experience entries for resumes.
 model WorkExperience {
   id String @id @default(cuid()) // Primary key with a default globally unique ID.
-
-  // Work experience details.
   position    String?    // Job position or title (optional).
   company     String?    // Company name (optional).
   startDate   DateTime?  // Start date of the work experience (optional).
@@ -71,8 +69,6 @@ model WorkExperience {
 // Education model: Represents education entries for resumes.
 model Education {
   id String @id @default(cuid()) // Primary key with a default globally unique ID.
-
-  // Education details.
   degree    String?    // Degree or certification earned (optional).
   school    String?    // Institution name (optional).
   startDate DateTime?  // Start date of the education (optional).
@@ -81,7 +77,6 @@ model Education {
   // Foreign key and relationship to the Resume model.
   resumeId String
   resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  // Links this entry to a specific resume. Deleting the resume will delete related education entries.
 
   // Timestamps.
   createdAt DateTime @default(now()) // Automatically set when created.
