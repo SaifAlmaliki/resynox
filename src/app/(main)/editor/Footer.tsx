@@ -70,7 +70,7 @@ export default function Footer({ currentStep, setCurrentStep, showSmResumePrevie
           <p
             className={cn(
               "text-muted-foreground opacity-0", // Default invisible text
-              isSaving && "opacity-100", // Make visible if saving
+              isSaving && "opacity-100",         // Make visible if saving
             )}
           >
             Saving...

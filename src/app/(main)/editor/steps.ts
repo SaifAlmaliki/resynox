@@ -1,5 +1,5 @@
 // Importing the `EditorFormProps` type definition, which defines the expected props for each form component.
-import { EditorFormProps } from "@/lib/types"; 
+import { EditorFormProps } from "@/lib/types";
 
 // Importing individual form components that represent different sections of the editor or resume form.
 import EducationForm from "./forms/EducationForm"; // Component for education details form.

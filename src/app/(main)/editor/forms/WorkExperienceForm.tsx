@@ -60,9 +60,9 @@ export default function WorkExperienceForm({resumeData, setResumeData }: EditorF
 
     if (over && active.id !== over.id) {
       const oldIndex = fields.findIndex((field) => field.id === active.id); // Find source index
-      const newIndex = fields.findIndex((field) => field.id === over.id); // Find destination index
-      move(oldIndex, newIndex); // Update field order in form state
-      return arrayMove(fields, oldIndex, newIndex); // Update local array
+      const newIndex = fields.findIndex((field) => field.id === over.id);   // Find destination index
+      move(oldIndex, newIndex);                                             // Update field order in form state
+      return arrayMove(fields, oldIndex, newIndex);                         // Update local array
     }
   }
 
@@ -81,13 +81,13 @@ export default function WorkExperienceForm({resumeData, setResumeData }: EditorF
         <form className="space-y-3">
           {/* Drag-and-drop context for sortable work experiences */}
           <DndContext
-            sensors={sensors} // Drag sensors
-            collisionDetection={closestCenter} // Detect closest drop zone
-            onDragEnd={handleDragEnd} // Handle reordering
-            modifiers={[restrictToVerticalAxis]} // Restrict drag to vertical axis
+            sensors={sensors}                     // Drag sensors
+            collisionDetection={closestCenter}    // Detect closest drop zone
+            onDragEnd={handleDragEnd}             // Handle reordering
+            modifiers={[restrictToVerticalAxis]}  // Restrict drag to vertical axis
           >
             <SortableContext
-              items={fields} // List of sortable items
+              items={fields}                         // List of sortable items
               strategy={verticalListSortingStrategy} // Use vertical ordering
             >
               {/* Render individual work experience items */}
@@ -128,10 +128,10 @@ export default function WorkExperienceForm({resumeData, setResumeData }: EditorF
 
 // Component for rendering individual work experience items
 interface WorkExperienceItemProps {
-  id: string; // Unique ID for the item
-  form: UseFormReturn<WorkExperienceValues>; // Form control object
-  index: number; // Index of the item in the array
-  remove: (index: number) => void; // Function to remove the item
+  id: string;                                 // Unique ID for the item
+  form: UseFormReturn<WorkExperienceValues>;  // Form control object
+  index: number;                              // Index of the item in the array
+  remove: (index: number) => void;            // Function to remove the item
 }
 
 function WorkExperienceItem({id, form, index, remove}: WorkExperienceItemProps) {
@@ -162,7 +162,7 @@ function WorkExperienceItem({id, form, index, remove}: WorkExperienceItemProps) 
         <span className="font-semibold">Work experience {index + 1}</span>
         <GripHorizontal className="size-5 cursor-grab text-muted-foreground focus:outline-none"
           {...attributes} // Drag handle attributes
-          {...listeners} // Drag handle event listeners
+          {...listeners}  // Drag handle event listeners
         />
       </div>
 
