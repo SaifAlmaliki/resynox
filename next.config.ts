@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "w0mlmrgwbziwquaq.public.blob.vercel-storage.com"
+        hostname: "ycpy9sns92utpex7.public.blob.vercel-storage.com"
         // Here, images served from this specific hostname over HTTPS
         // are considered allowed and can be optimized by Next.js.
       }
