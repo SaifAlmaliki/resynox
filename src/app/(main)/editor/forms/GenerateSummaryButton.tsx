@@ -9,8 +9,8 @@ import { useSubscriptionLevel } from "../../SubscriptionLevelProvider";
 import { generateSummary } from "./actions";
 
 interface GenerateSummaryButtonProps {
-  resumeData: ResumeValues;               // The current resume data
-  onSummaryGenerated: (summary: string) => void; // Callback when summary is generated
+  resumeData: ResumeValues;                       // The current resume data
+  onSummaryGenerated: (summary: string) => void;  // Callback when summary is generated
 }
 
 /**
@@ -52,7 +52,8 @@ export default function GenerateSummaryButton({
 
       // If successful, call the callback with the generated summary
       onSummaryGenerated(aiResponse);
-    } catch (error) {
+    }
+    catch (error) {
       console.error(error);
 
       // Show an error toast if something goes wrong
@@ -73,10 +74,7 @@ export default function GenerateSummaryButton({
       onClick={handleClick}
       loading={loading}
     >
-      {/*
-        WandSparklesIcon is a decorative icon representing magic/AI generation.
-        The "Generate (AI)" text clarifies the button's purpose.
-      */}
+      {/*WandSparklesIcon is a decorative icon representing magic/AI generation.*/}
       <WandSparklesIcon className="size-4" />
       Generate (AI)
     </LoadingButton>

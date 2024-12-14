@@ -96,11 +96,7 @@ interface InputDialogProps {
  * It contains a form where the user describes their experience. On submission, the AI-generated
  * experience is returned and processed.
  */
-function InputDialog({
-  open,
-  onOpenChange,
-  onWorkExperienceGenerated,
-}: InputDialogProps) {
+function InputDialog({ open, onOpenChange, onWorkExperienceGenerated }: InputDialogProps) {
   const { toast } = useToast();
 
   // Set up a form with react-hook-form and zod validation

@@ -39,6 +39,6 @@ export const env = createEnv({
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, // From process.env
     NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY, // From process.env
     NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY, // From process.env
-    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL, // From process.env
+    // NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL, // From process.env
   },
 });

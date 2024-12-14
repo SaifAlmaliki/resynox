@@ -58,9 +58,17 @@ export const workExperienceSchema = z.object({
 export type WorkExperienceValues = z.infer<typeof workExperienceSchema>;
 
 // Single work experience type
+// 1. `z.infer<typeof workExperienceSchema>`: Infers the TypeScript type from the Zod schema `workExperienceSchema`.
+// 2. `["workExperiences"]`: Accesses the `workExperiences` property on the inferred type. This should be an array or optional array.
+// 3. `[number]`: Indexes into the array type to get the type of a single element in that array.
+// 4. `NonNullable<...>`: Ensures that the type cannot be null or undefined.
+
+// In summary, this type definition extracts the individual work experience item type from
+// an array of `workExperiences` defined by the Zod schema, and ensures it cannot be null or undefined.
 export type WorkExperience = NonNullable<
   z.infer<typeof workExperienceSchema>["workExperiences"]
 >[number];
+
 
 // Schema for education details
 export const educationSchema = z.object({
@@ -130,10 +138,10 @@ export type GenerateWorkExperienceInput = z.infer<
 
 // Schema for generating a summary, reusing fields from other schemas
 export const generateSummarySchema = z.object({
-  jobTitle: optionalString, // Optional job title
-  ...workExperienceSchema.shape, // Reuse work experience fields
-  ...educationSchema.shape, // Reuse education fields
-  ...skillsSchema.shape, // Reuse skills fields
+  jobTitle: optionalString,       // Optional job title
+  ...workExperienceSchema.shape,  // Reuse work experience fields
+  ...educationSchema.shape,       // Reuse education fields
+  ...skillsSchema.shape,          // Reuse skills fields
 });
 
 // Type inference for the generate summary input
