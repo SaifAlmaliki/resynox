@@ -18,8 +18,8 @@ interface ResumePreviewProps {
 // Main component: ResumePreview
 // This component renders the entire resume preview, scaling it based on container dimensions.
 export default function ResumePreview({ resumeData, contentRef, className }: ResumePreviewProps) {
-  const containerRef = useRef<HTMLDivElement>(null); // Reference to the container div
-  const { width } = useDimensions(containerRef); // Dynamically get the width of the container
+  const containerRef = useRef<HTMLDivElement>(null);  // Reference to the container div
+  const { width } = useDimensions(containerRef);      // Dynamically get the width of the container
 
   return (          // Maintain A4 aspect ratio
     <div className={cn("aspect-[210/297] h-fit w-full bg-white text-black", className)} // Append any additional custom classNames
