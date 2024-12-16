@@ -28,7 +28,7 @@ export const env = createEnv({
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1), // Publishable key for Stripe, used on the client-side
     NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY: z.string().min(1), // Price ID for Stripe Pro Monthly subscription
     NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY: z.string().min(1), // Price ID for Stripe Pro Plus Monthly subscription
-//    NEXT_PUBLIC_BASE_URL: z.string().min(1).url(), // Base URL for the application (must be a valid URL)
+    NEXT_PUBLIC_BASE_URL: z.string().min(1).url(), // Base URL for the application (must be a valid URL)
   },
 
   // Map environment variables to their respective runtime values
@@ -39,6 +39,6 @@ export const env = createEnv({
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, // From process.env
     NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY, // From process.env
     NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY, // From process.env
-    // NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL, // From process.env
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL, // From process.env
   },
 });

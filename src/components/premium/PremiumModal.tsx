@@ -19,9 +19,9 @@ const premiumPlusFeatures = ["Infinite resumes", "Design customizations"];
  * It displays the features for two plans: Premium and Premium Plus.
  */
 export default function PremiumModal() {
-  const { open, setOpen } = usePremiumModal(); // Manage modal state (open/close)
-  const { toast } = useToast(); // Toast notifications for errors
-  const [loading, setLoading] = useState(false); // Loading state for checkout actions
+  const { open, setOpen } = usePremiumModal();    // Manage modal state (open/close)
+  const { toast } = useToast();                   // Toast notifications for errors
+  const [loading, setLoading] = useState(false);  // Loading state for checkout actions
 
   /**
    * Handles the click event for purchasing premium subscriptions.
@@ -38,7 +38,7 @@ export default function PremiumModal() {
       // Show error message if the checkout fails
       toast({
         variant: "destructive",
-        description: "Something went wrong. Please try again.",
+        description: "Something went wrong in the checkout. Please try again.",
       });
     } finally {
       setLoading(false); // Reset loading state
