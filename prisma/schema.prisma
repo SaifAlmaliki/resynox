@@ -88,12 +88,12 @@ model Education {
 // UserSubscription model: Represents subscription details for a user.
 model UserSubscription {
   id                      String   @id @default(cuid()) // Primary key with a default globally unique ID.
-  userId                  String   @unique             // Unique identifier linking the subscription to a user.
-  stripeCustomerId        String   @unique             // Unique Stripe customer ID.
-  stripeSubscriptionId    String   @unique             // Unique Stripe subscription ID.
-  stripePriceId           String                      // ID of the Stripe pricing plan.
-  stripeCurrentPeriodEnd  DateTime                    // End date of the current billing period.
-  stripeCancelAtPeriodEnd Boolean  @default(false)    // Indicates whether the subscription will be canceled at the end of the current period.
+  userId                  String   @unique              // Unique identifier linking the subscription to a user.
+  stripeCustomerId        String   @unique              // Unique Stripe customer ID.
+  stripeSubscriptionId    String   @unique              // Unique Stripe subscription ID.
+  stripePriceId           String                        // ID of the Stripe pricing plan.
+  stripeCurrentPeriodEnd  DateTime                      // End date of the current billing period.
+  stripeCancelAtPeriodEnd Boolean  @default(false)      // Indicates whether the subscription will be canceled at the end of the current period.
 
   // Timestamps.
   createdAt DateTime @default(now()) // Automatically set when created.

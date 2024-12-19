@@ -1,4 +1,3 @@
-// Import the SubscriptionLevel type or enum from the subscription module
 import { SubscriptionLevel } from "./subscription";
 
 /**

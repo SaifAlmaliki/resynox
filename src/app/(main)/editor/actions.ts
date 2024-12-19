@@ -61,9 +61,7 @@ export async function saveResume(values: ResumeValues) {
 
   // Check if the user is attempting to use customizations (e.g., borderStyle, custom colors)
   // and ensure that their subscription level permits it.
-  const hasCustomizations =
-    (resumeValues.borderStyle &&
-      resumeValues.borderStyle !== existingResume?.borderStyle) ||
+  const hasCustomizations = (resumeValues.borderStyle && resumeValues.borderStyle !== existingResume?.borderStyle) ||
     (resumeValues.colorHex && resumeValues.colorHex !== existingResume?.colorHex);
 
   if (hasCustomizations && !canUseCustomizations(subscriptionLevel)) {

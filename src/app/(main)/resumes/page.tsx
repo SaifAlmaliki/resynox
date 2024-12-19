@@ -2,8 +2,8 @@ import { canCreateResume } from "@/lib/permissions";
 import prisma from "@/lib/prisma";
 import { getUserSubscriptionLevel } from "@/lib/subscription";
 import { resumeDataInclude } from "@/lib/types";
-import { auth } from "@clerk/nextjs/server"; // Authentication utility from Clerk for server-side user authentication
-import { Metadata } from "next"; // Metadata type from Next.js for SEO
+import { auth } from "@clerk/nextjs/server";
+import { Metadata } from "next";
 import CreateResumeButton from "./CreateResumeButton";
 import ResumeItem from "./ResumeItem";
 
@@ -21,44 +21,49 @@ export default async function Page() {
     return null;
   }
 
-  // Fetch resumes, total resume count, and subscription level concurrently using Promise.all for efficiency
-  const [resumes, totalCount, subscriptionLevel] = await Promise.all([
-    prisma.resume.findMany({
-      where: {
-        userId, // Filter resumes by the authenticated user's ID
-      },
-      orderBy: {
-        updatedAt: "desc", // Sort resumes by the most recently updated first
-      },
-      include: resumeDataInclude, // Include related fields (e.g., sections, work experience)
-    }),
-    prisma.resume.count({
-      where: {
-        userId, // Count the total number of resumes for the user
-      },
-    }),
-    getUserSubscriptionLevel(userId), // Retrieve the user's subscription level
-  ]);
+  try {
+    // Fetch resumes, total resume count, and subscription level concurrently using Promise.all
+    const [resumes, totalCount, subscriptionLevel] = await Promise.all([
+      prisma.resume.findMany({
+        where: { userId },
+        orderBy: { updatedAt: "desc" },
+        include: resumeDataInclude,
+      }),
+      prisma.resume.count({ where: { userId } }),
+      getUserSubscriptionLevel(userId),
+    ]);
 
-  return (
-    <main className="mx-auto w-full max-w-7xl space-y-6 px-3 py-6">
-      {/* Render a button for creating a new resume, enabled only if allowed by subscription level */}
-      <CreateResumeButton canCreate={canCreateResume(subscriptionLevel, totalCount)}/>
+    // Render page content if the database fetch is successful
+    return (
+      <main className="mx-auto w-full max-w-7xl space-y-6 px-3 py-6">
+        {/* Render a button for creating a new resume */}
+        <CreateResumeButton canCreate={canCreateResume(subscriptionLevel, totalCount)} />
 
-      {/* Section header with the total count of resumes */}
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold">Your resumes</h1>
-        <p>Total: {totalCount}</p>
-      </div>
+        {/* Section header with the total count of resumes */}
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold">Your resumes</h1>
+          <p>Total: {totalCount}</p>
+        </div>
 
-      {/* Grid layout to display all the resumes */}
-      <div className="flex w-full grid-cols-2 flex-col gap-3 sm:grid md:grid-cols-3 lg:grid-cols-4">
-        {resumes.map((resume) => (
-          <ResumeItem key={resume.id} resume={resume} />
-          // Map through each resume and render the ResumeItem component
-          // 'key' is required by React for efficient rendering
-        ))}
-      </div>
-    </main>
-  );
+        {/* Grid layout to display all the resumes */}
+        <div className="flex w-full grid-cols-2 flex-col gap-3 sm:grid md:grid-cols-3 lg:grid-cols-4">
+          {resumes.map((resume) => (
+            <ResumeItem key={resume.id} resume={resume} />
+          ))}
+        </div>
+      </main>
+    );
+  } catch (err) {
+    // Log the error and display a fallback message
+    console.error("Database Error:", err);
+
+    return (
+      <main className="mx-auto w-full max-w-7xl space-y-6 px-3 py-6 text-center">
+        <h1 className="text-3xl font-bold text-red-500">Something went wrong!</h1>
+        <p className="text-gray-600">
+          We are currently unable to load your resumes. Please try again later.
+        </p>
+      </main>
+    );
+  }
 }

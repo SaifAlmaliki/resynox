@@ -16,9 +16,9 @@ interface ColorPickerProps {
 // Main component: ColorPicker
 // Allows users to pick a color for their resume, with restrictions based on their subscription level.
 export default function ColorPicker({ color, onChange }: ColorPickerProps) {
-  const subscriptionLevel = useSubscriptionLevel(); // Get the user's current subscription level
-  const premiumModal = usePremiumModal(); // Hook to open the premium upgrade modal
-  const [showPopover, setShowPopover] = useState(false); // State to control the visibility of the popover
+  const subscriptionLevel = useSubscriptionLevel();       // Get the user's current subscription level
+  const premiumModal = usePremiumModal();                 // Hook to open the premium upgrade modal
+  const [showPopover, setShowPopover] = useState(false);  // State to control the visibility of the popover
 
   return (
     // Popover container to toggle color picker visibility

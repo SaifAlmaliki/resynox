@@ -21,11 +21,11 @@ export async function generateSummary(input: GenerateSummaryInput) {
     throw new Error("Unauthorized");
   }
 
-  const subscriptionLevel = await getUserSubscriptionLevel(userId);
   // Get the user's current subscription level to determine access to AI tools
+  const subscriptionLevel = await getUserSubscriptionLevel(userId);
 
+  // If the user doesn't have the required subscription level to access AI tools, throw an error
   if (!canUseAITools(subscriptionLevel)) {
-    // If the user doesn't have the required subscription level to access AI tools, throw an error
     throw new Error("Upgrade your subscription to use this feature");
   }
 

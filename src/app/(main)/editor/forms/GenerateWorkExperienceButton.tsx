@@ -40,9 +40,7 @@ interface GenerateWorkExperienceButtonProps {
  * access to AI tools, it opens a dialog prompting the user to describe a work experience.
  * The AI then generates an optimized work experience entry from that description.
  */
-export default function GenerateWorkExperienceButton({
-  onWorkExperienceGenerated,
-}: GenerateWorkExperienceButtonProps) {
+export default function GenerateWorkExperienceButton({ onWorkExperienceGenerated }: GenerateWorkExperienceButtonProps) {
   // Get the current subscription level (determines if AI tools can be used)
   const subscriptionLevel = useSubscriptionLevel();
 
