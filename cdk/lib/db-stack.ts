@@ -4,50 +4,81 @@ import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 
+/**
+ * SmartResumeDbStack:
+ * - Creates a VPC for network isolation.
+ * - Sets up an RDS PostgreSQL database instance within the VPC.
+ * - Manages database credentials using AWS Secrets Manager.
+ * - Outputs the database endpoint and secret name for external reference.
+ */
 export class SmartResumeDbStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    /**
+     * Step 1: Create a VPC
+     * - This VPC will provide network isolation for the database.
+     * - Limits to 2 availability zones for cost-efficiency.
+     */
     const vpc = new ec2.Vpc(this, 'AIResumeVPC', {
-      maxAzs: 2, // Default is all AZs in the region
+      maxAzs: 2, // Default is all availability zones in the region
     });
 
+    /**
+     * Step 2: Create a Secrets Manager secret
+     * - Stores database credentials securely.
+     * - Auto-generates a strong password for the database user.
+     */
     const dbCredentialsSecret = new secretsmanager.Secret(this, 'DBCredentialsSecret', {
-      secretName: 'ai-resume-db-credentials',
+      secretName: 'ai-resume-db-credentials', // Name of the secret
       generateSecretString: {
-        secretStringTemplate: JSON.stringify({ username: 'admin' }),
-        generateStringKey: 'password',
+        secretStringTemplate: JSON.stringify({ username: 'db_admin' }), // Static username
+        generateStringKey: 'password',      // Key for the generated password
       },
     });
 
+    /**
+     * Step 3: Set up an RDS PostgreSQL Database
+     * - Configures a managed PostgreSQL database instance.
+     * - Utilizes the previously created VPC and Secrets Manager credentials.
+     */
     const db = new rds.DatabaseInstance(this, 'AIResumeDB', {
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_14,
+        version: rds.PostgresEngineVersion.VER_14, // PostgreSQL version 14
       }),
       instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE2,
-        ec2.InstanceSize.MICRO
+        ec2.InstanceClass.BURSTABLE3, // Cost-efficient instance type
+        ec2.InstanceSize.MICRO        // Small instance size for low traffic
       ),
-      vpc,
-      credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
-      multiAz: false,
-      allocatedStorage: 20,
-      maxAllocatedStorage: 100,
-      publiclyAccessible: true,
+      vpc, // Associates the database with the VPC
+      credentials: rds.Credentials.fromSecret(dbCredentialsSecret), // Uses the secret for credentials
+      multiAz: false,           // Single AZ deployment for cost-efficiency (not recommended for production)
+      allocatedStorage: 20,     // Initial storage in GB
+      maxAllocatedStorage: 100, // Maximum storage in GB (auto-scaling)
+      publiclyAccessible: true, // Allows public access (for development/testing; not recommended for production)
       vpcSubnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
+        subnetType: ec2.SubnetType.PUBLIC, // Places the database in public subnets
       },
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // NOT recommended for production
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // Deletes the database on stack removal (not recommended for production)
     });
 
+    /**
+     * Step 4: Add tags to the database instance
+     * - Useful for organization, billing, and resource tracking.
+     */
     cdk.Tags.of(db).add('Project', 'ai-resume');
 
+    /**
+     * Step 5: Output database connection details
+     * - Outputs the database endpoint and the name of the Secrets Manager secret.
+     * - These values can be used to connect to the database externally.
+     */
     new cdk.CfnOutput(this, 'DBEndpoint', {
-      value: db.dbInstanceEndpointAddress,
+      value: db.dbInstanceEndpointAddress, // Outputs the database endpoint
     });
 
     new cdk.CfnOutput(this, 'SecretName', {
-      value: dbCredentialsSecret.secretName,
+      value: dbCredentialsSecret.secretName, // Outputs the name of the secret
     });
   }
 }
