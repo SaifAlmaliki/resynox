@@ -44,9 +44,7 @@ export async function createCheckoutSession(priceId: string): Promise<string> {
   }
 
   // Retrieve Stripe Customer ID from the user's private metadata
-  const stripeCustomerId = user.privateMetadata.stripeCustomerId as
-    | string
-    | undefined;
+  const stripeCustomerId = user.privateMetadata.stripeCustomerId as string | undefined;
 
   // Prepare customer email (only if Stripe Customer ID does not exist)
   const customerEmail = stripeCustomerId ? undefined : user.emailAddresses[0].emailAddress;
@@ -66,7 +64,9 @@ export async function createCheckoutSession(priceId: string): Promise<string> {
     customer_email: customerEmail,
 
     // Metadata for tracking the user ID
-    metadata: { userId: user.id },
+    metadata: {
+      userId: user.id
+    },
     subscription_data: {
       metadata: { userId: user.id },
     },

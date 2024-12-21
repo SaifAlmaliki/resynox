@@ -35,7 +35,7 @@ export default function BorderStyleButton({ borderStyle, onChange }: BorderStyle
     // Check if the user has access to border customizations
     if (!canUseCustomizations(subscriptionLevel)) {
       premiumModal.setOpen(true); // Open the premium modal if access is restricted
-      return; // Exit early if customizations are not allowed
+      return;                     // Exit early if customizations are not allowed
     }
 
     // Find the index of the current border style in the array

@@ -1,10 +1,16 @@
-// Import necessary dependencies
 import { env } from "@/env";
 import prisma from "@/lib/prisma";
 import stripe from "@/lib/stripe";
 import { clerkClient } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import Stripe from "stripe";
+/**
+ * Stripe Webhook Handler for Next.js
+ *
+ * This file sets up a Stripe webhook endpoint to securely process events sent by Stripe.
+ * It listens for specific webhook events such as successful checkouts, subscription creation,
+ * updates, and deletions, and performs necessary actions in the database and Clerk user metadata.
+ */
 
 // Main webhook handler for POST requests from Stripe
 export async function POST(req: NextRequest) {
@@ -67,9 +73,7 @@ async function handleSessionCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Update Clerk user metadata with Stripe customer ID for future reference
-  await (
-    await clerkClient()
-  ).users.updateUserMetadata(userId, {
+  await (await clerkClient()).users.updateUserMetadata(userId, {
     privateMetadata: {
       stripeCustomerId: session.customer as string,
     },
@@ -114,7 +118,7 @@ async function handleSubscriptionCreatedOrUpdated(subscriptionId: string) {
       },
     });
   } else {
-    // Remove subscription from database if it's not in a valid state
+    // Remove not active subscription from database if it's not in a valid state (not active, not trailing, not past_due)
     await prisma.userSubscription.deleteMany({
       where: {
         stripeCustomerId: subscription.customer as string,

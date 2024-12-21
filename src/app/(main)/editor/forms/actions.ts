@@ -1,3 +1,7 @@
+// Summary:
+// This module provides functions to generate AI-assisted resume content, including professional summaries and work experience entries.
+// It uses OpenAI's GPT model for natural language processing and ensures user authorization and subscription level compliance.
+
 "use server";
 
 import openai from "@/lib/openai";
@@ -12,33 +16,37 @@ import {
 } from "@/lib/validation";
 import { auth } from "@clerk/nextjs/server";
 
+/**
+ * Generates a professional summary for a resume based on user input.
+ * Validates input, ensures user authorization, checks subscription level,
+ * and calls the OpenAI API to create the summary.
+ *
+ * @param {GenerateSummaryInput} input - Input data for summary generation.
+ * @returns {string} The generated summary.
+ * @throws {Error} If user is unauthorized, lacks access, or the API fails.
+ */
 export async function generateSummary(input: GenerateSummaryInput) {
-  const { userId } = await auth();
-  // Retrieve the authenticated user's ID
+  const { userId } = await auth(); // Retrieve the authenticated user's ID
 
   if (!userId) {
-    // If no user ID is found, throw an error, indicating that the user is not authenticated
-    throw new Error("Unauthorized");
+    throw new Error("Unauthorized"); // Ensure the user is logged in
   }
 
-  // Get the user's current subscription level to determine access to AI tools
-  const subscriptionLevel = await getUserSubscriptionLevel(userId);
+  const subscriptionLevel = await getUserSubscriptionLevel(userId); // Check subscription level
 
-  // If the user doesn't have the required subscription level to access AI tools, throw an error
   if (!canUseAITools(subscriptionLevel)) {
-    throw new Error("Upgrade your subscription to use this feature");
+    throw new Error("Upgrade your subscription to use this feature"); // Validate access rights
   }
 
-  // Validate and parse the input data against the defined schema
+  // Parse and validate the input data
   const { jobTitle, workExperiences, educations, skills } = generateSummarySchema.parse(input);
 
-  // Define a system message for the AI model. This sets the context and instructs the AI on the style and format of the output.
+  // Define system and user messages for the AI model
   const systemMessage = `
     You are a job resume generator AI. Your task is to write a professional introduction summary for a resume given the user's provided data.
     Only return the summary and do not include any other information in the response. Keep it concise and professional.
-    `;
+  `;
 
-  // Construct a user message with the given input data. This message is what the AI will use to generate the summary.
   const userMessage = `
     Please generate a professional resume summary from this data:
 
@@ -52,7 +60,7 @@ export async function generateSummary(input: GenerateSummaryInput) {
 
         Description:
         ${exp.description || "N/A"}
-        `,
+      `,
       )
       .join("\n\n")}
 
@@ -61,110 +69,95 @@ export async function generateSummary(input: GenerateSummaryInput) {
       ?.map(
         (edu) => `
         Degree: ${edu.degree || "N/A"} at ${edu.school || "N/A"} from ${edu.startDate || "N/A"} to ${edu.endDate || "N/A"}
-        `,
+      `,
       )
       .join("\n\n")}
 
     Skills:
     ${skills}
-    `;
+  `;
 
   console.log("systemMessage", systemMessage);
   console.log("userMessage", userMessage);
 
-  // Use the OpenAI API to create a chat completion. Here we provide the system and user messages.
+  // Call the OpenAI API to generate a summary
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
-      {
-        role: "system",
-        content: systemMessage,
-      },
-      {
-        role: "user",
-        content: userMessage,
-      },
+      { role: "system", content: systemMessage },
+      { role: "user", content: userMessage },
     ],
   });
 
-  const aiResponse = completion.choices[0].message.content;
-  // Extract the generated summary from the API response
+  const aiResponse = completion.choices[0].message.content; // Extract AI response
 
   if (!aiResponse) {
-    // If no AI response is returned, throw an error
-    throw new Error("Failed to generate AI response");
+    throw new Error("Failed to generate AI response"); // Ensure a response is received
   }
 
   return aiResponse;
 }
-//---------------------------------------------------------------------------
-export async function generateWorkExperience(
-  input: GenerateWorkExperienceInput,
-) {
-  // Retrieve the authenticated user's ID
-  const { userId } = await auth();
+
+/**
+ * Generates a structured work experience entry based on user input.
+ * Validates input, ensures user authorization, checks subscription level,
+ * and uses OpenAI to create the work experience entry.
+ *
+ * @param {GenerateWorkExperienceInput} input - Input description for the work experience.
+ * @returns {WorkExperience} The generated work experience entry.
+ * @throws {Error} If user is unauthorized, lacks access, or the API fails.
+ */
+export async function generateWorkExperience(input: GenerateWorkExperienceInput) {
+  const { userId } = await auth(); // Retrieve the authenticated user's ID
 
   if (!userId) {
-    // If no user is logged in, throw an error
-    throw new Error("Unauthorized");
+    throw new Error("Unauthorized"); // Ensure the user is logged in
   }
 
-  // Check the user's subscription level
-  const subscriptionLevel = await getUserSubscriptionLevel(userId);
+  const subscriptionLevel = await getUserSubscriptionLevel(userId); // Check subscription level
 
   if (!canUseAITools(subscriptionLevel)) {
-    // If the user does not have the required subscription level, throw an error
-    throw new Error("Upgrade your subscription to use this feature");
+    throw new Error("Upgrade your subscription to use this feature"); // Validate access rights
   }
 
-  // Validate and parse the input description for generating the work experience
+  // Parse and validate the input description
   const { description } = generateWorkExperienceSchema.parse(input);
 
-  // Define a system message that instructs the AI to produce a structured work experience entry
+  // Define system and user messages for the AI model
   const systemMessage = `
-  You are a job resume generator AI. Your task is to generate a single work experience entry based on the user input.
-  Your response must adhere to the following structure. You can omit fields if they can't be inferred from the provided data, but don't add any new ones.
+    You are a job resume generator AI. Your task is to generate a single work experience entry based on the user input.
+    Your response must adhere to the following structure. You can omit fields if they can't be inferred from the provided data, but don't add any new ones.
 
-  Job title: <job title>
-  Company: <company name>
-  Start date: <format: YYYY-MM-DD> (only if provided)
-  End date: <format: YYYY-MM-DD> (only if provided)
-  Description: <an optimized description in bullet format, might be inferred from the job title>
+    Job title: <job title>
+    Company: <company name>
+    Start date: <format: YYYY-MM-DD> (only if provided)
+    End date: <format: YYYY-MM-DD> (only if provided)
+    Description: <an optimized description in bullet format, might be inferred from the job title>
   `;
 
-  // Provide the user description from which the AI should infer a work experience entry
   const userMessage = `
-  Please provide a work experience entry from this description:
-  ${description}
+    Please provide a work experience entry from this description:
+    ${description}
   `;
 
-  // Use the OpenAI API to generate a structured work experience entry
+  // Call the OpenAI API to generate a work experience entry
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
-      {
-        role: "system",
-        content: systemMessage,
-      },
-      {
-        role: "user",
-        content: userMessage,
-      },
+      { role: "system", content: systemMessage },
+      { role: "user", content: userMessage },
     ],
   });
 
-  const aiResponse = completion.choices[0].message.content;
-  // Extract the generated work experience information from the AI response
+  const aiResponse = completion.choices[0].message.content; // Extract AI response
 
   if (!aiResponse) {
-    // If the AI doesn't provide any response, throw an error
-    throw new Error("Failed to generate AI response");
+    throw new Error("Failed to generate AI response"); // Ensure a response is received
   }
 
-  console.log("aiResponse", aiResponse);
-  // Log the raw AI response for debugging purposes
+  console.log("aiResponse", aiResponse); // Log the raw AI response
 
-  // Use regular expressions to extract relevant fields from the AI response
+  // Extract relevant fields using regular expressions
   return {
     position: aiResponse.match(/Job title: (.*)/)?.[1] || "",
     company: aiResponse.match(/Company: (.*)/)?.[1] || "",
