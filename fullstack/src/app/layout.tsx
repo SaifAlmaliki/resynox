@@ -23,13 +23,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   // Template for dynamic page titles.
   title: {
-    template: "%s - AI Resume Builder",
+    template: "%s - AI Powered Resume Builder",
     // Default title when no template is provided.
-    absolute: "AI Resume Builder",
+    absolute: "AI Powered Resume Builder",
   },
   // Meta description for SEO purposes.
   description:
-    "AI Resume Builder is the easiest way to create a professional resume that will help you land your dream job.",
+    "AI powered resume builder that helps you create a professional resume in minutes. Get started for free!",
 };
 
 // Root layout component that wraps the application with global providers and layout.

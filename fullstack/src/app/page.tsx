@@ -30,14 +30,14 @@ export default function Home() {
 
         {/* Headline */}
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-          Create the{" "}
+          Create Perfect{" "}
           <span
             className="
               inline-block bg-gradient-to-r from-green-600 to-green-400
               bg-clip-text text-transparent
             "
           >
-            Perfect AI Powered Resume
+             AI Powered Resume
           </span>{" "}
           in Minutes
         </h1>
@@ -45,7 +45,7 @@ export default function Home() {
         {/* Subheadline/Description */}
         <p className="text-lg text-gray-500">
           Our <span className="font-bold">AI powered resume builder</span> helps you
-          design a professional resume, even if you&apos;re not very smart.
+          design a professional resume in minutes.
         </p>
 
         {/* Call-to-Action Button */}
