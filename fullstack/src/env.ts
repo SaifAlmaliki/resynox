@@ -7,8 +7,6 @@ export const env = createEnv({
   server: {
     POSTGRES_URL: z.string().min(1),                    // URL for PostgreSQL database
     POSTGRES_PRISMA_URL: z.string().min(1),             // URL for Prisma integration with PostgreSQL
-    POSTGRES_URL_NO_SSL: z.string().min(1),             // PostgreSQL URL without SSL
-    POSTGRES_URL_NON_POOLING: z.string().min(1),        // PostgreSQL URL for non-pooling connections
     POSTGRES_USER: z.string().min(1),                   // PostgreSQL username
     POSTGRES_HOST: z.string().min(1),                   // PostgreSQL host
     POSTGRES_PASSWORD: z.string().min(1),               // PostgreSQL password
