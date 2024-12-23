@@ -38,7 +38,19 @@ export class SmartResumeDbStack extends cdk.Stack {
     });
 
     /**
-     * Step 3: Set up an RDS PostgreSQL Database
+     * Step 3: Create a Security Group
+     * - Allows PostgreSQL access from anywhere.
+     */
+    const securityGroup = new ec2.SecurityGroup(this, 'DBSecurityGroup', {
+      vpc,
+      description: 'Allow PostgreSQL access',
+      allowAllOutbound: true,
+    });
+
+    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(5432), 'Allow PostgreSQL access from anywhere');
+
+    /**
+     * Step 4: Set up an RDS PostgreSQL Database
      * - Configures a managed PostgreSQL database instance.
      * - Utilizes the previously created VPC and Secrets Manager credentials.
      */
@@ -59,17 +71,19 @@ export class SmartResumeDbStack extends cdk.Stack {
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC, // Places the database in public subnets
       },
+      securityGroups: [securityGroup], // Associates the security group with the database
       removalPolicy: cdk.RemovalPolicy.DESTROY, // Deletes the database on stack removal (not recommended for production)
+      databaseName: 'airesumedb', // Name of the database to be created
     });
 
     /**
-     * Step 4: Add tags to the database instance
+     * Step 5: Add tags to the database instance
      * - Useful for organization, billing, and resource tracking.
      */
     cdk.Tags.of(db).add('Project', 'ai-resume');
 
     /**
-     * Step 5: Output database connection details
+     * Step 6: Output database connection details
      * - Outputs the database endpoint and the name of the Secrets Manager secret.
      * - These values can be used to connect to the database externally.
      */
