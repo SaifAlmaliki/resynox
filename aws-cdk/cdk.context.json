@@ -1,0 +1,11 @@
+{
+  "availability-zones:account=153600957542:region=eu-central-1": [
+    "eu-central-1a",
+    "eu-central-1b",
+    "eu-central-1c"
+  ],
+  "hosted-zone:account=153600957542:domainName=resynox.com:region=eu-central-1": {
+    "Id": "/hostedzone/Z0812384E3ILJ5E2OPPY",
+    "Name": "resynox.com."
+  }
+}
