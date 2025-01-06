@@ -57,7 +57,7 @@ export class DatabaseConstruct extends Construct {
         subnetType: ec2.SubnetType.PUBLIC,
       },
       securityGroups: [securityGroup],
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
       databaseName: `${projectName}${stage}db`, // Example: 'airesumedevdb'
     });
 

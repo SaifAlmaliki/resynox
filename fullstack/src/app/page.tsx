@@ -60,7 +60,7 @@ export default function Home() {
           src={resumePreview}
           alt="Resume preview"
           width={600}
-          className="shadow-md lg:rotate-[1.5deg]"
+          className="shadow-lg rounded-lg lg:rotate-[1.5deg]"
         />
       </div>
     </main>
