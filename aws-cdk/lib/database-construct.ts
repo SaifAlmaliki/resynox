@@ -36,13 +36,13 @@ export class DatabaseConstruct extends Construct {
       vpc,
       description: 'Allow PostgreSQL access',
       allowAllOutbound: true,
-      securityGroupName: `${projectName}-${stage}-db-sg`, // Example: 'ai-resume-dev-db-sg'
+      securityGroupName: `${projectName}-${stage}-db-sg`, // Example: 'resynox-dev-db-sg'
     });
 
     securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(5432), 'Allow PostgreSQL access from anywhere');
 
     // Set up an RDS PostgreSQL Database with a name that includes projectName and stage
-    this.db = new rds.DatabaseInstance(this, 'AIResumeDB', {
+    this.db = new rds.DatabaseInstance(this, 'ResynoxDB', {
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_14,
       }),
@@ -58,7 +58,7 @@ export class DatabaseConstruct extends Construct {
       },
       securityGroups: [securityGroup],
       removalPolicy: cdk.RemovalPolicy.RETAIN,
-      databaseName: `${projectName}${stage}db`, // Example: 'airesumedevdb'
+      databaseName: `${projectName}${stage}db`, // Example: 'resynoxdevdb'
       autoMinorVersionUpgrade: true,
       backupRetention: cdk.Duration.days(7),
       monitoringInterval: cdk.Duration.seconds(60),

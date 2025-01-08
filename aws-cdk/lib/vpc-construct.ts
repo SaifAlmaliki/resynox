@@ -16,9 +16,9 @@ export class VpcConstruct extends Construct {
     const { projectName, stage } = props;
 
     // Create a VPC with a name that includes projectName and stage
-    this.vpc = new ec2.Vpc(this, 'AIResumeVPC', {
+    this.vpc = new ec2.Vpc(this, 'ResynoxVPC', {
       maxAzs: 2,
-      vpcName: `${projectName}-${stage}-vpc`, // Example: 'ai-resume-dev-vpc'
+      vpcName: `${projectName}-${stage}-vpc`, // Example: 'resynox-dev-vpc'
     });
   }
 }
