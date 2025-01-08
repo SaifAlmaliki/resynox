@@ -4,13 +4,13 @@ import { VpcConstruct } from './vpc-construct';
 import { DatabaseConstruct } from './database-construct';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 
-export interface SmartResumeDbStackProps extends cdk.StackProps {
-  projectName: string; // Project name (e.g., 'ai-resume')
-  stage: string; // Stage (e.g., 'dev', 'prod')
+export interface ResynoxDbStackProps extends cdk.StackProps {
+  projectName: string;
+  stage: string;
 }
 
-export class SmartResumeDbStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props: SmartResumeDbStackProps) {
+export class ResynoxDbStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: ResynoxDbStackProps) {
     super(scope, id, props);
 
     const { projectName, stage } = props;

@@ -51,7 +51,7 @@ export class DatabaseConstruct extends Construct {
       credentials: rds.Credentials.fromSecret(this.dbCredentialsSecret),
       multiAz: false,
       allocatedStorage: 20,
-      maxAllocatedStorage: 100,
+      maxAllocatedStorage: 50,
       publiclyAccessible: true,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC,
@@ -59,6 +59,11 @@ export class DatabaseConstruct extends Construct {
       securityGroups: [securityGroup],
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       databaseName: `${projectName}${stage}db`, // Example: 'airesumedevdb'
+      autoMinorVersionUpgrade: true,
+      backupRetention: cdk.Duration.days(7),
+      monitoringInterval: cdk.Duration.seconds(60),
+      deleteAutomatedBackups: true,
+      enablePerformanceInsights: false,
     });
 
     // Add tags to the database instance
