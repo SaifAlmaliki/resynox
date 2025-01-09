@@ -64,7 +64,7 @@ export default function Footer({ currentStep, setCurrentStep, showSmResumePrevie
         <div className="flex items-center gap-3">
           {/* Link to close the form and navigate back to the resumes list */}
           <Button variant="secondary" asChild>
-            <Link href="/resumes">Close</Link>
+            <Link href="/resumes">Done</Link>
           </Button>
           {/* Display saving status with conditional opacity */}
           <p
