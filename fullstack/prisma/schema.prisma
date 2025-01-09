@@ -36,6 +36,10 @@ model Resume {
   phone       String?  // User's phone number (optional).
   email       String?  // User's email address (optional).
 
+  // Cover letter fields
+  jobDescription String? // Job description for cover letter generation (optional).
+  coverLetter    String? // Generated or custom cover letter content (optional).
+
   // Relationships.
   workExperiences WorkExperience[] // A resume can have multiple work experiences.
   educations      Education[]      // A resume can have multiple education entries.

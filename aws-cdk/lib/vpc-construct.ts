@@ -19,6 +19,20 @@ export class VpcConstruct extends Construct {
     this.vpc = new ec2.Vpc(this, 'ResynoxVPC', {
       maxAzs: 2,
       vpcName: `${projectName}-${stage}-vpc`, // Example: 'resynox-dev-vpc'
+      natGateways: 0, // Reduce costs by not using NAT gateways
+      subnetConfiguration: [
+        {
+          name: 'Public',
+          subnetType: ec2.SubnetType.PUBLIC,
+          cidrMask: 24,
+        }
+      ],
     });
+
+    // Apply removal policy to VPC and its subnets
+    this.vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    for (const subnet of this.vpc.publicSubnets) {
+      subnet.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    }
   }
 }

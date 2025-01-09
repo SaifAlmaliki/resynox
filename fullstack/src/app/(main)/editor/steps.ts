@@ -2,6 +2,7 @@
 import { EditorFormProps } from "@/lib/types";
 
 // Importing individual form components that represent different sections of the editor or resume form.
+import CoverLetterForm from "./forms/CoverLetterForm"; // Component for cover letter form.
 import EducationForm from "./forms/EducationForm"; // Component for education details form.
 import GeneralInfoForm from "./forms/GeneralInfoForm"; // Component for general information form.
 import PersonalInfoForm from "./forms/PersonalInfoForm"; // Component for personal information form.
@@ -30,6 +31,8 @@ export const steps: {
   { title: "Education", component: EducationForm, key: "education"},
   // Fifth step: Skills form
   { title: "Skills", component: SkillsForm, key: "skills"},
-  // Final step: Summary form
+  // Sixth step: Summary form
   { title: "Summary", component: SummaryForm, key: "summary"},
+  // Final step: Cover Letter form
+  { title: "Cover Letter", component: CoverLetterForm, key: "cover-letter"},
 ];

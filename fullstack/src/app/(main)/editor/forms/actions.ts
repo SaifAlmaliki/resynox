@@ -13,6 +13,7 @@ import {
   GenerateWorkExperienceInput,
   generateWorkExperienceSchema,
   WorkExperience,
+  ResumeValues,
 } from "@/lib/validation";
 import { auth } from "@clerk/nextjs/server";
 
@@ -165,4 +166,93 @@ export async function generateWorkExperience(input: GenerateWorkExperienceInput)
     startDate: aiResponse.match(/Start date: (\d{4}-\d{2}-\d{2})/)?.[1],
     endDate: aiResponse.match(/End date: (\d{4}-\d{2}-\d{2})/)?.[1],
   } satisfies WorkExperience;
+}
+
+/**
+ * Generates a cover letter based on the user's resume data and a job description.
+ * Uses AI to create a personalized cover letter that highlights relevant experience.
+ *
+ * @param {ResumeValues} input - Resume data including job description
+ * @returns {string} The generated cover letter
+ * @throws {Error} If user is unauthorized, lacks access, or the API fails
+ */
+export async function generateCoverLetter(input: ResumeValues) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const subscriptionLevel = await getUserSubscriptionLevel(userId);
+
+  if (!canUseAITools(subscriptionLevel)) {
+    throw new Error("Upgrade your subscription to use this feature");
+  }
+
+  const { jobDescription, jobTitle, workExperiences, educations, skills, firstName, lastName, email, phone } = input;
+
+  if (!jobDescription?.trim()) {
+    throw new Error("Job description is required to generate a cover letter");
+  }
+
+  const systemMessage = `
+    You are a professional cover letter writer. Your task is to write a compelling cover letter that:
+    1. Is tailored to the specific job description
+    2. Highlights relevant experience and skills from the resume
+    3. Maintains a professional yet engaging tone
+    4. Is well-structured with clear paragraphs
+    5. Includes a proper greeting and closing
+    Only return the cover letter text without any additional formatting or information.
+  `;
+
+  const userMessage = `
+    Please write a cover letter for this job description:
+
+    ${jobDescription}
+
+    Using this candidate information:
+    Name: ${firstName || ''} ${lastName || ''}
+    Email: ${email || ''}
+    Phone: ${phone || ''}
+    Current Job Title: ${jobTitle || "N/A"}
+
+    Work Experience:
+    ${workExperiences
+      ?.map(
+        (exp) => `
+        Position: ${exp.position || "N/A"} at ${exp.company || "N/A"}
+        Duration: ${exp.startDate || "N/A"} to ${exp.endDate || "Present"}
+        Description: ${exp.description || "N/A"}
+      `,
+      )
+      .join("\n\n")}
+
+    Education:
+    ${educations
+      ?.map(
+        (edu) => `
+        ${edu.degree || "N/A"} at ${edu.school || "N/A"}
+        Duration: ${edu.startDate || "N/A"} to ${edu.endDate || "N/A"}
+      `,
+      )
+      .join("\n\n")}
+
+    Skills: ${skills}
+  `;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: systemMessage },
+      { role: "user", content: userMessage },
+    ],
+  });
+
+  const aiResponse = completion.choices[0].message.content;
+
+  if (!aiResponse) {
+    throw new Error("Failed to generate AI response");
+  }
+
+  return aiResponse;
 }

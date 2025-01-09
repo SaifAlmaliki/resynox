@@ -103,6 +103,15 @@ export const summarySchema = z.object({
 // Type inference for the summary field
 export type SummaryValues = z.infer<typeof summarySchema>;
 
+// Schema for cover letter fields
+export const coverLetterSchema = z.object({
+  jobDescription: optionalString,  // Make jobDescription optional
+  coverLetter: optionalString,
+});
+
+// Type inference for cover letter
+export type CoverLetterValues = z.infer<typeof coverLetterSchema>;
+
 // Comprehensive schema for a resume, combining all the above schemas
 export const resumeSchema = z.object({
   ...generalInfoSchema.shape,     // Unpacks all fields from `generalInfoSchema`
@@ -111,10 +120,12 @@ export const resumeSchema = z.object({
   ...educationSchema.shape,       // Unpacks all fields from `educationSchema`
   ...skillsSchema.shape,          // Unpacks all fields from `skillsSchema`
   ...summarySchema.shape,         // Unpacks all fields from `summarySchema`
+  ...coverLetterSchema.shape,     // Unpacks all fields from `coverLetterSchema`
+  id: z.string().optional(),
+  photo: z.union([z.custom<File>(), z.string(), z.null()]).optional(),
   colorHex: optionalString,       // Adds an optional `colorHex` field
   borderStyle: optionalString,    // Adds an optional `borderStyle` field
 });
-
 
 // Type inference for the resume schema
 export type ResumeValues = Omit<z.infer<typeof resumeSchema>, "photo"> & {

@@ -39,7 +39,15 @@ export class DatabaseConstruct extends Construct {
       securityGroupName: `${projectName}-${stage}-db-sg`, // Example: 'resynox-dev-db-sg'
     });
 
-    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(5432), 'Allow PostgreSQL access from anywhere');
+    // Apply removal policy to security group
+    securityGroup.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+
+    // Add ingress rule with removal policy
+    const ingressRule = securityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(5432),
+      'Allow PostgreSQL access from anywhere'
+    );
 
     // Set up an RDS PostgreSQL Database with a name that includes projectName and stage
     this.db = new rds.DatabaseInstance(this, 'ResynoxDB', {
@@ -57,7 +65,8 @@ export class DatabaseConstruct extends Construct {
         subnetType: ec2.SubnetType.PUBLIC,
       },
       securityGroups: [securityGroup],
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      deletionProtection: false,
       databaseName: `${projectName}${stage}db`, // Example: 'resynoxdevdb'
       autoMinorVersionUpgrade: true,
       backupRetention: cdk.Duration.days(7),
@@ -65,6 +74,9 @@ export class DatabaseConstruct extends Construct {
       deleteAutomatedBackups: true,
       enablePerformanceInsights: false,
     });
+
+    // Add dependency to ensure proper deletion order
+    this.db.node.addDependency(securityGroup);
 
     // Add tags to the database instance
     cdk.Tags.of(this.db).add('Project', projectName);
