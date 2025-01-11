@@ -15,8 +15,18 @@ import { createCheckoutSession } from "./actions";
  */
 
 // Define features for Premium and Premium Plus plans
-const premiumFeatures = ["AI tools", "Up to 3 resumes"];
-const premiumPlusFeatures = ["Infinite resumes", "Design customizations"];
+const premiumFeatures = [
+  "AI Cover Letter Personalized from your resume",
+  "AI Professional career summaries",
+  "AI Experience Optimizer to enhance work descriptions",
+  "Up to 3 resumes"
+];
+
+const premiumPlusFeatures = [
+  "All AI features included",
+  "Infinite resumes",
+  "Advanced design customizations"
+];
 
 export default function PremiumModal() {
   // Hook to manage the modal's open/close state
@@ -57,7 +67,7 @@ export default function PremiumModal() {
     >
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Resume Builder AI Premium</DialogTitle>
+          <DialogTitle>Resynox AI Premium</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
           <p>Get a premium subscription to unlock more features.</p>
