@@ -152,7 +152,7 @@ function InputDialog({ open, onOpenChange, onCoverLetterGenerated }: InputDialog
         <DialogHeader>
           <DialogTitle>Generate Cover Letter</DialogTitle>
           <DialogDescription>
-            Enter the job description and we'll generate a personalized cover letter based on your resume.
+            Enter the job description and we&apos;ll generate a personalized cover letter based on your resume.
           </DialogDescription>
         </DialogHeader>
 
