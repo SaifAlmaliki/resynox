@@ -31,7 +31,7 @@ export async function saveResume(values: ResumeValues) {
   console.log("received values", values);
 
   // Validate incoming resume data against the Zod schema
-  const { photo, workExperiences, educations, ...resumeValues } = resumeSchema.parse(values);
+  const { photo, workExperiences, educations, languages, ...resumeValues } = resumeSchema.parse(values);
 
   // Retrieve the authenticated user ID from Clerk
   const { userId } = await auth();
@@ -115,6 +115,13 @@ export async function saveResume(values: ResumeValues) {
             endDate: edu.endDate ? new Date(edu.endDate) : undefined,
           })),
         },
+        languages: {
+          deleteMany: {},  // Delete existing language skills
+          create: values.languages?.map((lang) => ({  // Create new language skills from the input
+            language: lang.language,
+            level: lang.level,
+          })),
+        },
         updatedAt: new Date(),
       },
     });
@@ -137,6 +144,12 @@ export async function saveResume(values: ResumeValues) {
             ...edu,
             startDate: edu.startDate ? new Date(edu.startDate) : undefined,
             endDate: edu.endDate ? new Date(edu.endDate) : undefined,
+          })),
+        },
+        languages: {
+          create: values.languages?.map((lang) => ({
+            language: lang.language,
+            level: lang.level,
           })),
         },
       },

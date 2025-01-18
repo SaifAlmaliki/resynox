@@ -5,6 +5,7 @@ import { EditorFormProps } from "@/lib/types";
 import CoverLetterForm from "./forms/CoverLetterForm"; // Component for cover letter form.
 import EducationForm from "./forms/EducationForm"; // Component for education details form.
 import GeneralInfoForm from "./forms/GeneralInfoForm"; // Component for general information form.
+import LanguageSkillsForm from "./forms/LanguageSkillsForm"; // Component for language skills form.
 import PersonalInfoForm from "./forms/PersonalInfoForm"; // Component for personal information form.
 import SkillsForm from "./forms/SkillsForm"; // Component for skills form.
 import SummaryForm from "./forms/SummaryForm"; // Component for summary or overview form.
@@ -31,7 +32,9 @@ export const steps: {
   { title: "Education", component: EducationForm, key: "education"},
   // Fifth step: Skills form
   { title: "Skills", component: SkillsForm, key: "skills"},
-  // Sixth step: Summary form
+  // Sixth step: Language Skills form
+  { title: "Language Skills", component: LanguageSkillsForm, key: "language-skills"},
+  // Seventh step: Summary form
   { title: "Summary", component: SummaryForm, key: "summary"},
   // Final step: Cover Letter form
   { title: "Cover Letter", component: CoverLetterForm, key: "cover-letter"},

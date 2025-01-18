@@ -44,6 +44,7 @@ model Resume {
   workExperiences WorkExperience[] // A resume can have multiple work experiences.
   educations      Education[]      // A resume can have multiple education entries.
   skills          String[]         // A list of skills associated with the resume.
+  languages       LanguageSkill[]  // A resume can have multiple language skills.
 
   // Timestamps.
   createdAt DateTime @default(now())  // Automatically set when the resume is created.
@@ -87,6 +88,17 @@ model Education {
   updatedAt DateTime @updatedAt      // Automatically updated on modification.
 
   @@map("educations") // Maps this model to the `educations` table in the database.
+}
+
+// Language skill model: Represents language proficiencies
+model LanguageSkill {
+  id       String @id @default(cuid())
+  language String
+  level    String // One of: "native", "advanced", "intermediate", "beginner"
+
+  // Relationship with Resume
+  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resumeId String
 }
 
 // UserSubscription model: Represents subscription details for a user.

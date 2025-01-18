@@ -16,9 +16,8 @@ import { createCheckoutSession } from "./actions";
 
 // Define features for Premium and Premium Plus plans
 const premiumFeatures = [
-  "AI Cover Letter Personalized from your resume",
+  "AI Personalized Cover Letter",
   "AI Professional career summaries",
-  "AI Experience Optimizer to enhance work descriptions",
   "Up to 3 resumes"
 ];
 

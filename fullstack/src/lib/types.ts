@@ -11,6 +11,7 @@ export interface EditorFormProps {
 export const resumeDataInclude = {
   workExperiences: true, // Include related work experience data
   educations: true,      // Include related education data
+  languages: true,       // Include related language skills data
 } satisfies Prisma.ResumeInclude; // Ensure the object satisfies Prisma's `ResumeInclude` type
 
 // Type definition for server-side resume data, including related fields

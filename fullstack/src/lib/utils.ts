@@ -81,7 +81,14 @@ export function mapToResumeValues(data: ResumeServerData): ResumeValues {
       endDate: edu.endDate?.toISOString().split("T")[0],   // End date in ISO string format
     })),
 
-    skills: data.skills,           // List of skills
+    // Skills mapping
+    skills: data.skills,
+
+    // Language skills mapping
+    languages: data.languages.map((lang) => ({
+      language: lang.language,
+      level: lang.level as "native" | "advanced" | "intermediate" | "beginner",
+    })),
     borderStyle: data.borderStyle, // Border style for resume design
     colorHex: data.colorHex,       // Hexadecimal color code for styling
     summary: data.summary || undefined, // Professional summary or about section

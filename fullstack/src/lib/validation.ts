@@ -69,7 +69,6 @@ export type WorkExperience = NonNullable<
   z.infer<typeof workExperienceSchema>["workExperiences"]
 >[number];
 
-
 // Schema for education details
 export const educationSchema = z.object({
   educations: z
@@ -95,6 +94,17 @@ export const skillsSchema = z.object({
 // Type inference for skills
 export type SkillsValues = z.infer<typeof skillsSchema>;
 
+// Schema for language skills
+export const languageSkillsSchema = z.object({
+  languages: z.array(z.object({
+    language: z.string().trim(),
+    level: z.enum(["native", "advanced", "intermediate", "beginner"])
+  })).optional(),
+});
+
+// Type inference for language skills
+export type LanguageSkillsValues = z.infer<typeof languageSkillsSchema>;
+
 // Schema for a summary field
 export const summarySchema = z.object({
   summary: optionalString, // Optional summary field
@@ -119,19 +129,17 @@ export const resumeSchema = z.object({
   ...workExperienceSchema.shape,  // Unpacks all fields from `workExperienceSchema`
   ...educationSchema.shape,       // Unpacks all fields from `educationSchema`
   ...skillsSchema.shape,          // Unpacks all fields from `skillsSchema`
+  ...languageSkillsSchema.shape,  // Unpacks all fields from `languageSkillsSchema`
   ...summarySchema.shape,         // Unpacks all fields from `summarySchema`
   ...coverLetterSchema.shape,     // Unpacks all fields from `coverLetterSchema`
-  id: z.string().optional(),
-  photo: z.union([z.custom<File>(), z.string(), z.null()]).optional(),
-  colorHex: optionalString,       // Adds an optional `colorHex` field
-  borderStyle: optionalString,    // Adds an optional `borderStyle` field
+  colorHex: z.string().optional(),      // Optional color hex code
+  borderStyle: z.string().optional(),   // Optional border style
+  id: z.string().optional(),           // Optional ID field
+  photo: z.union([z.custom<File>(), z.string(), z.null()]).optional(), // Optional photo field
 });
 
 // Type inference for the resume schema
-export type ResumeValues = Omit<z.infer<typeof resumeSchema>, "photo"> & {
-  id?: string; // Optional ID for the resume
-  photo?: File | string | null; // Flexible type for the photo
-};
+export type ResumeValues = z.infer<typeof resumeSchema>;
 
 // Schema for generating work experience with validation rules
 export const generateWorkExperienceSchema = z.object({

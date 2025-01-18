@@ -38,6 +38,7 @@ export default function ResumePreview({ resumeData, contentRef, className }: Res
         <SummarySection resumeData={resumeData} />
         <WorkExperienceSection resumeData={resumeData} />
         <EducationSection resumeData={resumeData} />
+        <LanguageSkillsSection resumeData={resumeData} />
         <SkillsSection resumeData={resumeData} />
       </div>
     </div>
@@ -205,6 +206,32 @@ function EducationSection({ resumeData }: ResumeSectionProps) {
           </div>
         ))}
       </div>
+    </>
+  );
+}
+
+// Language skills section component
+function LanguageSkillsSection({ resumeData }: ResumeSectionProps) {
+  const { languages, colorHex } = resumeData;
+
+  if (!languages?.length) return null;
+
+  return (
+    <>
+      <hr className="border-2" style={{ borderColor: colorHex }} />
+      <section className="space-y-2">
+        <p className="text-lg font-semibold" style={{ color: colorHex }}>
+          Languages
+        </p>
+        <div className="space-y-1">
+          {languages.map((lang, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <span className="font-medium">{lang.language}</span>
+              <span className="text-gray-600 capitalize">{lang.level}</span>
+            </div>
+          ))}
+        </div>
+      </section>
     </>
   );
 }
