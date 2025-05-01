@@ -93,10 +93,10 @@ export default function CoverLetterForm({
         </form>
       </Form>
 
-      {/* The input dialog for the user to provide a job description */}
       <InputDialog
         open={showInputDialog}
         onOpenChange={setShowInputDialog}
+        resumeData={resumeData}
         onCoverLetterGenerated={(coverLetter) => {
           form.setValue("coverLetter", coverLetter);
           setShowInputDialog(false);
@@ -110,14 +110,10 @@ interface InputDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCoverLetterGenerated: (coverLetter: string) => void;
+  resumeData?: any; // Add resume data to props
 }
 
-/**
- * The dialog component that appears when the user wants to generate a cover letter.
- * It contains a form where the user enters the job description. On submission, the AI-generated
- * cover letter is returned and processed.
- */
-function InputDialog({ open, onOpenChange, onCoverLetterGenerated }: InputDialogProps) {
+function InputDialog({ open, onOpenChange, onCoverLetterGenerated, resumeData }: InputDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -133,7 +129,13 @@ function InputDialog({ open, onOpenChange, onCoverLetterGenerated }: InputDialog
   async function onSubmit(values: CoverLetterValues) {
     try {
       setLoading(true);
-      const coverLetter = await generateCoverLetter(values);
+      // Combine the form values with the resume data
+      const combinedData = {
+        ...values,
+        ...resumeData // Include all resume data fields
+      };
+      console.log('Sending combined data for cover letter generation:', combinedData);
+      const coverLetter = await generateCoverLetter(combinedData);
       onCoverLetterGenerated(coverLetter);
     } catch (error) {
       console.error(error);

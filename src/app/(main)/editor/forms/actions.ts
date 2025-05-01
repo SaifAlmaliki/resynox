@@ -1,6 +1,4 @@
-// Summary:
-// This module provides functions to generate AI-assisted resume content, including professional summaries and work experience entries.
-// It uses OpenAI's GPT model for natural language processing and ensures user authorization and subscription level compliance.
+// AI-assisted resume content generation functions
 
 "use server";
 
@@ -18,35 +16,25 @@ import {
 } from "@/lib/validation";
 import { auth } from "@clerk/nextjs/server";
 
-/**
- * Generates a professional summary for a resume based on user input.
- * Validates input, ensures user authorization, checks subscription level,
- * and calls the OpenAI API to create the summary.
- *
- * @param {GenerateSummaryInput} input - Input data for summary generation.
- * @returns {string} The generated summary.
- * @throws {Error} If user is unauthorized, lacks access, or the API fails.
- */
+// Generates a professional summary for a resume
 export async function generateSummary(input: GenerateSummaryInput) {
-  const { userId } = await auth(); // Retrieve the authenticated user's ID
+  const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized"); // Ensure the user is logged in
+    throw new Error("Unauthorized");
   }
 
-  const subscriptionLevel = await getUserSubscriptionLevel(userId); // Check subscription level
+  const subscriptionLevel = await getUserSubscriptionLevel(userId);
 
   if (!canUseAITools(subscriptionLevel)) {
-    throw new Error("Upgrade your subscription to use this feature"); // Validate access rights
+    throw new Error("Upgrade your subscription to use this feature");
   }
 
-  // Parse and validate the input data
   const { jobTitle, workExperiences, educations, skills } = generateSummarySchema.parse(input);
 
-  // Define system and user messages for the AI model
   const systemMessage = `
     You are a job resume generator AI. Your task is to write a professional introduction summary for a resume given the user's provided data.
-    Only return the summary and do not include any other information in the response. Keep it concise and professional.
+    Only return the summary and do not include any other information in the response. Keep it concise, professional and short.
   `;
 
   const userMessage = `
@@ -89,43 +77,35 @@ export async function generateSummary(input: GenerateSummaryInput) {
       { role: "system", content: systemMessage },
       { role: "user", content: userMessage },
     ],
+    temperature: 0.7, // Slightly creative but still professional
+    max_tokens: 1500, // Allow for a comprehensive cover letter
   });
 
-  const aiResponse = completion.choices[0].message.content; // Extract AI response
+  const aiResponse = completion.choices[0].message.content;
 
   if (!aiResponse) {
-    throw new Error("Failed to generate AI response"); // Ensure a response is received
+    throw new Error("Failed to generate AI response");
   }
 
   return aiResponse;
 }
 
-/**
- * Generates a structured work experience entry based on user input.
- * Validates input, ensures user authorization, checks subscription level,
- * and uses OpenAI to create the work experience entry.
- *
- * @param {GenerateWorkExperienceInput} input - Input description for the work experience.
- * @returns {WorkExperience} The generated work experience entry.
- * @throws {Error} If user is unauthorized, lacks access, or the API fails.
- */
+// Generates a work experience entry from a description
 export async function generateWorkExperience(input: GenerateWorkExperienceInput) {
-  const { userId } = await auth(); // Retrieve the authenticated user's ID
+  const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized"); // Ensure the user is logged in
+    throw new Error("Unauthorized");
   }
 
-  const subscriptionLevel = await getUserSubscriptionLevel(userId); // Check subscription level
+  const subscriptionLevel = await getUserSubscriptionLevel(userId);
 
   if (!canUseAITools(subscriptionLevel)) {
-    throw new Error("Upgrade your subscription to use this feature"); // Validate access rights
+    throw new Error("Upgrade your subscription to use this feature");
   }
 
-  // Parse and validate the input description
   const { description } = generateWorkExperienceSchema.parse(input);
 
-  // Define system and user messages for the AI model
   const systemMessage = `
     You are a job resume generator AI. Your task is to generate a single work experience entry based on the user input.
     Your response must adhere to the following structure. You can omit fields if they can't be inferred from the provided data, but don't add any new ones.
@@ -149,17 +129,19 @@ export async function generateWorkExperience(input: GenerateWorkExperienceInput)
       { role: "system", content: systemMessage },
       { role: "user", content: userMessage },
     ],
+    temperature: 0.7, // Slightly creative but still professional
+    max_tokens: 1500, // Allow for a comprehensive cover letter
   });
 
-  const aiResponse = completion.choices[0].message.content; // Extract AI response
+  const aiResponse = completion.choices[0].message.content;
 
   if (!aiResponse) {
-    throw new Error("Failed to generate AI response"); // Ensure a response is received
+    throw new Error("Failed to generate AI response");
   }
 
-  console.log("aiResponse", aiResponse); // Log the raw AI response
+  console.log("aiResponse", aiResponse);
 
-  // Extract relevant fields using regular expressions
+
   return {
     position: aiResponse.match(/Job title: (.*)/)?.[1] || "",
     company: aiResponse.match(/Company: (.*)/)?.[1] || "",
@@ -169,14 +151,7 @@ export async function generateWorkExperience(input: GenerateWorkExperienceInput)
   } satisfies WorkExperience;
 }
 
-/**
- * Generates a cover letter based on a job description and resume data.
- * Uses AI to create a personalized cover letter that highlights relevant experience.
- *
- * @param {CoverLetterValues & Partial<ResumeValues>} input - Job description and resume data
- * @returns {string} The generated cover letter
- * @throws {Error} If user is unauthorized, lacks access, or the API fails
- */
+// Generates a personalized cover letter
 export async function generateCoverLetter(input: CoverLetterValues & Partial<ResumeValues>) {
   const { userId } = await auth();
 
@@ -196,15 +171,27 @@ export async function generateCoverLetter(input: CoverLetterValues & Partial<Res
     throw new Error("Job description is required to generate a cover letter");
   }
 
+  // Get current date for the cover letter
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
   const systemMessage = `
     You are a professional cover letter writer. Your task is to write a compelling cover letter that:
-    1. Is tailored to the specific job description
+    1. Is precisely tailored to the specific job description by analyzing key requirements and responsibilities
     2. EXPLICITLY highlights relevant experience and skills from the resume that match the job requirements
     3. Maintains a professional yet engaging tone
-    4. Is well-structured with clear paragraphs
+    4. Is well-structured with clear paragraphs (introduction, body with experience highlights, closing)
     5. Includes a proper greeting and closing
     6. Specifically mentions how the candidate's previous work experience makes them a good fit for this role
     7. Draws direct connections between the candidate's skills/experience and the job requirements
+    8. Uses specific achievements and metrics from past roles when available
+    9. Demonstrates understanding of the industry and company needs
+    10. Conveys enthusiasm for the specific position and company
+    11. ALWAYS uses the EXACT current date provided in the user message, not a placeholder or made-up date
     
     Only return the cover letter text without any additional formatting or information.
   `;
@@ -214,8 +201,43 @@ export async function generateCoverLetter(input: CoverLetterValues & Partial<Res
     firstName, lastName, jobTitle, summary,
     workExperiences: workExperiences?.length,
     educations: educations?.length,
-    skills: skills?.length
+    skills: skills?.length,
+    currentDate: formattedDate
   });
+
+  // First, analyze the job description to extract key requirements and responsibilities
+  const analysisPrompt = `
+    Analyze this job description and extract the key requirements, skills, and responsibilities:
+    ${jobDescription}
+    
+    Format your response as a JSON object with these fields:
+    1. keyRequirements: Array of the most important skills and qualifications
+    2. responsibilities: Array of main job responsibilities
+    3. companyValues: Any company values or culture elements mentioned
+    4. industryContext: The industry or field context
+  `;
+  
+  // Analyze the job description first
+  const analysisCompletion = await openai.chat.completions.create({
+    model: "gpt-4.1-mini",
+    messages: [
+      { 
+        role: "system", 
+        content: "You are an expert job analyst. Extract key information from job descriptions in a structured format." 
+      },
+      { role: "user", content: analysisPrompt },
+    ],
+    response_format: { type: "json_object" },
+  });
+  
+  let jobAnalysis = {};
+  try {
+    jobAnalysis = JSON.parse(analysisCompletion.choices[0].message.content || '{}');
+    console.log('Job analysis:', jobAnalysis);
+  } catch (error) {
+    console.error('Error parsing job analysis:', error);
+    // Continue with default empty object if parsing fails
+  }
 
   const userMessage = `
     Please write a cover letter for this job description:
@@ -228,6 +250,7 @@ export async function generateCoverLetter(input: CoverLetterValues & Partial<Res
     Phone: ${phone || ''}
     Current Job Title: ${jobTitle || "N/A"}
     Professional Summary: ${summary || "N/A"}
+    Current Date: ${formattedDate} (IMPORTANT: Use this exact date in the cover letter header)
 
     ${workExperiences && workExperiences.length > 0 ? `Work Experience:
     ${workExperiences
@@ -252,12 +275,19 @@ export async function generateCoverLetter(input: CoverLetterValues & Partial<Res
 
     ${skills && skills.length > 0 ? `Skills: ${skills.join(", ")}` : 'No skills provided'}
 
+    Job Analysis:
+    ${JSON.stringify(jobAnalysis, null, 2)}
+
     IMPORTANT INSTRUCTIONS:
-    1. You MUST explicitly mention how the candidate's previous work experience makes them a good fit for this role
-    2. Draw direct connections between the candidate's skills/experience and specific requirements in the job description
-    3. Make it professional, concise, and engaging
-    4. If the candidate has limited experience, focus on their potential, transferable skills, and enthusiasm
-    5. The cover letter should be personalized and not generic
+    1. Use the job analysis to precisely match the candidate's experience with the job requirements
+    2. You MUST explicitly mention how the candidate's previous work experience makes them a good fit for this role
+    3. Draw direct connections between the candidate's skills/experience and specific requirements in the job description
+    4. Reference at least 2-3 specific requirements from the job description and how the candidate meets them
+    5. Make it professional, concise, and engaging
+    6. If the candidate has limited experience, focus on their potential, transferable skills, and enthusiasm
+    7. The cover letter should be personalized and not generic
+    8. Include a brief mention of why the candidate is interested in this specific company (based on company values if available)
+    9. Format as a proper business letter with date, greeting, body paragraphs, and professional closing
   `;
 
   const completion = await openai.chat.completions.create({
@@ -266,6 +296,8 @@ export async function generateCoverLetter(input: CoverLetterValues & Partial<Res
       { role: "system", content: systemMessage },
       { role: "user", content: userMessage },
     ],
+    temperature: 0.7, // Slightly creative but still professional
+    max_tokens: 1500, // Allow for a comprehensive cover letter
   });
 
   const aiResponse = completion.choices[0].message.content;
