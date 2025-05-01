@@ -169,7 +169,7 @@ function InputDialog({ open, onOpenChange, onCoverLetterGenerated, resumeData }:
                   <FormControl>
                     <Textarea
                       {...field}
-                      placeholder="Paste the job description here..."
+                      placeholder="Paste the complete job description for the position you're applying for. Our AI will generate a customized cover letter that highlights your relevant skills and experience."
                       className="min-h-[200px]"
                     />
                   </FormControl>

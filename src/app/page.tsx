@@ -188,18 +188,7 @@ export default function Home() {
             />
           </div>
           
-          <div className="mt-10 text-center">
-            <Button 
-              variant="outline" 
-              className="group"
-              asChild
-            >
-              <Link href="/testimonials">
-                Read More Success Stories
-                <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </Button>
-          </div>
+          {/* Removed 'Read More Success Stories' button */}
         </div>
         
         {/* How It Works Section */}
