@@ -5,7 +5,7 @@
  * Description:
  * - This file defines the `getUserSubscriptionLevel` function.
  * - It fetches the user's subscription data from the database using Prisma.
- * - The function determines the user's current subscription level ("free", "pro", "pro_plus").
+ * - The function determines the user's current subscription level ("free", "pro").
  * - Caching is applied for optimization, ensuring that repeated calls for the same user do not hit the database unnecessarily.
  */
 
@@ -14,7 +14,7 @@ import { cache } from "react"; // Cache utility to optimize repeated calls
 import prisma from "./prisma"; // Prisma client for database access
 
 // Define the possible subscription levels
-export type SubscriptionLevel = "free" | "pro" | "pro_plus";
+export type SubscriptionLevel = "free" | "pro";
 
 /**
  * Determines the subscription level of a user.
@@ -27,7 +27,7 @@ export type SubscriptionLevel = "free" | "pro" | "pro_plus";
  * 2. If no subscription exists or it has expired, return "free".
  * 3. Compare the user's Stripe subscription price ID to environment variables:
  *    - If matches `NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY`, return "pro".
- *    - If matches `NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY`, return "pro_plus".
+ *    - If matches `NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY`, also return "pro" (for backward compatibility).
  * 4. Throw an error if the subscription price ID is invalid.
  *
  * Optimization:
@@ -50,11 +50,6 @@ export const getUserSubscriptionLevel = cache(
     // Check for "pro" subscription level
     if ( subscription.stripePriceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY) {
       return "pro";
-    }
-
-    // Check for "pro_plus" subscription level
-    if (subscription.stripePriceId ===env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY) {
-      return "pro_plus";
     }
 
     // Throw an error if an unknown or invalid subscription is found

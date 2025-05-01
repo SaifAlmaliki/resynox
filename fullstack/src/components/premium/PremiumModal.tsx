@@ -11,20 +11,16 @@ import { createCheckoutSession } from "./actions";
 
 /**
  * This file contains the PremiumModal component, which displays a dialog for users
- * to subscribe to premium plans. It includes two subscription tiers: Premium and Premium Plus.
+ * to subscribe to premium plans. It includes a subscription tier: Premium.
  */
 
-// Define features for Premium and Premium Plus plans
+// Define features for Premium plan (now includes all features from previous Premium Plus)
 const premiumFeatures = [
   "AI Personalized Cover Letter",
   "AI Professional career summaries",
-  "Up to 3 resumes"
-];
-
-const premiumPlusFeatures = [
-  "All AI features included",
-  "Infinite resumes",
-  "Advanced design customizations"
+  "Unlimited resumes",
+  "Advanced design customizations",
+  "All AI features included"
 ];
 
 export default function PremiumModal() {
@@ -70,37 +66,14 @@ export default function PremiumModal() {
         </DialogHeader>
         <div className="space-y-6">
           <p>Get a premium subscription to unlock more features.</p>
-          <div className="flex">
-            {/* Premium Plan Section */}
-            <div className="flex w-1/2 flex-col space-y-5">
-              <h3 className="text-center text-lg font-bold">Premium</h3>
-              <ul className="list-inside space-y-2">
-                {premiumFeatures.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2">
-                    <Check className="size-4 text-green-500" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button
-                onClick={() =>
-                  handlePremiumClick(
-                    env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY, // Use the Premium plan price ID
-                  )
-                }
-                disabled={loading}
-              >
-                Get Premium
-              </Button>
-            </div>
-            <div className="mx-6 border-l" />
-            {/* Premium Plus Plan Section */}
-            <div className="flex w-1/2 flex-col space-y-5">
+          <div className="flex justify-center">
+            {/* Premium Plan Section (now includes all features) */}
+            <div className="flex w-2/3 flex-col space-y-5">
               <h3 className="bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-center text-lg font-bold text-transparent">
-                Premium Plus
+                Premium
               </h3>
               <ul className="list-inside space-y-2">
-                {premiumPlusFeatures.map((feature) => (
+                {premiumFeatures.map((feature) => (
                   <li key={feature} className="flex items-center gap-2">
                     <Check className="size-4 text-green-500" />
                     {feature}
@@ -111,12 +84,12 @@ export default function PremiumModal() {
                 variant="premium"
                 onClick={() =>
                   handlePremiumClick(
-                    env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY, // Use the Premium Plus plan price ID
+                    env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY, // Use the Premium plan price ID
                   )
                 }
                 disabled={loading}
               >
-                Get Premium Plus
+                Get Premium
               </Button>
             </div>
           </div>

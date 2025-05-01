@@ -3,7 +3,7 @@ import { SubscriptionLevel } from "./subscription";
 /**
  * Determines whether a user can create more resumes based on their subscription level and current resume count.
  *
- * @param subscriptionLevel - The user's current subscription level (e.g., "free", "pro", "pro_plus").
+ * @param subscriptionLevel - The user's current subscription level (e.g., "free", "pro").
  * @param currentResumeCount - The number of resumes the user has already created.
  * @returns true if the user can create more resumes, false otherwise.
  */
@@ -11,8 +11,7 @@ export function canCreateResume(subscriptionLevel: SubscriptionLevel, currentRes
   // A mapping that defines the maximum number of resumes allowed for each subscription level
   const maxResumeMap: Record<SubscriptionLevel, number> = {
     free: 1,            // Free users can create 1 resume
-    pro: 3,             // Pro users can create up to 3 resumes
-    pro_plus: Infinity, // Pro Plus users have no limit on resume creation
+    pro: Infinity,      // Pro users can create unlimited resumes (merged with pro_plus)
   };
 
   // Look up the maximum number of resumes allowed for the user's subscription level
@@ -25,7 +24,7 @@ export function canCreateResume(subscriptionLevel: SubscriptionLevel, currentRes
 /**
  * Determines whether a user can use AI tools based on their subscription level.
  *
- * @param subscriptionLevel - The user's subscription level (e.g., "free", "pro", "pro_plus").
+ * @param subscriptionLevel - The user's subscription level (e.g., "free", "pro").
  * @returns true if the user can use AI tools, false if they are on the free plan.
  */
 export function canUseAITools(subscriptionLevel: SubscriptionLevel) {
@@ -36,10 +35,10 @@ export function canUseAITools(subscriptionLevel: SubscriptionLevel) {
 /**
  * Determines whether a user can access advanced customizations based on their subscription level.
  *
- * @param subscriptionLevel - The user's subscription level (e.g., "free", "pro", "pro_plus").
- * @returns true if the user is on the "pro_plus" subscription, false otherwise.
+ * @param subscriptionLevel - The user's subscription level (e.g., "free", "pro").
+ * @returns true if the user is on the "pro" subscription, false otherwise.
  */
 export function canUseCustomizations(subscriptionLevel: SubscriptionLevel) {
-  // Advanced customizations are available only to "pro_plus" users
-  return subscriptionLevel === "pro_plus";
+  // Advanced customizations are available to all "pro" users (merged with pro_plus)
+  return subscriptionLevel === "pro";
 }

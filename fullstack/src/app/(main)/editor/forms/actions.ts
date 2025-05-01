@@ -14,6 +14,7 @@ import {
   generateWorkExperienceSchema,
   WorkExperience,
   ResumeValues,
+  CoverLetterValues,
 } from "@/lib/validation";
 import { auth } from "@clerk/nextjs/server";
 
@@ -83,7 +84,7 @@ export async function generateSummary(input: GenerateSummaryInput) {
 
   // Call the OpenAI API to generate a summary
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4.1-mini",
     messages: [
       { role: "system", content: systemMessage },
       { role: "user", content: userMessage },
@@ -143,7 +144,7 @@ export async function generateWorkExperience(input: GenerateWorkExperienceInput)
 
   // Call the OpenAI API to generate a work experience entry
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4.1-mini",
     messages: [
       { role: "system", content: systemMessage },
       { role: "user", content: userMessage },
@@ -169,14 +170,14 @@ export async function generateWorkExperience(input: GenerateWorkExperienceInput)
 }
 
 /**
- * Generates a cover letter based on the user's resume data and a job description.
+ * Generates a cover letter based on a job description and resume data.
  * Uses AI to create a personalized cover letter that highlights relevant experience.
  *
- * @param {ResumeValues} input - Resume data including job description
+ * @param {CoverLetterValues & Partial<ResumeValues>} input - Job description and resume data
  * @returns {string} The generated cover letter
  * @throws {Error} If user is unauthorized, lacks access, or the API fails
  */
-export async function generateCoverLetter(input: ResumeValues) {
+export async function generateCoverLetter(input: CoverLetterValues & Partial<ResumeValues>) {
   const { userId } = await auth();
 
   if (!userId) {
@@ -189,7 +190,7 @@ export async function generateCoverLetter(input: ResumeValues) {
     throw new Error("Upgrade your subscription to use this feature");
   }
 
-  const { jobDescription, jobTitle, workExperiences, educations, skills, firstName, lastName, email, phone } = input;
+  const { jobDescription, workExperiences, educations, skills, firstName, lastName, email, phone, jobTitle, summary } = input;
 
   if (!jobDescription?.trim()) {
     throw new Error("Job description is required to generate a cover letter");
@@ -198,12 +199,23 @@ export async function generateCoverLetter(input: ResumeValues) {
   const systemMessage = `
     You are a professional cover letter writer. Your task is to write a compelling cover letter that:
     1. Is tailored to the specific job description
-    2. Highlights relevant experience and skills from the resume
+    2. EXPLICITLY highlights relevant experience and skills from the resume that match the job requirements
     3. Maintains a professional yet engaging tone
     4. Is well-structured with clear paragraphs
     5. Includes a proper greeting and closing
+    6. Specifically mentions how the candidate's previous work experience makes them a good fit for this role
+    7. Draws direct connections between the candidate's skills/experience and the job requirements
+    
     Only return the cover letter text without any additional formatting or information.
   `;
+
+  // Log the resume data to help with debugging
+  console.log('Resume data for cover letter generation:', {
+    firstName, lastName, jobTitle, summary,
+    workExperiences: workExperiences?.length,
+    educations: educations?.length,
+    skills: skills?.length
+  });
 
   const userMessage = `
     Please write a cover letter for this job description:
@@ -215,33 +227,41 @@ export async function generateCoverLetter(input: ResumeValues) {
     Email: ${email || ''}
     Phone: ${phone || ''}
     Current Job Title: ${jobTitle || "N/A"}
+    Professional Summary: ${summary || "N/A"}
 
-    Work Experience:
+    ${workExperiences && workExperiences.length > 0 ? `Work Experience:
     ${workExperiences
-      ?.map(
+      .map(
         (exp) => `
         Position: ${exp.position || "N/A"} at ${exp.company || "N/A"}
         Duration: ${exp.startDate || "N/A"} to ${exp.endDate || "Present"}
         Description: ${exp.description || "N/A"}
-      `,
+      `
       )
-      .join("\n\n")}
+      .join("\n\n")}` : 'No work experience provided'}
 
-    Education:
+    ${educations && educations.length > 0 ? `Education:
     ${educations
-      ?.map(
+      .map(
         (edu) => `
         ${edu.degree || "N/A"} at ${edu.school || "N/A"}
         Duration: ${edu.startDate || "N/A"} to ${edu.endDate || "N/A"}
-      `,
+      `
       )
-      .join("\n\n")}
+      .join("\n\n")}` : 'No education provided'}
 
-    Skills: ${skills}
+    ${skills && skills.length > 0 ? `Skills: ${skills.join(", ")}` : 'No skills provided'}
+
+    IMPORTANT INSTRUCTIONS:
+    1. You MUST explicitly mention how the candidate's previous work experience makes them a good fit for this role
+    2. Draw direct connections between the candidate's skills/experience and specific requirements in the job description
+    3. Make it professional, concise, and engaging
+    4. If the candidate has limited experience, focus on their potential, transferable skills, and enthusiasm
+    5. The cover letter should be personalized and not generic
   `;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4.1-mini",
     messages: [
       { role: "system", content: systemMessage },
       { role: "user", content: userMessage },
