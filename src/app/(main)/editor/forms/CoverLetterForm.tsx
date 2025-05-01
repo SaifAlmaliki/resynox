@@ -1,7 +1,7 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { EditorFormProps } from "@/lib/types";
-import { coverLetterSchema, CoverLetterValues } from "@/lib/validation";
+import { coverLetterSchema, CoverLetterValues, ResumeValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -110,7 +110,7 @@ interface InputDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCoverLetterGenerated: (coverLetter: string) => void;
-  resumeData?: any; // Add resume data to props
+  resumeData?: Partial<ResumeValues>; // Use proper type instead of any
 }
 
 function InputDialog({ open, onOpenChange, onCoverLetterGenerated, resumeData }: InputDialogProps) {

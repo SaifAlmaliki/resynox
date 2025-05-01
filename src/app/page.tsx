@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SplineScene } from "@/components/ui/spline-scene";
 import { Spotlight } from "@/components/ui/spotlight";
-import { ArrowRight, CheckCircle, FileCheck, Users, Star, ChevronRight, Mail } from "lucide-react";
+import { ArrowRight, CheckCircle, FileCheck, Users, Star, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -294,7 +294,7 @@ function TestimonialCard({
           <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
         ))}
       </div>
-      <p className="text-gray-700 dark:text-gray-300 mb-6 italic">"{testimonial}"</p>
+      <p className="text-gray-700 dark:text-gray-300 mb-6 italic">&ldquo;{testimonial}&rdquo;</p>
       <div>
         <p className="font-semibold">{name}</p>
         <p className="text-sm text-gray-600 dark:text-gray-400">{role} at {company}</p>
