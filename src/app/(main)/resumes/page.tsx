@@ -7,16 +7,13 @@ import { Metadata } from "next";
 import CreateResumeButton from "./CreateResumeButton";
 import ResumeItem from "./ResumeItem";
 
-// Define metadata for the page, used by Next.js for SEO and browser title
 export const metadata: Metadata = {
-  title: "Your resumes", // Set the page title
+  title: "AI Powered Resume Builder",
 };
 
 export default async function Page() {
-  // Retrieve the authenticated user's ID using Clerk
   const { userId } = await auth();
 
-  // If the user is not authenticated, return null (render nothing)
   if (!userId) {
     return null;
   }
@@ -41,7 +38,7 @@ export default async function Page() {
 
         {/* Section header with the total count of resumes */}
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold">Your resumes</h1>
+          <h1 className="text-3xl font-bold">Your Resumes</h1>
           <p>Total: {totalCount}</p>
         </div>
 
@@ -61,7 +58,7 @@ export default async function Page() {
       <main className="mx-auto w-full max-w-7xl space-y-6 px-3 py-6 text-center">
         <h1 className="text-3xl font-bold text-red-500">Something went wrong!</h1>
         <p className="text-gray-600">
-          We are currently unable to load your resumes. Please try again later.
+          We are currently unable to load your Resumes. Please try again later.
         </p>
       </main>
     );
