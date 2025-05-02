@@ -11,7 +11,7 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GripHorizontal } from "lucide-react";
+import { GripHorizontal, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import GenerateWorkExperienceButton from "./GenerateWorkExperienceButton";
@@ -257,7 +257,8 @@ function WorkExperienceItem({id, form, index, remove}: WorkExperienceItemProps) 
       />
 
       {/* Button to remove the work experience item */}
-      <Button variant="destructive" type="button" onClick={() => remove(index)}>
+      <Button variant="destructive" type="button" onClick={() => remove(index)} className="flex items-center gap-2">
+        <Trash2 className="h-4 w-4" />
         Remove
       </Button>
     </div>

@@ -1,7 +1,8 @@
 // Importing necessary components and hooks from the project and external libraries.
-import { Button } from "@/components/ui/button"; // Button UI component.
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // Form-related components for structured and styled forms.
-import { Input } from "@/components/ui/input"; // Input field UI component.
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ImageIcon, UploadIcon, Trash2 } from "lucide-react";
 import { EditorFormProps } from "@/lib/types"; // Type definitions for form props.
 import { personalInfoSchema, PersonalInfoValues } from "@/lib/validation"; // Validation schema and type definitions for form data.
 import { zodResolver } from "@hookform/resolvers/zod"; // Zod resolver for integrating validation schema with React Hook Form.
@@ -57,32 +58,56 @@ export default function PersonalInfoForm({resumeData, setResumeData}: EditorForm
             render={({ field: { value, ...fieldValues } }) => (
               <FormItem>
                 <FormLabel>Your photo</FormLabel>
-                <div className="flex items-center gap-2">
-                  <FormControl>
-                    <Input
-                      {...fieldValues} // Pass form field props.
-                      type="file"      // Input type for file upload.
-                      accept="image/*" // Accept only image files.
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]; // Get the selected file.
-                        fieldValues.onChange(file);       // Update field value.
-                      }}
-                      ref={photoInputRef} // Attach input field to the reference.
-                    />
-                  </FormControl>
-                  {/* Button to clear the photo input */}
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    onClick={() => {
-                      fieldValues.onChange(null); // Clear the form value.
-                      if (photoInputRef.current) {
-                        photoInputRef.current.value = ""; // Reset the input field.
-                      }
-                    }}
-                  >
-                    Remove
-                  </Button>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <FormControl>
+                      <div>
+                        <Input
+                          {...fieldValues}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            fieldValues.onChange(file);
+                          }}
+                          ref={photoInputRef}
+                          className="hidden"
+                          id="photo-upload"
+                        />
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="flex items-center gap-2 border-2 h-11 px-4 bg-white dark:bg-gray-950 hover:bg-gray-100 dark:hover:bg-gray-900"
+                            onClick={() => photoInputRef.current?.click()}
+                          >
+                            <UploadIcon className="h-4 w-4" />
+                            <span>{value ? 'Change Photo' : 'Choose File'}</span>
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            type="button"
+                            className="h-11"
+                            onClick={() => {
+                              fieldValues.onChange(null);
+                              if (photoInputRef.current) {
+                                photoInputRef.current.value = "";
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    </FormControl>
+                  </div>
+                  {value && (
+                    <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1 pl-1">
+                      <ImageIcon className="h-3 w-3" />
+                      {value instanceof File ? value.name : 'Photo selected'}
+                    </div>
+                  )}
                 </div>
                 <FormMessage /> {/* Displays validation error messages. */}
               </FormItem>

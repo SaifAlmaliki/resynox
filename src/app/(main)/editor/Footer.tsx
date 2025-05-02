@@ -1,7 +1,7 @@
 // Import necessary components and utilities
 import { Button } from "@/components/ui/button"; // UI Button component
 import { cn } from "@/lib/utils"; // Utility function for conditional class names
-import { FileUserIcon, PenLineIcon } from "lucide-react"; // Icons for UI
+import { FileUserIcon, PenLineIcon, ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon } from "lucide-react";
 import Link from "next/link"; // Next.js Link component for navigation
 import { steps } from "./steps"; // Steps configuration array
 
@@ -32,17 +32,22 @@ export default function Footer({ currentStep, setCurrentStep, showSmResumePrevie
         {/* Navigation buttons for "Previous" and "Next" steps */}
         <div className="flex items-center gap-3">
           <Button
-            variant="secondary" // Secondary style for the button
-            onClick={previousStep ? () => setCurrentStep(previousStep) : undefined }  // Set to the previous step if available
-            disabled={!previousStep} // Disable button if no previous step
+            variant="secondary"
+            onClick={previousStep ? () => setCurrentStep(previousStep) : undefined }
+            disabled={!previousStep}
+            className="flex items-center gap-2"
           >
+            <ArrowLeftIcon className="h-4 w-4" />
             Previous step
           </Button>
 
-          <Button onClick={nextStep ? () => setCurrentStep(nextStep) : undefined } // Set to the next step if available
-            disabled={!nextStep} // Disable button if no next step
+          <Button 
+            onClick={nextStep ? () => setCurrentStep(nextStep) : undefined }
+            disabled={!nextStep}
+            className="flex items-center gap-2"
           >
             Next step
+            <ArrowRightIcon className="h-4 w-4" />
           </Button>
         </div>
 
@@ -63,8 +68,11 @@ export default function Footer({ currentStep, setCurrentStep, showSmResumePrevie
         {/* Action buttons for closing and status display */}
         <div className="flex items-center gap-3">
           {/* Link to close the form and navigate back to the resumes list */}
-          <Button variant="secondary" asChild>
-            <Link href="/resumes">Done</Link>
+          <Button variant="secondary" asChild className="flex items-center gap-2">
+            <Link href="/resumes">
+              <CheckCircleIcon className="h-4 w-4" />
+              Done
+            </Link>
           </Button>
           {/* Display saving status with conditional opacity */}
           <p

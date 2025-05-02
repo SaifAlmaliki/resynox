@@ -9,14 +9,11 @@ import { ArrowRight, CheckCircle, FileCheck, Users, Star, Mail } from "lucide-re
 import Image from "next/image";
 import Link from "next/link";
 
-/**
- * Home Component: Renders the homepage for the application.
- * Features an interactive 3D scene with elegant design elements.
- */
+// Home page with 3D scene
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black">
-      {/* Hero Section with 3D Scene */}
+
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <Card className="w-full bg-black/[0.96] relative overflow-hidden rounded-xl shadow-2xl border-0">
           <Spotlight
@@ -24,11 +21,11 @@ export default function Home() {
             fill="white"
           />
           
-          <div className="flex flex-col md:flex-row h-[600px]">
-            {/* Left content */}
-            <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center">
-              {/* Logo */}
-              <div className="mb-6">
+          <div className="flex flex-col md:flex-row h-[650px] md:h-[600px]">
+
+            <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-start md:justify-center pt-4 md:pt-0">
+
+              <div className="mb-6 hidden md:block">
                 <Image
                   src={logo}
                   alt="Logo"
@@ -62,17 +59,17 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right content - 3D Scene */}
-            <div className="flex-1 relative">
+
+            <div className="flex-1 relative order-first md:order-last mb-0 md:mb-0 h-[300px] md:h-full">
               <SplineScene 
                 scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="w-full h-full"
+                className="w-full h-full scale-125 md:scale-100"
               />
             </div>
           </div>
         </Card>
 
-        {/* Features Section */}
+
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           <FeatureCard 
             title="AI-Powered Content"
@@ -91,7 +88,7 @@ export default function Home() {
           />
         </div>
         
-        {/* ATS-Friendly Section */}
+
         <div className="mt-24 bg-white dark:bg-gray-900 rounded-xl p-8 md:p-12 shadow-lg">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -153,7 +150,7 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Success Stories Section */}
+
         <div className="mt-24">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Success Stories</h2>
@@ -188,10 +185,10 @@ export default function Home() {
             />
           </div>
           
-          {/* Removed 'Read More Success Stories' button */}
+
         </div>
         
-        {/* How It Works Section */}
+
         <div className="mt-24 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl p-8 md:p-12">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">

@@ -13,7 +13,6 @@ interface ResumePreviewProps {
   className?: string;
 }
 
-// Resume preview component with responsive scaling
 export default function ResumePreview({ resumeData, contentRef, className }: ResumePreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { width } = useDimensions(containerRef);
@@ -46,7 +45,6 @@ interface ResumeSectionProps {
   resumeData: ResumeValues;
 }
 
-// Personal information section with photo and contact details
 function PersonalInfoHeader({ resumeData }: ResumeSectionProps) {
   const { photo, firstName, lastName, jobTitle, city, country, phone, email, colorHex, borderStyle } = resumeData;
 
@@ -102,7 +100,6 @@ function PersonalInfoHeader({ resumeData }: ResumeSectionProps) {
   );
 }
 
-// Professional summary section
 function SummarySection({ resumeData }: ResumeSectionProps) {
   const { summary, colorHex } = resumeData;
 
@@ -121,7 +118,6 @@ function SummarySection({ resumeData }: ResumeSectionProps) {
   );
 }
 
-// Work experience section
 function WorkExperienceSection({ resumeData }: ResumeSectionProps) {
   const { workExperiences, colorHex } = resumeData;
 
@@ -161,7 +157,6 @@ function WorkExperienceSection({ resumeData }: ResumeSectionProps) {
   );
 }
 
-// Education section
 function EducationSection({ resumeData }: ResumeSectionProps) {
   const { educations, colorHex } = resumeData;
 
@@ -200,7 +195,6 @@ function EducationSection({ resumeData }: ResumeSectionProps) {
   );
 }
 
-// Language skills section component
 function LanguageSkillsSection({ resumeData }: ResumeSectionProps) {
   const { languages, colorHex } = resumeData;
 
@@ -226,12 +220,10 @@ function LanguageSkillsSection({ resumeData }: ResumeSectionProps) {
   );
 }
 
-// Skills Section
-// Renders the list of skills as badges.
 function SkillsSection({ resumeData }: ResumeSectionProps) {
   const { skills, colorHex, borderStyle } = resumeData;
 
-  if (!skills?.length) return null; // Skip if no skills are provided
+  if (!skills?.length) return null;
 
   return (
     <>

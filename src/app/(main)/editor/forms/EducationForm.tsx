@@ -31,7 +31,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities"; // Utilities for styling during dragging
 import { zodResolver } from "@hookform/resolvers/zod"; // Resolver for Zod schema validation
-import { GripHorizontal } from "lucide-react"; // Icon for draggable elements
+import { GripHorizontal, Trash2 } from "lucide-react"; // Icons for UI elements
 import { useEffect } from "react"; // React hook for lifecycle events
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form"; // Hooks for managing forms
 
@@ -256,7 +256,8 @@ function EducationItem({ id, form, index, remove }: EducationItemProps) {
       </div>
 
       {/* Remove Button */}
-      <Button variant="destructive" type="button" onClick={() => remove(index)}>
+      <Button variant="destructive" type="button" onClick={() => remove(index)} className="flex items-center gap-2">
+        <Trash2 className="h-4 w-4" />
         Remove
       </Button>
     </div>
