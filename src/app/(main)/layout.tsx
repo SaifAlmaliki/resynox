@@ -1,16 +1,3 @@
-/*
- * File: Layout.tsx
- * Purpose: Defines a layout wrapper for authenticated users, providing a consistent UI structure.
- *
- * Description:
- * - This layout is used to wrap pages and components for authenticated users.
- * - It retrieves the user's subscription level and provides it to the entire application using a context provider.
- * - The layout includes:
- *   - A `Navbar` component for navigation.
- *   - A `PremiumModal` component to display premium upgrade options when needed.
- *   - Children components (the content of the specific page).
- */
-
 import PremiumModal from "@/components/premium/PremiumModal";
 import { getUserSubscriptionLevel } from "@/lib/subscription";
 import { auth } from "@clerk/nextjs/server";
