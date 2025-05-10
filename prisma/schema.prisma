@@ -117,3 +117,49 @@ model UserSubscription {
 
   @@map("user_subscriptions") // Maps this model to the `user_subscriptions` table in the database.
 }
+
+// Interview model: Represents mock interviews created by users
+model Interview {
+  id        String   @id @default(cuid())
+  userId    String   // Foreign key to associate the interview with a user
+  role      String   // Job role for the interview (e.g., "Frontend Developer")
+  level     String   // Experience level (e.g., "Junior", "Mid", "Senior")
+  questions String[] // List of interview questions
+  techstack String[] // Technologies relevant to the interview
+  type      String   // Type of interview
+  finalized Boolean  @default(false) // Whether the interview is completed
+  
+  // Relationship with Feedback
+  feedback  Feedback[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("interviews")
+}
+
+// Feedback model: Represents AI-generated feedback for interviews
+model Feedback {
+  id              String   @id @default(cuid())
+  totalScore      Float    // Overall interview score
+  
+  // Structured feedback categories
+  categoryScores  Json     // Array of {name, score, comment}
+  strengths       String[] // List of identified strengths
+  areasForImprovement String[] // List of areas to improve
+  finalAssessment String   // Overall assessment and recommendations
+  
+  // Relationship with Interview
+  interviewId     String
+  interview       Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  
+  // User relationship
+  userId          String
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("feedback")
+}
