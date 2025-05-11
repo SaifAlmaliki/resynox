@@ -156,7 +156,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                "After practicing with ResynoX's mock interviews, I felt so much more confident during my actual interviews. The feedback was incredibly helpful and I landed my dream job at Google!"
+                &quot;After practicing with ResynoX&apos;s mock interviews, I felt so much more confident during my actual interviews. The feedback was incredibly helpful and I landed my dream job at Google!&quot;
               </p>
               <div className="flex text-yellow-400">
                 <Star className="h-5 w-5 fill-current" />
@@ -178,7 +178,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                "The resume builder helped me create a standout resume that got me multiple interviews. The templates are modern and professional, and the AI suggestions were spot on."
+                &quot;The resume builder helped me create a standout resume that got me multiple interviews. The templates are modern and professional, and the AI suggestions were spot on.&quot;
               </p>
               <div className="flex text-yellow-400">
                 <Star className="h-5 w-5 fill-current" />
@@ -200,7 +200,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                "I used the resume builder for my career change and it helped me highlight my transferable skills perfectly. I received compliments on my resume in every interview and landed my dream job!"
+                &quot;I used the resume builder for my career change and it helped me highlight my transferable skills perfectly. I received compliments on my resume in every interview and landed my dream job!&quot;
               </p>
               <div className="flex text-yellow-400">
                 <Star className="h-5 w-5 fill-current" />

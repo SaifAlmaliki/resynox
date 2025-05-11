@@ -78,7 +78,7 @@ const InterviewPage = async () => {
             </div>
             <h3 className="text-xl font-medium mb-2">No interviews yet</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              You haven't created any interviews yet. Start your first mock interview to practice your skills.
+              You haven&apos;t created any interviews yet. Start your first mock interview to practice your skills.
             </p>
             <Button asChild>
               <Link href="/interview/generate">Start Your First Interview</Link>
@@ -101,7 +101,7 @@ const InterviewPage = async () => {
           </div>
           <div className="p-4 bg-muted/50 rounded-lg">
             <h4 className="font-medium mb-2">3. Get feedback</h4>
-            <p className="text-sm text-muted-foreground">After the interview, you'll receive detailed feedback on your performance and areas for improvement.</p>
+            <p className="text-sm text-muted-foreground">After the interview, you&apos;ll receive detailed feedback on your performance and areas for improvement.</p>
           </div>
         </div>
       </div>

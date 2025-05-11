@@ -35,7 +35,7 @@ const InterviewGeneratePage = async () => {
           </div>
           <div className="p-4 bg-muted/50 rounded-lg">
             <h4 className="font-medium mb-2">3. Get feedback</h4>
-            <p className="text-sm text-muted-foreground">After the interview, you'll receive detailed feedback on your performance and areas for improvement to help you prepare for real interviews.</p>
+            <p className="text-sm text-muted-foreground">After the interview, you&apos;ll receive detailed feedback on your performance and areas for improvement to help you prepare for real interviews.</p>
           </div>
         </div>
       </div>
