@@ -11,14 +11,7 @@ import { createFeedback, createInterview } from "@/lib/actions/interview.actions
 import { AgentProps, CallStatus, SavedMessage } from "@/types/interview";
 import { Button } from "@/components/ui/button";
 
-const Agent = ({
-  userName,
-  userId,
-  interviewId,
-  feedbackId,
-  type,
-  questions,
-}: AgentProps) => {
+const Agent = ({userName, userId, interviewId, feedbackId, type, questions}: AgentProps) => {
   const router = useRouter();
   
   // State management
@@ -55,13 +48,13 @@ const Agent = ({
         // Try to reconnect after a short delay
         setTimeout(() => {
           if (type === "generate") {
-            // @ts-ignore - Type issues with VAPI client
+            // @ts-expect-error - Type issues with VAPI client
             vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
               variableValues: {
                 username: userName,
                 userid: userId,
               },
-            }).catch((err: any) => {
+            }).catch((err: Error) => {
               console.error("Failed to reconnect:", err);
               setCallStatus(CallStatus.FINISHED);
               setError("Connection lost. Please try again.");
@@ -75,11 +68,27 @@ const Agent = ({
       }
     };
 
+    // Define a type for VAPI messages
+    interface VapiMessage {
+      type: string;
+      transcriptType?: string;
+      role?: string;
+      transcript?: string;
+    }
+
     // Handler for receiving messages (transcripts)
-    const onMessage = (message: any) => {
+    const onMessage = (message: VapiMessage) => {
       // Only process final transcripts, not interim ones
-      if (message.type === "transcript" && message.transcriptType === "final") {
-        const newMessage = { role: message.role, content: message.transcript };
+      if (message.type === "transcript" && message.transcriptType === "final" && message.role && message.transcript) {
+        // Convert VAPI role to SavedMessage role
+        const role = message.role === "user" ? "user" : 
+                    message.role === "system" ? "system" : "assistant";
+        
+        const newMessage: SavedMessage = { 
+          role: role, 
+          content: message.transcript 
+        };
+        
         setMessages((prev) => [...prev, newMessage]);
       }
     };
@@ -257,7 +266,6 @@ const Agent = ({
           : '';
 
         // Start the interview directly with personalized data from resume
-        // @ts-ignore - Type issues with VAPI client
         await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
           variableValues: {
             username: userName,
@@ -268,6 +276,8 @@ const Agent = ({
             questions: formattedQuestions, // Pass personalized questions directly
             skipIntro: true, // Skip the introduction/selection step
           },
+          clientMessages: [],
+          serverMessages: [],
         });
       } else {
         // For feedback type, format questions and use the interviewer workflow
@@ -279,12 +289,13 @@ const Agent = ({
         }
 
         // Start the interview with the formatted questions
-        // @ts-ignore - Type issues with VAPI client
         await vapi.start(interviewer, {
           variableValues: {
             questions: formattedQuestions,
             interviewId: interviewId, // Use the provided interview ID
           },
+          clientMessages: [],
+          serverMessages: [],
         });
       }
     } catch (error) {

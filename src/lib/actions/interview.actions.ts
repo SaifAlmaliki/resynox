@@ -5,8 +5,9 @@ import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { feedbackSchema } from "@/constants";
 import prisma from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { CreateFeedbackParams, GetFeedbackByInterviewIdParams, GetLatestInterviewsParams, Feedback, Interview } from "@/types/interview";
+import { CreateFeedbackParams, GetFeedbackByInterviewIdParams, GetLatestInterviewsParams } from "@/types/interview";
 
 /**
  * Get the current authenticated user
@@ -41,13 +42,11 @@ export async function createFeedback(params: CreateFeedbackParams) {
       .join("");
 
     // Generate AI feedback using Google's Gemini model
-    // @ts-ignore - Ignoring type issues with the AI SDK
     const result = await generateObject({
-      // @ts-ignore - Type issues with AI SDK
       model: google("gemini-1.5-pro", {
         structuredOutputs: false,
       }),
-      // @ts-ignore - Schema property not recognized by type system
+      // @ts-expect-error - Schema property not recognized by type system
       schema: feedbackSchema, // Schema defines the structure of the response
       prompt: `
         You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
@@ -65,8 +64,21 @@ export async function createFeedback(params: CreateFeedbackParams) {
         "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
     });
 
+    // Define a type for AI response object
+    interface FeedbackObject {
+      totalScore: number;
+      categoryScores: Array<{
+        name: string;
+        score: number;
+        comment: string;
+      }>;
+      strengths: string[];
+      areasForImprovement: string[];
+      finalAssessment: string;
+    }
+
     // Cast the result to access the object property
-    const aiResponse = result as { object: any };
+    const aiResponse = result as { object: FeedbackObject };
     const object = aiResponse.object;
 
     // Prepare feedback object with AI-generated data
@@ -83,16 +95,34 @@ export async function createFeedback(params: CreateFeedbackParams) {
     };
 
     // Use existing feedback document or create a new one
-    let feedback;
+    // Define a type for the feedback data
+    type FeedbackData = {
+      id: string;
+      interviewId: string;
+      userId: string;
+      totalScore: number;
+      categoryScores: Array<{
+        name: string;
+        score: number;
+        comment: string;
+      }>;
+      strengths: string[];
+      areasForImprovement: string[];
+      finalAssessment: string;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+
+    let feedback: FeedbackData;
     if (feedbackId) {
-      feedback = await (prisma as any).feedback.update({
+      feedback = await (prisma as PrismaClient).feedback.update({
         where: { id: feedbackId },
         data: feedbackData
-      });
+      }) as unknown as FeedbackData;
     } else {
-      feedback = await (prisma as any).feedback.create({
+      feedback = await (prisma as PrismaClient).feedback.create({
         data: feedbackData
-      });
+      }) as unknown as FeedbackData;
     }
 
     revalidatePath(`/interview/${interviewId}/feedback`);
@@ -109,9 +139,23 @@ export async function createFeedback(params: CreateFeedbackParams) {
  */
 export async function getInterviewById(id: string) {
   try {
-    const interview = await (prisma as any).interview.findUnique({
+    // Define a type for the interview data
+    type InterviewData = {
+      id: string;
+      userId: string;
+      role: string;
+      level: string;
+      questions: string[];
+      techstack: string[];
+      type: string;
+      finalized: boolean;
+      createdAt: Date;
+      updatedAt?: Date;
+    };
+
+    const interview = await (prisma as PrismaClient).interview.findUnique({
       where: { id }
-    });
+    }) as unknown as InterviewData | null;
     
     return interview;
   } catch (error) {
@@ -133,7 +177,7 @@ export async function getFeedbackByInterviewId(params: GetFeedbackByInterviewIdP
 
   try {
     // Check if feedback already exists for this interview and user
-    const existingFeedback = await (prisma as any).feedback.findFirst({
+    const existingFeedback = await (prisma as PrismaClient).feedback.findFirst({
       where: {
         interviewId: interviewId,
         userId: userId
@@ -159,7 +203,7 @@ export async function getLatestInterviews(params: GetLatestInterviewsParams) {
   }
 
   try {
-    const interviews = await (prisma as any).interview.findMany({
+    const interviews = await (prisma as PrismaClient).interview.findMany({
       where: {
         userId: { not: userId },
         finalized: true
@@ -187,7 +231,7 @@ export async function getInterviewsByUserId(userId: string) {
   }
   
   try {
-    const interviews = await (prisma as any).interview.findMany({
+    const interviews = await (prisma as PrismaClient).interview.findMany({
       where: {
         userId
       },
@@ -217,7 +261,6 @@ export async function createInterview(data: {
 }) {
   try {
     // Fetch the user's most recent resume to personalize the interview
-    // @ts-ignore - Prisma types
     const userResume = await prisma.resume.findFirst({
       where: { userId: data.userId },
       orderBy: { updatedAt: 'desc' }
@@ -243,7 +286,6 @@ export async function createInterview(data: {
 
     // Generate personalized questions based on resume data and provided role/techstack
     const personalizedQuestions = await generatePersonalizedQuestions({
-      userId: data.userId,
       role: personalizedRole,
       level: data.level,
       techstack: personalizedTechstack,
@@ -251,7 +293,6 @@ export async function createInterview(data: {
     });
 
     // Create the interview with personalized data
-    // @ts-ignore - Prisma types not recognizing the interview model
     const interview = await prisma.interview.create({
       data: {
         userId: data.userId,
@@ -282,17 +323,15 @@ export async function createInterview(data: {
  * Generates personalized interview questions based on resume data
  */
 async function generatePersonalizedQuestions({ 
-  userId, 
   role, 
   level, 
   techstack,
   resumeData
 }: {
-  userId: string;
   role: string;
   level: string;
   techstack: string[];
-  resumeData: any;
+  resumeData: Record<string, unknown> | null;
 }) {
   try {
     // Default questions if personalization fails
@@ -313,21 +352,31 @@ async function generatePersonalizedQuestions({
     console.log("Generating personalized questions based on resume data");
     
     // Create personalized questions based on resume data
+    // Type guard function to check if resumeData has skills property
+    const hasSkills = (data: Record<string, unknown> | null): data is { skills: string[] } => {
+      return !!data && 'skills' in data && Array.isArray((data as Record<string, unknown>).skills);
+    };
+
+    // Type guard function to check if resumeData has jobTitle property
+    const hasJobTitle = (data: Record<string, unknown> | null): data is { jobTitle: string } => {
+      return !!data && 'jobTitle' in data && typeof (data as Record<string, unknown>).jobTitle === 'string';
+    };
+
     const personalizedQuestions = [
       // Technical skills questions
-      `Tell me about your experience with ${resumeData.skills ? resumeData.skills.slice(0, 3).join(', ') : techstack.join(', ')}.`,
+      `Tell me about your experience with ${hasSkills(resumeData) ? resumeData.skills.slice(0, 3).join(', ') : techstack.join(', ')}.`,
       
       // Role-specific questions
-      `What challenges have you faced as a ${resumeData.jobTitle || role}?`,
+      `What challenges have you faced as a ${hasJobTitle(resumeData) ? resumeData.jobTitle : role}?`,
       
       // Technology trends question
-      `How do you stay updated with the latest trends in ${resumeData.skills?.[0] || techstack[0] || 'technology'}?`,
+      `How do you stay updated with the latest trends in ${hasSkills(resumeData) && resumeData.skills.length > 0 ? resumeData.skills[0] : techstack[0] || 'technology'}?`,
       
       // Project experience question
-      `Describe a project where you used ${resumeData.skills?.[0] || techstack[0] || 'your technical skills'}.`,
+      `Describe a project where you used ${hasSkills(resumeData) && resumeData.skills.length > 0 ? resumeData.skills[0] : techstack[0] || 'your technical skills'}.`,
       
       // Problem-solving question based on role
-      `How do you approach problem-solving in your work as a ${resumeData.jobTitle || role}?`,
+      `How do you approach problem-solving in your work as a ${hasJobTitle(resumeData) ? resumeData.jobTitle : role}?`,
       
       // Career interest question
       `What interests you most about this ${role} position?`,

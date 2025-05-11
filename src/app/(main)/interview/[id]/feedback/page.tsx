@@ -69,7 +69,7 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
           <CardTitle>Category Scores</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {Array.isArray(feedback.categoryScores) && feedback.categoryScores.map((category: any, index: number) => (
+          {Array.isArray(feedback.categoryScores) && feedback.categoryScores.map((category: { name: string; score: number; comment: string }, index: number) => (
             <div key={index}>
               <div className="flex justify-between mb-1">
                 <div className="font-medium">{category.name}</div>

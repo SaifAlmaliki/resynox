@@ -99,7 +99,7 @@ const InterviewDetailPage = async ({ params }: InterviewDetailPageProps) => {
         </CardHeader>
         <CardContent className="p-6">
           <Agent
-            userName={user?.name!}
+            userName={user?.name || 'User'}
             userId={user?.id}
             interviewId={interview.id}
             type="interview"

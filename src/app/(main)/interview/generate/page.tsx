@@ -17,7 +17,7 @@ const InterviewGeneratePage = async () => {
       </div>
 
       <Agent
-        userName={user?.name!}
+        userName={user?.name || 'User'}
         userId={user?.id}
         type="generate"
       />
