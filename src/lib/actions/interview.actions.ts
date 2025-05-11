@@ -450,7 +450,7 @@ export async function generateInterviewQuestions(params: {
       model: google("gemini-1.5-pro"),
       output: "no-schema",
       prompt: `
-        Generate 10 technical interview questions for a ${experienceLevel} ${role} position.
+        Generate 20 interview questions for a ${experienceLevel} ${role} position.
         
         Candidate background:
         - Job Title: ${jobTitle}
@@ -459,14 +459,15 @@ export async function generateInterviewQuestions(params: {
         
         Requirements:
         1. Questions should be tailored to the candidate's experience level (${experienceLevel}) and role (${role}).
-        2. Include a mix of technical questions related to their skills (${technologies}).
-        3. Include some behavioral questions relevant to the role.
-        4. Questions should be challenging but appropriate for their experience level.
-        5. Each question should be concise and clear.
-        6. Return exactly 10 questions, numbered from 1 to 10.
-        7. Format each question as a single string without additional formatting.
+        2. Include 12 technical questions related to their skills (${technologies}).
+        3. Include 8 behavioral questions that assess soft skills relevant to the role.
+        4. The behavioral questions should evaluate teamwork, problem-solving, communication, adaptability, leadership, conflict resolution, time management, and work ethic.
+        5. Questions should be challenging but appropriate for their experience level.
+        6. Each question should be concise and clear.
+        7. Return exactly 20 questions, numbered from 1 to 20.
+        8. Format each question as a single string without additional formatting.
       `,
-      system: "You are an expert technical interviewer creating personalized interview questions based on a candidate's resume and job target."
+      system: "You are an expert interviewer creating personalized interview questions based on a candidate's resume and job target."
     });
     
     // Return the generated questions - convert to array of strings
@@ -475,8 +476,8 @@ export async function generateInterviewQuestions(params: {
         Object.values(result).filter(q => typeof q === 'string') : 
         [];
     
-    // Ensure we have exactly 10 questions
-    if (questions.length === 10) {
+    // Ensure we have exactly 20 questions
+    if (questions.length === 20) {
       return questions as string[];
     }
     
@@ -488,18 +489,38 @@ export async function generateInterviewQuestions(params: {
   }
 }
 
-// Helper function to generate default questions
+// Helper function to generate default questions with a mix of technical and behavioral questions
 function getDefaultQuestions(role: string, techstack: string[]): string[] {
-  return [
+  // Technical questions (12)
+  const technicalQuestions = [
     `Tell me about your experience as a ${role}.`,
     `What projects have you worked on that involved ${techstack[0] || 'your core technologies'}?`,
     `How do you stay updated with the latest trends in ${role} development?`,
-    `Describe a challenging problem you faced and how you solved it.`,
-    `How do you approach learning new technologies?`,
-    `What's your experience with ${techstack[1] || 'collaborative development'}?`,
-    `How do you handle feedback on your work?`,
-    `Describe your ideal work environment.`,
-    `What are your strengths and weaknesses as a ${role}?`,
-    `Where do you see yourself in 5 years?`
+    `Explain how you would implement ${techstack[0] || 'a key technology'} in a real-world project.`,
+    `What challenges have you faced when working with ${techstack[1] || 'modern technologies'} and how did you overcome them?`,
+    `Describe your approach to debugging complex issues in ${techstack[2] || 'your technical environment'}.`,
+    `What methodologies do you follow for ${role} work?`,
+    `How do you ensure the quality of your ${role} deliverables?`,
+    `Describe a technical solution you designed that you're particularly proud of.`,
+    `How would you optimize a system that's experiencing performance issues?`,
+    `What tools and technologies do you use for ${techstack[0] || 'your daily work'}?`,
+    `How do you approach learning a new ${techstack[1] || 'technology'} that you haven't worked with before?`
+  ];
+  
+  // Behavioral questions (8)
+  const behavioralQuestions = [
+    `Tell me about a time when you had to work with a difficult team member. How did you handle the situation?`,
+    `Describe a situation where you had to learn a new technology or skill quickly. What was your approach?`,
+    `How do you handle feedback on your work, especially when it's critical?`,
+    `Give an example of a time when you had to make a difficult decision with limited information. What was your thought process?`,
+    `Describe a situation where you had to lead a team or project. What was your leadership style?`,
+    `Tell me about a conflict you had with a colleague or manager and how you resolved it.`,
+    `How do you manage your time when working on multiple projects with competing deadlines?`,
+    `Describe your work ethic and how it influences your approach to challenging tasks.`
+  ];
+  
+  return [
+    ...technicalQuestions,
+    ...behavioralQuestions
   ];
 }
