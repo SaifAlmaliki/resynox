@@ -8,10 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-interface FeedbackPageProps {
+// Use the proper Next.js page props type
+type FeedbackPageProps = {
   params: {
     id: string;
   };
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
 const FeedbackPage = async ({ params }: FeedbackPageProps) => {
@@ -69,16 +71,31 @@ const FeedbackPage = async ({ params }: FeedbackPageProps) => {
           <CardTitle>Category Scores</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {Array.isArray(feedback.categoryScores) && feedback.categoryScores.map((category: { name: string; score: number; comment: string }, index: number) => (
-            <div key={index}>
-              <div className="flex justify-between mb-1">
-                <div className="font-medium">{category.name}</div>
-                <div className="text-sm">{category.score}/100</div>
+          {Array.isArray(feedback.categoryScores) && feedback.categoryScores.map((category, index) => {
+            // Define a type for the expected category structure
+            interface CategoryItem {
+              name?: string;
+              score?: number;
+              comment?: string;
+              [key: string]: string | number | boolean | object | undefined;
+            }
+            // Safely access properties with type checking
+            const categoryObj = category as CategoryItem;
+            const name = typeof categoryObj?.name === 'string' ? categoryObj.name : 'Unknown';
+            const score = typeof categoryObj?.score === 'number' ? categoryObj.score : 0;
+            const comment = typeof categoryObj?.comment === 'string' ? categoryObj.comment : '';
+            
+            return (
+              <div key={index}>
+                <div className="flex justify-between mb-1">
+                  <div className="font-medium">{name}</div>
+                  <div className="text-sm">{score}/100</div>
+                </div>
+                <Progress value={score} className="h-2 mb-2" />
+                <p className="text-sm text-muted-foreground">{comment}</p>
               </div>
-              <Progress value={category.score} className="h-2 mb-2" />
-              <p className="text-sm text-muted-foreground">{category.comment}</p>
-            </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
 
