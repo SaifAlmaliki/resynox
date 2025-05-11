@@ -29,20 +29,12 @@ export type Resume = {
   jobDescription?: string;
 };
 
-/**
- * Get all resumes for a specific user
- * @param userId The ID of the user
- * @returns Array of resume objects
- */
+// Get all resumes for a specific user
 export async function getUserResumes(userId: string): Promise<Resume[]> {
   try {
     const resumes = await prisma.resume.findMany({
-      where: {
-        userId,
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
+      where: {userId},
+      orderBy: {updatedAt: "desc"},
     });
 
     return resumes as Resume[];
@@ -52,19 +44,10 @@ export async function getUserResumes(userId: string): Promise<Resume[]> {
   }
 }
 
-/**
- * Get a specific resume by ID
- * @param resumeId The ID of the resume
- * @returns Resume object or null if not found
- */
+// Get a specific resume by ID
 export async function getResumeById(resumeId: string): Promise<Resume | null> {
   try {
-    const resume = await prisma.resume.findUnique({
-      where: {
-        id: resumeId,
-      },
-    });
-
+    const resume = await prisma.resume.findUnique({where: {id: resumeId}});
     return resume as Resume | null;
   } catch (error) {
     console.error("Error fetching resume:", error);

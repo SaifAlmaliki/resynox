@@ -279,8 +279,35 @@ const Agent = ({userName, userId, interviewId, feedbackId, type, questions}: Age
           clientMessages: [],
           serverMessages: [],
         });
+      } else if (type === "interview") {
+        // For interview type with pre-generated questions
+        let formattedQuestions = "";
+        if (questions && questions.length > 0) {
+          formattedQuestions = questions
+            .map((question) => `- ${question}`)
+            .join("\n");
+          console.log("Starting interview with pre-generated questions:", formattedQuestions);
+        } else {
+          console.error("No questions provided for interview");
+          setError("No questions available for this interview. Please try again.");
+          setCallStatus(CallStatus.INACTIVE);
+          return;
+        }
+
+        // Start the interview with the pre-generated questions
+        await vapi.start(interviewer, {
+          variableValues: {
+            username: userName,
+            userid: userId,
+            questions: formattedQuestions,
+            interviewId: interviewId,
+            skipIntro: true, // Skip the introduction step
+          },
+          clientMessages: [],
+          serverMessages: [],
+        });
       } else {
-        // For feedback type, format questions and use the interviewer workflow
+        // For feedback type or any other type
         let formattedQuestions = "";
         if (questions) {
           formattedQuestions = questions

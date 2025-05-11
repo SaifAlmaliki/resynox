@@ -43,7 +43,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
 
     // Generate AI feedback using Google's Gemini model
     const result = await generateObject({
-      model: google("gemini-1.5-pro", {
+      model: google("gemini-2.0-flash", {
         structuredOutputs: false,
       }),
       // @ts-expect-error - Schema property not recognized by type system
@@ -447,7 +447,7 @@ export async function generateInterviewQuestions(params: {
     
     // Use AI to generate personalized interview questions
     const result = await generateObject({
-      model: google("gemini-1.5-pro"),
+      model: google("gemini-2.0-flash"),
       output: "no-schema",
       prompt: `
         Generate 20 interview questions for a ${experienceLevel} ${role} position.
