@@ -6,16 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, Briefcase, Code, Layers, Mic } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-interface InterviewDetailPageProps {
-  params: {
-    id: string;
-  };
-}
-
-const InterviewDetailPage = async ({ params }: InterviewDetailPageProps) => {
+// In Next.js 15, params is a Promise
+async function InterviewDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // Await the params Promise to get the actual values
+  const resolvedParams = await params;
   const [user, interview] = await Promise.all([
     getCurrentUser(),
-    getInterviewById(params.id),
+    getInterviewById(resolvedParams.id),
   ]);
 
   if (!interview) {
