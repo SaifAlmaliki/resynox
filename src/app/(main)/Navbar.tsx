@@ -27,34 +27,45 @@ export default function Navbar() {
     <header className="shadow-sm">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 p-3">
 
-        <Link href="/resumes" className="flex items-center gap-2">
-          <Image
-            src={logo}
-            alt="Logo"
-            width={35}
-            height={35}
-            className="rounded-full"
-          />
-          <span className="text-xl font-bold tracking-tight">
-            RESYNOX
-          </span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/resumes" className="flex items-center gap-2">
+            <Image
+              src={logo}
+              alt="Logo"
+              width={35}
+              height={35}
+              className="rounded-full"
+            />
+            <span className="text-xl font-bold tracking-tight">
+              RESYNOX
+            </span>
+          </Link>
+        </div>
 
 
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <Link href="/resumes" className="font-medium hover:text-primary transition-colors">
+              Resumes
+            </Link>
+            <Link href="/interview" className="font-medium hover:text-primary transition-colors">
+              Interviews
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
 
-
-          <UserButton appearance={getUserButtonAppearance(theme)}>
-            <UserButton.MenuItems>
-
-              <UserButton.Link
-                label="Billing"
-                labelIcon={<CreditCard className="size-4" />}
-                href="/billing"
-              />
-            </UserButton.MenuItems>
-          </UserButton>
+            <UserButton appearance={getUserButtonAppearance(theme)}>
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  label="Billing"
+                  labelIcon={<CreditCard className="size-4" />}
+                  href="/billing"
+                />
+              </UserButton.MenuItems>
+            </UserButton>
+          </div>
         </div>
       </nav>
     </header>
