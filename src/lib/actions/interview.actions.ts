@@ -415,3 +415,91 @@ async function generatePersonalizedQuestions({
     ] };
   }
 }
+
+/**
+ * Generates 10 interview questions based on resume data and user preferences
+ * @param params Object containing userId, role, level, techstack, and resumeData
+ * @returns Array of interview questions
+ */
+export async function generateInterviewQuestions(params: {
+  userId: string;
+  role: string;
+  level: string;
+  techstack: string[];
+  resumeData: Record<string, unknown>;
+}) {
+  const { role, level, techstack, resumeData } = params;
+  
+  try {
+    // Create a prompt that describes the candidate and the interview context
+    const experienceLevelMap: Record<string, string> = {
+      entry: "Entry-level",
+      mid: "Mid-level",
+      senior: "Senior",
+      lead: "Lead/Manager",
+      executive: "Executive"
+    };
+    
+    const experienceLevel = experienceLevelMap[level] || "Mid-level";
+    const technologies = techstack.join(", ");
+    const jobTitle = (resumeData.jobTitle as string) || role;
+    const summary = (resumeData.summary as string) || "";
+    
+    // Use AI to generate personalized interview questions
+    const result = await generateObject({
+      model: google("gemini-1.5-pro"),
+      output: "no-schema",
+      prompt: `
+        Generate 10 technical interview questions for a ${experienceLevel} ${role} position.
+        
+        Candidate background:
+        - Job Title: ${jobTitle}
+        - Skills: ${technologies}
+        - Summary: ${summary}
+        
+        Requirements:
+        1. Questions should be tailored to the candidate's experience level (${experienceLevel}) and role (${role}).
+        2. Include a mix of technical questions related to their skills (${technologies}).
+        3. Include some behavioral questions relevant to the role.
+        4. Questions should be challenging but appropriate for their experience level.
+        5. Each question should be concise and clear.
+        6. Return exactly 10 questions, numbered from 1 to 10.
+        7. Format each question as a single string without additional formatting.
+      `,
+      system: "You are an expert technical interviewer creating personalized interview questions based on a candidate's resume and job target."
+    });
+    
+    // Return the generated questions - convert to array of strings
+    const questions = Array.isArray(result) ? result : 
+      typeof result === 'object' && result !== null ? 
+        Object.values(result).filter(q => typeof q === 'string') : 
+        [];
+    
+    // Ensure we have exactly 10 questions
+    if (questions.length === 10) {
+      return questions as string[];
+    }
+    
+    // If we don't have exactly 10 questions, return default questions
+    return getDefaultQuestions(role, techstack);
+  } catch (error) {
+    console.error("Error generating interview questions:", error);
+    return getDefaultQuestions(role, techstack);
+  }
+}
+
+// Helper function to generate default questions
+function getDefaultQuestions(role: string, techstack: string[]): string[] {
+  return [
+    `Tell me about your experience as a ${role}.`,
+    `What projects have you worked on that involved ${techstack[0] || 'your core technologies'}?`,
+    `How do you stay updated with the latest trends in ${role} development?`,
+    `Describe a challenging problem you faced and how you solved it.`,
+    `How do you approach learning new technologies?`,
+    `What's your experience with ${techstack[1] || 'collaborative development'}?`,
+    `How do you handle feedback on your work?`,
+    `Describe your ideal work environment.`,
+    `What are your strengths and weaknesses as a ${role}?`,
+    `Where do you see yourself in 5 years?`
+  ];
+}
