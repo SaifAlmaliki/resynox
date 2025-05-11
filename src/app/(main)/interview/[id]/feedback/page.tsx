@@ -1,22 +1,17 @@
 import { notFound } from "next/navigation";
-import { 
-  getCurrentUser, 
-  getInterviewById, 
-  getFeedbackByInterviewId 
-} from "@/lib/actions/interview.actions";
+import { getCurrentUser, getInterviewById, getFeedbackByInterviewId } from "@/lib/actions/interview.actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-// Use the proper Next.js page props type
-type FeedbackPageProps = {
-  params: {
-    id: string;
-  };
-  searchParams?: Record<string, string | string[] | undefined>;
-}
-
-const FeedbackPage = async ({ params }: FeedbackPageProps) => {
+// Use Next.js 15 page props pattern
+const FeedbackPage = async (
+  props: {
+    params: { id: string };
+    searchParams?: { [key: string]: string | string[] | undefined };
+  }
+) => {
+  const { params } = props;
   const user = await getCurrentUser();
   
   if (!user) {
