@@ -4,14 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-// Use Next.js 15 page props pattern
-const FeedbackPage = async (
-  props: {
-    params: { id: string };
-    searchParams?: { [key: string]: string | string[] | undefined };
-  }
-) => {
-  const { params } = props;
+// In Next.js 15, params is a Promise
+async function FeedbackPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // Await the params Promise to get the actual values
+  const resolvedParams = await params;
   const user = await getCurrentUser();
   
   if (!user) {
@@ -19,9 +19,9 @@ const FeedbackPage = async (
   }
 
   const [interview, feedback] = await Promise.all([
-    getInterviewById(params.id),
+    getInterviewById(resolvedParams.id),
     getFeedbackByInterviewId({
-      interviewId: params.id,
+      interviewId: resolvedParams.id,
       userId: user.id,
     }),
   ]);
@@ -135,4 +135,5 @@ const FeedbackPage = async (
   );
 };
 
+// Export the component as default
 export default FeedbackPage;
