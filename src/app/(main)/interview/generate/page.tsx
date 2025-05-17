@@ -476,7 +476,7 @@ const InterviewGeneratePage = () => {
           </Card>
           
           <Agent
-            userName={user?.name || 'User'}
+            userName={selectedResume?.firstName || user?.name || 'User'}
             userId={user?.id}
             interviewId={interviewId}
             type="interview"

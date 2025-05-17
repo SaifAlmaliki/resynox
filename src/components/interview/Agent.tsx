@@ -162,24 +162,30 @@ const Agent = ({userName, userId, interviewId, feedbackId, type, questions}: Age
 
       if (!interviewId || !userId) {
         console.error("Missing interviewId or userId");
-        router.push("/");
+        setError("Unable to process interview data. Missing required information.");
         return;
       }
 
-      // Call API to create feedback record in the database
-      const { success, feedbackId: id } = await createFeedback({
-        interviewId: interviewId,
-        userId: userId,
-        transcript: messages,
-        feedbackId,
-      });
+      try {
+        // Call API to create feedback record in the database
+        const { success, feedbackId: id } = await createFeedback({
+          interviewId: interviewId,
+          userId: userId,
+          transcript: messages,
+          feedbackId,
+        });
 
-      // Navigate based on API response
-      if (success && id) {
-        router.push(`/interview/${interviewId}/feedback`);
-      } else {
-        console.log("Error saving feedback");
-        router.push("/");
+        // Navigate based on API response
+        if (success && id) {
+          router.push(`/interview/${interviewId}/feedback`);
+        } else {
+          // Show error but stay on the page instead of redirecting
+          setError("There was an issue generating feedback. Please try again later.");
+          console.log("Error saving feedback - API returned unsuccessful response");
+        }
+      } catch (err) {
+        console.error("Error in feedback generation:", err);
+        setError("There was an issue generating feedback. Please try again later.");
       }
     };
 

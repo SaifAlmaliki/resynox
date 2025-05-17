@@ -77,9 +77,19 @@ export async function createFeedback(params: CreateFeedbackParams) {
       finalAssessment: string;
     }
 
-    // Cast the result to access the object property
-    const aiResponse = result as { object: FeedbackObject };
-    const object = aiResponse.object;
+    // Cast the result to access the object property with proper error handling
+    let object: FeedbackObject | null = null;
+    
+    try {
+      // Check if result exists and has the expected structure
+      if (result && typeof result === 'object') {
+        const aiResponse = result as { object?: FeedbackObject };
+        object = aiResponse.object || null;
+      }
+    } catch (err) {
+      console.error('Error processing AI response:', err);
+      // Continue with null object, we'll use fallback values
+    }
 
     // Prepare feedback object with AI-generated data
     const feedbackData = {
