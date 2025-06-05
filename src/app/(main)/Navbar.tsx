@@ -48,9 +48,6 @@ export default function Navbar() {
             <Link href="/resumes" className="font-medium hover:text-primary transition-colors">
               Resumes
             </Link>
-            <Link href="/interview" className="font-medium hover:text-primary transition-colors">
-              Interviews
-            </Link>
           </div>
           
           <div className="flex items-center gap-3">

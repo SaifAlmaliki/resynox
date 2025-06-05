@@ -17,8 +17,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 // Inline Stepper component implementation
 import { cn } from "@/lib/utils";
-import { X, Plus, Loader2 } from "lucide-react";
+import { X, Plus, Loader2, Lock, ArrowRight } from "lucide-react";
 import { Agent } from "@/components/interview/Agent";
+import { useSubscriptionLevel } from "../../SubscriptionLevelProvider";
+import { canUseVoiceAgent } from "@/lib/permissions";
+import usePremiumModal from "@/hooks/usePremiumModal";
+import Link from "next/link";
 
 // Define type for user
 type User = {
@@ -108,6 +112,10 @@ const experienceLevels = [
 
 // Component to display and manage interview setup wizard
 const InterviewGeneratePage = () => {
+  const subscriptionLevel = useSubscriptionLevel();
+  const hasVoiceAgentAccess = canUseVoiceAgent(subscriptionLevel);
+  const premiumModal = usePremiumModal();
+
   const [activeStep, setActiveStep] = useState(0);
   const [user, setUser] = useState<User | null>(null);
   const [resumes, setResumes] = useState<Resume[]>([]);
@@ -121,6 +129,47 @@ const InterviewGeneratePage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [interviewId, setInterviewId] = useState<string | null>(null);
   const [isStartingInterview, setIsStartingInterview] = useState(false);
+
+  // Check access and show upgrade prompt if needed
+  if (!hasVoiceAgentAccess) {
+    return (
+      <div className="container py-8 max-w-4xl mx-auto">
+        <Card className="border-2 border-orange-200 bg-orange-50/50">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+              <Lock className="h-8 w-8 text-orange-600" />
+            </div>
+            <CardTitle className="text-2xl text-orange-800">Voice Agent Interviews - Pro Plus Feature</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-orange-700 text-lg">
+              Advanced AI voice interviewer with real-time feedback is available exclusively for Pro Plus subscribers.
+            </p>
+            <div className="bg-white/80 rounded-lg p-4 space-y-2">
+              <h4 className="font-semibold text-orange-800">Pro Plus Features Include:</h4>
+              <ul className="text-sm text-orange-700 space-y-1">
+                <li>• AI Voice Agent Mock Interviews</li>
+                <li>• Real-time Interview Feedback</li>
+                <li>• Advanced Performance Analytics</li>
+                <li>• Unlimited Interview Sessions</li>
+                <li>• Plus all Pro features</li>
+              </ul>
+            </div>
+            <div className="pt-4 flex gap-3 justify-center">
+              <Button asChild size="lg" className="bg-orange-600 hover:bg-orange-700">
+                <Link href="/billing">
+                  Upgrade to Pro Plus <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button variant="outline" onClick={() => premiumModal.setOpen(true)}>
+                View Plans
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   // Fetch user and resumes on component mount
   useEffect(() => {

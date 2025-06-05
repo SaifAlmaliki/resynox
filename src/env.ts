@@ -25,6 +25,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().min(1),                 // Clerk sign-up URL
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),            // Publishable key for Stripe, used on the client-side
     NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY: z.string().min(1),       // Price ID for Stripe Pro Monthly subscription
+    NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY: z.string().min(1),  // Price ID for Stripe Pro Plus Monthly subscription
     NEXT_PUBLIC_BASE_URL: z.string().min(1).url(),                    // Base URL for the application (must be a valid URL)
   },
 
@@ -35,6 +36,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY,
+    NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL
   },
 });
