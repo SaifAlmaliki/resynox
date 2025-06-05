@@ -65,7 +65,7 @@ export const Agent = ({
       
       if (result.success) {
         // Redirect to the feedback page
-        router.push(`/interview/${targetInterviewId}/feedback/${result.feedbackId}`);
+        router.push(`/interview/${targetInterviewId}/feedback`);
       } else {
         console.error("Failed to create feedback");
         setError("Failed to generate feedback. Please try again.");
