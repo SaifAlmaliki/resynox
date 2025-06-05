@@ -3,11 +3,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
-import { feedbackSchema } from "@/constants";
 import prisma from "@/lib/prisma";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { CreateFeedbackParams, GetFeedbackByInterviewIdParams, GetLatestInterviewsParams } from "@/types/interview";
+import { z } from "zod";
 
 /**
  * Get the current authenticated user
@@ -43,13 +43,21 @@ export async function createFeedback(params: CreateFeedbackParams) {
 
     // Generate AI feedback using Google's Gemini model
     const result = await generateObject({
-      model: google("gemini-2.0-flash", {
-        structuredOutputs: false,
+      model: google("gemini-2.0-flash-exp"),
+      schema: z.object({
+        totalScore: z.number().min(0).max(100).describe("Overall score from 0-100"),
+        categoryScores: z.array(z.object({
+          name: z.string().describe("Category name"),
+          score: z.number().min(0).max(100).describe("Score from 0-100"),
+          comment: z.string().describe("Detailed feedback for this category"),
+        })).describe("Scores for each category"),
+        strengths: z.array(z.string()).describe("List of candidate strengths"),
+        areasForImprovement: z.array(z.string()).describe("List of areas for improvement"),
+        finalAssessment: z.string().describe("Overall assessment and recommendations"),
       }),
-      // @ts-expect-error - Schema property not recognized by type system
-      schema: feedbackSchema, // Schema defines the structure of the response
       prompt: `
         You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
+        
         Transcript:
         ${formattedTranscript}
 
@@ -77,29 +85,18 @@ export async function createFeedback(params: CreateFeedbackParams) {
       finalAssessment: string;
     }
 
-    // Cast the result to access the object property with proper error handling
-    let object: FeedbackObject | null = null;
-    
-    try {
-      // Check if result exists and has the expected structure
-      if (result && typeof result === 'object') {
-        const aiResponse = result as { object?: FeedbackObject };
-        object = aiResponse.object || null;
-      }
-    } catch (err) {
-      console.error('Error processing AI response:', err);
-      // Continue with null object, we'll use fallback values
-    }
+    // With Zod schema, the result.object contains the structured response
+    const object: FeedbackObject = result.object;
 
     // Prepare feedback object with AI-generated data
     const feedbackData = {
       interviewId: interviewId,
       userId: userId,
-      totalScore: object?.totalScore || 0,
-      categoryScores: object?.categoryScores || [],
-      strengths: object?.strengths || [],
-      areasForImprovement: object?.areasForImprovement || [],
-      finalAssessment: object?.finalAssessment || "No assessment provided",
+      totalScore: object.totalScore || 0,
+      categoryScores: object.categoryScores || [],
+      strengths: object.strengths || [],
+      areasForImprovement: object.areasForImprovement || [],
+      finalAssessment: object.finalAssessment || "No assessment provided",
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -144,9 +141,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
   }
 }
 
-/**
- * Retrieves a specific interview by its ID
- */
+// Retrieves a specific interview by its ID
 export async function getInterviewById(id: string) {
   try {
     // Define a type for the interview data
@@ -174,9 +169,7 @@ export async function getInterviewById(id: string) {
   }
 }
 
-/**
- * Gets feedback for a specific interview and user
- */
+// Gets feedback for a specific interview and user
 export async function getFeedbackByInterviewId(params: GetFeedbackByInterviewIdParams) {
   const { interviewId, userId } = params;
 
@@ -231,9 +224,7 @@ export async function getLatestInterviews(params: GetLatestInterviewsParams) {
   }
 }
 
-/**
- * Gets all interviews created by a specific user
- */
+// Gets all interviews created by a specific user
 export async function getInterviewsByUserId(userId: string) {
   // If userId is undefined or null, return empty array
   if (!userId) {
@@ -257,9 +248,7 @@ export async function getInterviewsByUserId(userId: string) {
   }
 }
 
-/**
- * Creates a new interview with personalized questions based on user's resume
- */
+// Creates a new interview with personalized questions based on user's resume
 export async function createInterview(data: {
   userId: string;
   role: string;
@@ -329,9 +318,7 @@ export async function createInterview(data: {
   }
 }
 
-/**
- * Generates personalized interview questions based on resume data
- */
+// Generates personalized interview questions based on resume data
 async function generatePersonalizedQuestions({ 
   role, 
   level, 
@@ -426,11 +413,7 @@ async function generatePersonalizedQuestions({
   }
 }
 
-/**
- * Generates 10 interview questions based on resume data and user preferences
- * @param params Object containing userId, role, level, techstack, and resumeData
- * @returns Array of interview questions
- */
+
 export async function generateInterviewQuestions(params: {
   userId: string;
   role: string;

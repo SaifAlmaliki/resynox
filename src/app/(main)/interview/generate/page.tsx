@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 // Inline Stepper component implementation
 import { cn } from "@/lib/utils";
 import { X, Plus, Loader2 } from "lucide-react";
-import Agent from "@/components/interview/Agent";
+import { Agent } from "@/components/interview/Agent";
 
 // Define type for user
 type User = {

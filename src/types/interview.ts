@@ -33,6 +33,11 @@ export interface CreateFeedbackParams {
   userId: string;
   transcript: { role: string; content: string }[];
   feedbackId?: string;
+  additionalContext?: {
+    role?: string;
+    techstack?: string[];
+    level?: string;
+  };
 }
 
 export interface InterviewCardProps {
@@ -51,6 +56,13 @@ export interface AgentProps {
   feedbackId?: string;
   type: "generate" | "interview";
   questions?: string[];
+  role?: string;
+  level?: string;
+  techstack?: string[];
+  experienceLevel?: string;
+  interviewDuration?: string;
+  specificFocus?: string;
+  skipIntro?: boolean;
 }
 
 export interface GetFeedbackByInterviewIdParams {
@@ -81,9 +93,25 @@ export enum CallStatus {
   CONNECTING = "CONNECTING",
   ACTIVE = "ACTIVE",
   FINISHED = "FINISHED",
+  ERROR = "ERROR"
 }
+
+// Type of agent/interview being conducted
+export type AgentType = "generate" | "interview" | "feedback";
 
 export interface SavedMessage {
   role: "user" | "system" | "assistant";
   content: string;
+}
+
+export interface InterviewEvaluationCriteria {
+  technicalKnowledge: number;
+  problemSolving: number;
+  communication: number;
+  culturalFit: number;
+  confidence: number;
+  overallScore: number;
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
 }

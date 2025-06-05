@@ -56,5 +56,5 @@ export const feedbackSchema = {
   ],
 };
 
-// VAPI Workflow ID for the interviewer
-export const interviewer = process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!;
+// VAPI Assistant ID for the interviewer
+export const VAPI_ASSISTANT_ID = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID || '';

@@ -1,35 +1,79 @@
-# Resynox: AI Resume Builder
+# Resynox: AI-Powered Career Preparation Platform
 
 ![Logo](./src/assets/logo.png)
 
 ## Overview
-Resynox is an AI-powered resume and cover letter builder designed to help users create professional, visually stunning, and ATS-friendly resumes in minutes. Leveraging OpenAI for content generation and Stripe for subscription management, Resynox offers a seamless experience for both free and premium users, with advanced customization and smart AI tools for resume and cover letter creation.
+Resynox is a comprehensive AI-powered career preparation platform that combines resume building with mock interview practice. Designed to help job seekers land their dream roles, the platform offers professional resume creation, AI-powered voice interviews, and detailed performance feedback. With modern design, seamless user experience, and advanced AI integrations, Resynox provides everything needed for successful job search preparation.
 
 ---
 
 ## Features
-- **AI-Powered Resume Generation**: Instantly generate summaries, work experiences, and cover letters using OpenAI.
-- **Beautiful, Customizable Templates**: Choose colors, border styles, and layouts. Premium users unlock full design controls.
-- **Drag-and-Drop Editing**: Easily reorder work experiences, education, and skills.
-- **Auto-Save & Versioning**: Your progress is saved automatically as you edit.
-- **Photo Upload**: Add a professional photo to your resume.
-- **Multi-Section Support**: Personal info, work experience, education, skills, languages, summary, and cover letter.
-- **Export & Print**: Download or print your resume directly from the app.
-- **Authentication & Security**: User authentication via Clerk.
-- **Subscription Management**: Upgrade to Pro for advanced features via Stripe billing.
-- **Responsive & Accessible**: Works on all modern devices and browsers.
+
+### Resume Builder
+- **AI-Powered Resume Generation**: Generate professional summaries, work experiences, and cover letters using AI
+- **Beautiful, Customizable Templates**: Choose colors, border styles, and layouts with premium design controls
+- **Drag-and-Drop Editing**: Easily reorder work experiences, education, and skills sections
+- **Auto-Save & Versioning**: Automatic progress saving with version control
+- **Photo Upload**: Add professional photos to resumes using blob storage
+- **Multi-Section Support**: Personal info, work experience, education, skills, languages, summary, and cover letter
+- **Export & Print**: Download or print resumes directly from the app
+
+### Mock Interview System
+- **AI Voice Interviews**: Conduct realistic mock interviews using VAPI (Voice AI Platform) integration
+- **Personalized Interview Questions**: Tailored questions based on role, experience level, and tech stack
+- **Real-time Voice Interaction**: Natural conversation flow with AI interviewer
+- **Performance Feedback**: Detailed AI-generated feedback with scoring and improvement suggestions
+- **Interview History**: Track and review past interview sessions
+- **Multi-format Support**: Support for various interview types (technical, behavioral, etc.)
+
+### General Features
+- **Authentication & Security**: Secure user authentication via Clerk
+- **Subscription Management**: Freemium model with Pro features via Stripe billing
+- **Responsive Design**: Works seamlessly on all modern devices and browsers
+- **Dark/Light Theme**: System-based theme switching with Next.js themes
+- **Real-time Updates**: Live data synchronization and state management
 
 ---
 
 ## Tech Stack
-- **Frontend**: Next.js, React, Tailwind CSS
-- **Backend**: Next.js API routes, Prisma ORM
-- **Database**: PostgreSQL (via Prisma)
-- **Authentication**: Clerk
-- **AI Integration**: OpenAI API
-- **Payments**: Stripe
-- **State Management**: Zustand
-- **Other**: Radix UI, React Hook Form, Zod, DnD Kit, Lucide Icons
+
+### Frontend
+- **Next.js 15**: React-based full-stack framework with App Router
+- **React 18**: Modern React with hooks and concurrent features
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first CSS framework
+- **Radix UI**: Accessible UI component primitives
+- **Lucide Icons**: Modern icon library
+- **Next Themes**: Theme switching functionality
+
+### Backend & Database
+- **Next.js API Routes**: Serverless API endpoints
+- **Prisma ORM**: Type-safe database access layer
+- **PostgreSQL**: Production-ready relational database
+- **Vercel Blob**: File storage for images and documents
+
+### AI & Voice Integration
+- **Google AI SDK**: AI content generation and processing
+- **OpenAI API**: Alternative AI provider for content generation
+- **VAPI (Voice AI Platform)**: Real-time voice interview functionality
+- **AI SDK**: Unified AI integration layer
+
+### Authentication & Payments
+- **Clerk**: Complete authentication and user management
+- **Stripe**: Payment processing and subscription management
+
+### State Management & Utilities
+- **Zustand**: Lightweight state management
+- **React Hook Form**: Form handling with validation
+- **Zod**: Schema validation
+- **DnD Kit**: Drag and drop functionality
+- **React Color**: Color picker components
+- **Date-fns**: Date manipulation utilities
+
+### Development Tools
+- **ESLint & Prettier**: Code formatting and linting
+- **PostCSS**: CSS processing
+- **T3 Env**: Type-safe environment variable management
 
 ---
 
@@ -39,9 +83,11 @@ Resynox is an AI-powered resume and cover letter builder designed to help users 
 - Node.js (v18+ recommended)
 - npm or yarn
 - PostgreSQL database
-- OpenAI API key
-- Clerk API credentials
+- Google AI API key or OpenAI API key
+- Clerk authentication credentials
 - Stripe API keys
+- VAPI account and API keys
+- Vercel Blob storage token
 
 ### Installation
 1. **Clone the repository:**
@@ -49,23 +95,50 @@ Resynox is an AI-powered resume and cover letter builder designed to help users 
    git clone https://github.com/SaifAlmaliki/resynox.git
    cd resynox
    ```
+
 2. **Install dependencies:**
    ```bash
    npm install
    # or
    yarn install
    ```
+
 3. **Configure environment variables:**
-   - Copy `.env.example` to `.env` and fill in the required values:
-     - Database URL (POSTGRES_URL)
-     - Clerk keys
-     - OpenAI API key
-     - Stripe keys
+   Create a `.env` file with the following variables:
+   ```env
+   # Database
+   DATABASE_URL="postgresql://username:password@localhost:5432/your_database"
+
+   # Clerk Authentication
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+   CLERK_SECRET_KEY=your_clerk_secret_key
+
+   # VAPI Configuration
+   NEXT_PUBLIC_VAPI_WEB_TOKEN=your_vapi_web_token
+   NEXT_PUBLIC_VAPI_ASSISTANT_ID=your_vapi_assistant_id
+
+   # Google AI
+   GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key
+
+   # Payments (Stripe)
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+   NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY=your_stripe_price_id
+
+   # Storage
+   BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
+
+   # App Configuration
+   NEXT_PUBLIC_BASE_URL=http://localhost:3000
+   ```
+
 4. **Set up the database:**
    ```bash
    npx prisma migrate deploy
    npx prisma generate
    ```
+
 5. **Start the development server:**
    ```bash
    npm run dev
@@ -77,65 +150,106 @@ Resynox is an AI-powered resume and cover letter builder designed to help users 
 ---
 
 ## Usage
-- **Register/Login**: Sign up or log in with Clerk.
-- **Create Resume**: Click "New Resume" and follow the step-by-step editor.
-- **Edit Sections**: Fill in personal info, work experience, education, skills, languages, summary, and cover letter.
-- **Use AI Tools**: Premium users can generate summaries, work experience, and cover letters with AI.
-- **Customize Design**: Pick colors, border styles, and upload a photo.
-- **Export/Print**: Download or print your resume.
-- **Upgrade**: Unlock all features by subscribing to Pro in the Premium modal.
+
+### Resume Building
+- **Register/Login**: Sign up or log in using Clerk authentication
+- **Create Resume**: Click "New Resume" and use the step-by-step editor
+- **Edit Sections**: Fill in personal information, work experience, education, skills, languages, and summary
+- **Use AI Tools**: Generate content using AI-powered suggestions (Premium feature)
+- **Customize Design**: Choose colors, border styles, and upload professional photos
+- **Export/Print**: Download or print your completed resume
+
+### Mock Interviews
+- **Start Interview**: Select interview type, role, and experience level
+- **Voice Interaction**: Engage in realistic conversations with AI interviewer
+- **Real-time Feedback**: Receive immediate responses and follow-up questions
+- **Performance Analysis**: Get detailed feedback with scoring and improvement areas
+- **Track Progress**: Review interview history and performance trends
+
+### Premium Features
+- **Upgrade to Pro**: Unlock advanced AI features and unlimited usage
+- **Enhanced AI**: Access to premium AI models for better content generation
+- **Advanced Analytics**: Detailed performance metrics and insights
+- **Priority Support**: Faster response times and dedicated assistance
 
 ---
 
-## Environment Variables
-See `.env.example` for all required variables, including:
-- `POSTGRES_URL`
-- `CLERK_*` (Clerk authentication)
-- `OPENAI_API_KEY`
-- `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY`
+## Project Structure
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── (auth)/            # Authentication pages
+│   ├── (main)/            # Main application pages
+│   ├── interview/         # Interview-related pages
+│   ├── api/               # API routes
+│   └── globals.css        # Global styles
+├── components/            # React components
+│   ├── ui/                # Reusable UI components
+│   ├── interview/         # Interview-specific components
+│   └── premium/           # Premium feature components
+├── lib/                   # Utility functions and services
+│   ├── actions/           # Server actions
+│   ├── vapi.*.ts          # VAPI integration files
+│   └── validation.ts      # Schema validation
+├── hooks/                 # Custom React hooks
+├── types/                 # TypeScript type definitions
+└── constants/             # Application constants
+```
 
 ---
 
 ## Deployment
-- **Production build:**
-  ```bash
-  npm run build
-  npm start
-  ```
-- **Vercel/Netlify:**
-  - Set environment variables in your dashboard.
-  - Deploy as a Next.js app.
+
+### Production Build
+```bash
+npm run build
+npm start
+```
+
+### Vercel Deployment
+1. Connect your repository to Vercel
+2. Configure environment variables in the Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Environment Setup
+- Ensure all environment variables are properly configured
+- Set up PostgreSQL database (recommended: Neon, Supabase, or Railway)
+- Configure Stripe webhooks for subscription management
+- Set up VAPI workspace and assistant configurations
 
 ---
 
 ## Contributing
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
 ---
 
 ## License
-See [LICENSE](./LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
 ---
 
 ## Acknowledgements
-- [OpenAI](https://openai.com/)
-- [Clerk](https://clerk.com/)
-- [Stripe](https://stripe.com/)
-- [Next.js](https://nextjs.org/)
-- [Prisma](https://www.prisma.io/)
-- [Tailwind CSS](https://tailwindcss.com/)
+- [VAPI](https://vapi.ai/) - Voice AI Platform for interview functionality
+- [Google AI](https://ai.google.dev/) - AI content generation
+- [OpenAI](https://openai.com/) - Alternative AI provider
+- [Clerk](https://clerk.com/) - Authentication and user management
+- [Stripe](https://stripe.com/) - Payment processing
+- [Next.js](https://nextjs.org/) - React framework
+- [Prisma](https://www.prisma.io/) - Database ORM
+- [Tailwind CSS](https://tailwindcss.com/) - CSS framework
+- [Vercel](https://vercel.com/) - Deployment and blob storage
+
+---
+
+## Support
+For questions, support, or feature requests, please contact [Saif Almaliki](mailto:saifalmaliki.dev@gmail.com).
 
 ---
 
 ## Screenshots
-> _Add screenshots/gifs of the editor, resume preview, and AI features here._
-
----
-
-## Contact
-For questions or support, please contact [Saif Almaliki](mailto:saifalmaliki.dev@gmail.com).
+> _Add screenshots/gifs showcasing the resume editor, interview interface, and AI features here._

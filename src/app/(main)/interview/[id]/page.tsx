@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getCurrentUser, getInterviewById } from "@/lib/actions/interview.actions";
-import Agent from "@/components/interview/Agent";
+import { Agent } from "@/components/interview/Agent";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, Briefcase, Code, Layers, Mic } from "lucide-react";
