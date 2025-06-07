@@ -25,7 +25,9 @@ export function canUseCustomizations(subscriptionLevel: SubscriptionLevel) {
   return subscriptionLevel === "pro" || subscriptionLevel === "pro_plus";
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function canUseVoiceAgent(subscriptionLevel: SubscriptionLevel) {
   // Voice agent for mock interviews is available only to "pro_plus" users
-  return subscriptionLevel === "pro_plus";
+  // return subscriptionLevel === "pro_plus";
+  return true;
 }

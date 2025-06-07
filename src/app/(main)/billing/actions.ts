@@ -19,6 +19,8 @@ export async function createCustomerPortalSession() {
     throw new Error("Stripe customer ID not found");
   }
 
+  // Create a customer portal session with the default configuration
+  // This will show all available subscription options to the customer
   const session = await stripe.billingPortal.sessions.create({
     customer: stripeCustomerId,
     return_url: `${env.NEXT_PUBLIC_BASE_URL}/billing`,
