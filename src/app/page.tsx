@@ -115,9 +115,19 @@ export default function Home() {
 
             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-md border border-gray-200 dark:border-gray-700 text-center">
               <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4 mx-auto">
+                <FileText className="h-8 w-8 text-green-600 dark:text-green-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">2. Generate Cover Letter</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Create tailored cover letters based on your resume and job descriptions
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-md border border-gray-200 dark:border-gray-700 text-center">
+              <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4 mx-auto">
                 <Mic className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-xl font-bold mb-2">2. Practice Interviews</h3>
+              <h3 className="text-xl font-bold mb-2">3. Practice Interviews</h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Prepare for real interviews with our AI-powered mock interviews
               </p>
@@ -127,7 +137,7 @@ export default function Home() {
               <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4 mx-auto">
                 <TrendingUp className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="text-xl font-bold mb-2">3. Get Feedback</h3>
+              <h3 className="text-xl font-bold mb-2">4. Get Feedback</h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Receive detailed feedback and improve your performance
               </p>
@@ -276,7 +286,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Resume Builder CTA */}
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 shadow-md border border-white/20 text-center hover:bg-white/15 transition-colors flex flex-col h-full">
               <div className="h-16 w-16 rounded-full bg-white/20 flex items-center justify-center mb-4 mx-auto">
@@ -296,6 +306,30 @@ export default function Home() {
                 >
                   <Link href="/resumes">
                     Build Resume <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Cover Letter CTA */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 shadow-md border border-white/20 text-center hover:bg-white/15 transition-colors flex flex-col h-full">
+              <div className="h-16 w-16 rounded-full bg-white/20 flex items-center justify-center mb-4 mx-auto">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Cover Letter Generator</h3>
+              <p className="text-white/80 mb-auto">
+                Generate tailored cover letters based on your resume and job descriptions.
+                Create compelling cover letters that stand out to employers.
+              </p>
+              <div className="mt-6">
+                <Button 
+                  asChild 
+                  size="lg"
+                  variant="secondary"
+                  className="w-full group rounded-full px-6 py-4 text-green-600 bg-white hover:bg-gray-100"
+                >
+                  <Link href="/cover-letters/new">
+                    Create Cover Letter <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
               </div>

@@ -163,3 +163,19 @@ model Feedback {
 
   @@map("feedback")
 }
+
+// CoverLetter model: Represents cover letters created by users
+model CoverLetter {
+  id              String   @id @default(cuid())
+  userId          String   // Foreign key to associate the cover letter with a user
+  resumeId        String   // Foreign key to associate with the base resume
+  jobDescription  String   // The job description the cover letter is tailored for
+  content         String   // The generated cover letter content
+  title           String?  // Optional title for the cover letter
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("cover_letters")
+}

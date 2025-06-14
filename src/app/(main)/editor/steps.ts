@@ -1,5 +1,4 @@
 import { EditorFormProps } from "@/lib/types";
-import CoverLetterForm from "./forms/CoverLetterForm";
 import EducationForm from "./forms/EducationForm";
 import GeneralInfoForm from "./forms/GeneralInfoForm";
 import LanguageSkillsForm from "./forms/LanguageSkillsForm";
@@ -24,5 +23,4 @@ export const steps: {
   { title: "Skills", component: SkillsForm, key: "skills"},
   { title: "Language Skills", component: LanguageSkillsForm, key: "language-skills"},
   { title: "Summary", component: SummaryForm, key: "summary"},
-  { title: "Cover Letter", component: CoverLetterForm, key: "cover-letter"},
 ];
