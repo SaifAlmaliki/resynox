@@ -1,17 +1,23 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getCurrentUser, getInterviewById, getFeedbackByInterviewId } from "@/lib/actions/interview.actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
+// Minimum interview duration in minutes
+const MIN_INTERVIEW_DURATION_MINUTES = 5;
+
 // In Next.js 15, params is a Promise
 async function FeedbackPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   // Await the params Promise to get the actual values
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const user = await getCurrentUser();
   
   if (!user) {
@@ -30,8 +36,19 @@ async function FeedbackPage({
     notFound();
   }
 
+  // Calculate interview duration in minutes
+  const interviewDurationMs = new Date(interview.updatedAt || interview.createdAt).getTime() - new Date(interview.createdAt).getTime();
+  const interviewDurationMinutes = interviewDurationMs / (1000 * 60);
+
+  // Check if interview meets minimum duration requirement
+  if (interviewDurationMinutes < MIN_INTERVIEW_DURATION_MINUTES) {
+    // Redirect back to interview page with error message
+    const redirectUrl = `/interview/${resolvedParams.id}?error=interview_too_short&duration=${Math.round(interviewDurationMinutes)}`;
+    redirect(redirectUrl);
+  }
+
   return (
-    <div className="container py-8">
+    <div className="container py-8 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Interview Feedback</h1>
         <div className="flex flex-wrap gap-2 mb-4">

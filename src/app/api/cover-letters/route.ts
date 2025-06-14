@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { getUserSubscriptionLevel } from "@/lib/subscription";
 
 export async function POST(req: Request) {
   try {
@@ -16,10 +17,8 @@ export async function POST(req: Request) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
-    // Get user's subscription level
-    const subscription = await db.userSubscription.findUnique({
-      where: { userId },
-    });
+    // Get user's subscription level using the centralized function
+    const subscriptionLevel = await getUserSubscriptionLevel(userId);
 
     // Check cover letter limit based on subscription
     const coverLetterCount = await db.coverLetter.count({
@@ -28,15 +27,14 @@ export async function POST(req: Request) {
 
     // Set limits based on subscription level
     let limit = 1; // Default for free users
-    if (subscription?.stripePriceId?.includes("pro_plus")) {
+    if (subscriptionLevel === "pro_plus") {
       limit = 10;
-    } else if (subscription?.stripePriceId?.includes("pro")) {
+    } else if (subscriptionLevel === "pro") {
       limit = 3;
     }
 
     if (coverLetterCount >= limit) {
-      const subscriptionType = subscription ? "subscription" : "free";
-      return new NextResponse(`Cover letter limit reached for ${subscriptionType} users (${limit} cover letters)`, { status: 403 });
+      return new NextResponse(`Cover letter limit reached for ${subscriptionLevel} users (${limit} cover letters)`, { status: 403 });
     }
 
     const coverLetter = await db.coverLetter.create({

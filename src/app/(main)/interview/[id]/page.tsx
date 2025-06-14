@@ -3,17 +3,20 @@ import { getCurrentUser, getInterviewById } from "@/lib/actions/interview.action
 import { Agent } from "@/components/interview/Agent";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Briefcase, Code, Layers, Mic } from "lucide-react";
+import { CalendarDays, Briefcase, Code, Layers, Mic, AlertTriangle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 // In Next.js 15, params is a Promise
 async function InterviewDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   // Await the params Promise to get the actual values
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const [user, interview] = await Promise.all([
     getCurrentUser(),
     getInterviewById(resolvedParams.id),
@@ -23,11 +26,34 @@ async function InterviewDetailPage({
     notFound();
   }
 
+  // Check for error messages from redirects
+  const error = resolvedSearchParams.error;
+  const duration = resolvedSearchParams.duration;
+
   // Format the date
   const formattedDate = interview.createdAt ? formatDistanceToNow(new Date(interview.createdAt), { addSuffix: true }) : "";
 
   return (
     <div className="container py-8 max-w-7xl mx-auto">
+      {/* Error Alert for insufficient interview duration */}
+      {error === 'interview_too_short' && (
+        <Card className="mb-6 border-orange-200 bg-orange-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start space-x-3">
+              <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-orange-800 mb-1">Interview Too Short</h3>
+                <p className="text-orange-700 text-sm">
+                  Your interview lasted only {duration} minute{duration !== '1' ? 's' : ''}. 
+                  To generate meaningful feedback, interviews must be at least 5 minutes long. 
+                  Please conduct a longer interview session to receive detailed feedback.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header section with interview details */}
       <div className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
