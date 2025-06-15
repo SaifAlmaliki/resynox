@@ -1,4 +1,3 @@
-
 import { env } from "@/env"; // Import environment variables
 import { cache } from "react"; // Cache utility to optimize repeated calls
 import prisma from "./prisma"; // Prisma client for database access
@@ -21,29 +20,14 @@ export const getUserSubscriptionLevel = cache(
       return "free";
     }
 
-    // Get the subscription plan type from the database if available
-    if (subscription.planType) {
-      if (subscription.planType === "pro") {
-        return "pro";
-      }
-      if (subscription.planType === "pro_plus") {
-        return "pro_plus";
-      }
-    }
-
-    // If we have a provider field and it's set to 'stripe', check the price ID
-    if (subscription.provider === 'stripe' && subscription.stripePriceId) {
-      // Check if the subscription has a status field and it's active
-      if (subscription.status && subscription.status !== 'active') {
-        return 'free';
-      }
-      
-      // Determine subscription level based on price ID
-      // We'll check against the current environment variable
+    // Determine subscription level based on Stripe price ID
+    if (subscription.stripePriceId) {
+      // Check against environment variables for Pro plan
       if (subscription.stripePriceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY) {
         return 'pro';
       }
       
+      // Check against environment variables for Pro Plus plan
       if (subscription.stripePriceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY) {
         return 'pro_plus';
       }
@@ -57,14 +41,16 @@ export const getUserSubscriptionLevel = cache(
         return 'pro_plus';
       }
       
-      // Default to Pro for any other Stripe subscription
-      return 'pro';
+      // Check for Pro subscription based on naming pattern
+      if (priceId.includes('pro')) {
+        return 'pro';
+      }
     }
 
-    // Log the invalid subscription for debugging
-    console.log("Invalid subscription with price ID:", subscription.stripePriceId);
+    // Log the subscription for debugging
+    console.log("Subscription found but couldn't determine plan type:", subscription.stripePriceId);
     
-    // Default to "pro" instead of throwing an error
+    // Default to "pro" for any active subscription that we can't identify
     // This ensures the app doesn't crash if a subscription can't be identified
     return "pro";
   }
