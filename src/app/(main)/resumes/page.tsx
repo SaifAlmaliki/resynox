@@ -32,7 +32,7 @@ export default async function Page() {
 
     // Render page content if the database fetch is successful
     return (
-      <main className="mx-auto w-full max-w-7xl space-y-6 px-3 py-6">
+      <main className="mx-auto w-full max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 py-6">
         {/* Render a button for creating a new resume */}
         <CreateResumeButton canCreate={canCreateResume(subscriptionLevel, totalCount)} />
 
@@ -55,7 +55,7 @@ export default async function Page() {
     console.error("Database Error:", err);
 
     return (
-      <main className="mx-auto w-full max-w-7xl space-y-6 px-3 py-6 text-center">
+      <main className="mx-auto w-full max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 py-6 text-center">
         <h1 className="text-3xl font-bold text-red-500">Something went wrong!</h1>
         <p className="text-gray-600">
           We are currently unable to load your Resumes. Please try again later.

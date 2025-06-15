@@ -1,6 +1,9 @@
 // Import a `Toaster` component for displaying toast notifications in the UI.
 import { Toaster } from "@/components/ui/toaster";
 
+// Import the floating header component for site-wide navigation.
+import FloatingHeader from "@/components/ui/floating-header";
+
 // Wraps the app with Clerk's provider for authentication and user management.
 import { ClerkProvider } from "@clerk/nextjs";
 
@@ -58,6 +61,8 @@ export default function RootLayout({
             // Disables transition animations when changing themes.
             disableTransitionOnChange
           >
+            {/* Site-wide floating header navigation */}
+            <FloatingHeader />
             {/* Renders the nested content (pages and components). */}
             {children}
             {/* Includes the Toaster component to display toast notifications globally. */}

@@ -71,7 +71,7 @@ const InterviewPage = async () => {
   }
 
   return (
-    <div className="container py-8 max-w-7xl mx-auto">
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 py-6">
       {/* Hero section with interview starter */}
       <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-8 mb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -165,7 +165,7 @@ const InterviewPage = async () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -186,8 +186,8 @@ export default function NewCoverLetterPage() {
   }, [step]);
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-3xl mx-auto">
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-3xl mx-auto space-y-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Create New Cover Letter</h1>
           <p className="text-gray-600 dark:text-gray-400">
@@ -324,6 +324,6 @@ export default function NewCoverLetterPage() {
           </div>
         </Card>
       </div>
-    </div>
+    </main>
   );
 } 

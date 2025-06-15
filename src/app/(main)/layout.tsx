@@ -16,8 +16,10 @@ export default async function Layout({children}: {children: React.ReactNode;}) {
   return (
     <SubscriptionLevelProvider userSubscriptionLevel={userSubscriptionLevel}>
       <div className="flex min-h-screen flex-col">
-        <Navbar />
-        {children}
+        {/* Floating header is now handled globally in root layout */}
+        <div className="pt-20">
+          {children}
+        </div>
         <PremiumModal />
       </div>
     </SubscriptionLevelProvider>
