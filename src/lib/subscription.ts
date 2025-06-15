@@ -50,8 +50,8 @@ export const getUserSubscriptionLevel = cache(
     // Log the subscription for debugging
     console.log("Subscription found but couldn't determine plan type:", subscription.stripePriceId);
     
-    // Default to "pro" for any active subscription that we can't identify
+    // Default to "free" for any active subscription that we can't identify
     // This ensures the app doesn't crash if a subscription can't be identified
-    return "pro";
+    return "free";
   }
 );
