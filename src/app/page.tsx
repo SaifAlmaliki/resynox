@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { SplineScene } from "@/components/ui/spline-scene";
 import { Spotlight } from "@/components/ui/spotlight";
+import Footer from "@/components/ui/footer";
 import { ArrowRight, BriefcaseIcon, ChevronDown, FileText, Mic, Star, TrendingUp, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -361,6 +362,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </main>
   );
 }
