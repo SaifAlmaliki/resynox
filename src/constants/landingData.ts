@@ -15,10 +15,10 @@ export const heroData = {
 };
 
 export const statsData = [
-  { value: "10,000+", label: "Users" },
-  { value: "25,000+", label: "Resumes Created" },
-  { value: "50,000+", label: "Mock Interviews" },
-  { value: "85%", label: "Success Rate" }
+  { value: "500+", label: "Users" },
+  { value: "1,200+", label: "Resumes Created" },
+  { value: "800+", label: "Mock Interviews" },
+  { value: "92%", label: "Success Rate" }
 ];
 
 export const howItWorksData = {

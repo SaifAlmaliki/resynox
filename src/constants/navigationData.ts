@@ -129,9 +129,9 @@ export const footerData: FooterData = {
       title: "Support",
       links: [
         { label: "Help Center", href: "/help" },
+        { label: "Contact Support", href: "/contact" },
         { label: "Documentation", href: "/docs" },
-        { label: "Community", href: "/community" },
-        { label: "Status", href: "/status" }
+        { label: "Community", href: "/community" }
       ]
     }
   ],
@@ -167,7 +167,7 @@ export const simpleFooterData: FooterData = {
   bottomLinks: [
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/tos" },
-    { label: "Support", href: "/help" },
+    { label: "Support", href: "/contact" },
     { label: "Contact", href: "/contact" }
   ],
   copyright: "© 2024 RESYNOX. All rights reserved.",
