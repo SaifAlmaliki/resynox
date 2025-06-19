@@ -5,7 +5,7 @@ interface Step {
   icon: LucideIcon;
   title: string;
   description: string;
-  step: string;
+  step: number;
 }
 
 interface HowItWorksSectionProps {

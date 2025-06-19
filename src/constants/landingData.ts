@@ -29,25 +29,25 @@ export const howItWorksData = {
       icon: FileText,
       title: "Create Your Resume",
       description: "Build a professional resume with our AI-powered tools and templates",
-      step: "1"
+      step: 1
     },
     {
       icon: FileText,
       title: "Generate Cover Letter",
       description: "Create tailored cover letters based on your resume and job descriptions",
-      step: "2"
+      step: 2
     },
     {
       icon: Mic,
       title: "Practice Interviews",
       description: "Prepare for real interviews with our AI-powered mock interviews",
-      step: "3"
+      step: 3
     },
     {
       icon: TrendingUp,
       title: "Get Feedback",
       description: "Receive detailed feedback and improve your performance",
-      step: "4"
+      step: 4
     }
   ]
 };
