@@ -25,6 +25,21 @@ export function canUseCustomizations(subscriptionLevel: SubscriptionLevel) {
   return subscriptionLevel === "pro" || subscriptionLevel === "pro_plus";
 }
 
+export function canCreateCoverLetter(subscriptionLevel: SubscriptionLevel, currentCoverLetterCount: number) {
+  // A mapping that defines the maximum number of cover letters allowed for each subscription level
+  const maxCoverLetterMap: Record<SubscriptionLevel, number> = {
+    free: 1,
+    pro: 3,
+    pro_plus: 10,
+  };
+
+  // Look up the maximum number of cover letters allowed for the user's subscription level
+  const maxCoverLetters = maxCoverLetterMap[subscriptionLevel];
+
+  // Return true if the user's current cover letter count is less than the maximum allowed
+  return currentCoverLetterCount < maxCoverLetters;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function canUseVoiceAgent(subscriptionLevel: SubscriptionLevel) {
   // Voice agent for mock interviews is available only to "pro_plus" users

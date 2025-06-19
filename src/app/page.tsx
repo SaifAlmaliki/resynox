@@ -328,7 +328,7 @@ export default function Home() {
                   variant="secondary"
                   className="w-full group rounded-full px-6 py-4 text-green-600 bg-white hover:bg-gray-100"
                 >
-                  <Link href="/cover-letters/new">
+                  <Link href="/cover-letters">
                     Create Cover Letter <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>

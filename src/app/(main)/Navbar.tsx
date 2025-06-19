@@ -28,7 +28,7 @@ export default function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 p-3">
 
         <div className="flex items-center gap-2">
-          <Link href="/resumes" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <Image
               src={logo}
               alt="Logo"
