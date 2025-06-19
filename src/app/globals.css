@@ -27,6 +27,143 @@ body {
   }
 }
 
+/* Lightweight page transition animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes bounce-dots {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Page transition utilities */
+.page-transition-container {
+  will-change: transform, opacity;
+}
+
+.stagger-container {
+  --stagger-delay: 0.1s;
+}
+
+.stagger-item {
+  --item-index: 0;
+  animation: fadeInUp 0.6s ease-out;
+  animation-delay: calc(var(--item-index) * var(--stagger-delay));
+  animation-fill-mode: both;
+}
+
+/* Loading skeleton animations */
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-size: 200px 100%;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(
+    to right,
+    #374151 0%,
+    #4b5563 20%,
+    #374151 40%,
+    #374151 100%
+  );
+  background-size: 200px 100%;
+}
+
+/* Bounce loading dots */
+.bounce-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.bounce-dots > div {
+  animation: bounce-dots 1.4s ease-in-out infinite both;
+}
+
+.bounce-dots > div:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.bounce-dots > div:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+/* Utility classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out;
+}
+
+/* Progress bar styles */
+.progress-bar {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

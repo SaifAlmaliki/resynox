@@ -1,4 +1,5 @@
 import PremiumModal from "@/components/premium/PremiumModal";
+import { NavigationProgress } from "@/components/ui/page-navigation";
 import { getUserSubscriptionLevel } from "@/lib/subscription";
 import { auth } from "@clerk/nextjs/server";
 import Navbar from "./Navbar";
@@ -16,6 +17,7 @@ export default async function Layout({children}: {children: React.ReactNode;}) {
   return (
     <SubscriptionLevelProvider userSubscriptionLevel={userSubscriptionLevel}>
       <div className="flex min-h-screen flex-col">
+        <NavigationProgress />
         <Navbar />
         {children}
         <PremiumModal />

@@ -8,6 +8,7 @@ import Link from "next/link";
 
 import logo from "@/assets/logo.png";
 import ThemeToggle from "@/components/ThemeToggle";
+import { NavLink } from "@/components/ui/nav-link";
 
 
 const getUserButtonAppearance = (theme: string | undefined) => ({
@@ -45,9 +46,15 @@ export default function Navbar() {
 
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4">
-            <Link href="/resumes" className="font-medium hover:text-primary transition-colors">
+            <NavLink href="/resumes" className="font-medium hover:text-primary transition-colors">
               Resumes
-            </Link>
+            </NavLink>
+            <NavLink href="/cover-letters" className="font-medium hover:text-primary transition-colors">
+              Cover Letters
+            </NavLink>
+            <NavLink href="/interview" className="font-medium hover:text-primary transition-colors">
+              Interviews
+            </NavLink>
           </div>
           
           <div className="flex items-center gap-3">

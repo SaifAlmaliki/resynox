@@ -1,5 +1,11 @@
-import { Loader2 } from "lucide-react";
+import { ProgressLoader } from "@/components/ui/progress-loader";
 
 export default function Loading() {
-  return <Loader2 className="mx-auto my-6 animate-spin" />;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-md mx-auto p-8">
+        <ProgressLoader isLoading={true} />
+      </div>
+    </div>
+  );
 }
