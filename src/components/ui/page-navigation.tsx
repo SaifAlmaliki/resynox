@@ -63,7 +63,7 @@ export function NavigationProgress() {
       {/* Top loading bar */}
       {isLoading && (
         <div className="fixed top-0 left-0 right-0 z-50">
-          <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 transition-all duration-300 ease-out"
+          <div className="h-1 bg-gradient-to-r from-green-900 to-green-800 transition-all duration-300 ease-out"
                style={{ width: `${progress}%` }} />
         </div>
       )}

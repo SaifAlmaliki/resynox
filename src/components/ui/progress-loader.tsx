@@ -79,8 +79,8 @@ export function ProgressLoader({
       <div className="w-full max-w-md mx-auto p-8 space-y-6">
         {/* Logo/Brand area */}
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-r from-green-400 to-green-600 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-r from-green-900 to-green-800 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-green-100 border-t-transparent rounded-full animate-spin" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">Loading</h3>
         </div>
@@ -94,7 +94,7 @@ export function ProgressLoader({
           
           <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-300 ease-out"
+              className="h-full bg-gradient-to-r from-green-900 to-green-800 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${currentProgress}%` }}
             />
           </div>
@@ -105,7 +105,7 @@ export function ProgressLoader({
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+              className="w-2 h-2 bg-green-800 rounded-full animate-pulse"
               style={{
                 animationDelay: `${i * 0.2}s`,
                 animationDuration: '1s'
@@ -131,7 +131,7 @@ export function SimpleLoader({ isVisible }: { isVisible: boolean }) {
     <div className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm transition-all duration-200">
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-green-800 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-muted-foreground animate-pulse">Loading...</p>
         </div>
       </div>

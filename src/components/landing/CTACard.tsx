@@ -25,7 +25,7 @@ export function CTACard({ icon: Icon, title, description, buttonText, href }: CT
           asChild 
           size="lg"
           variant="secondary"
-          className="w-full group rounded-full px-6 py-4 text-green-600 bg-white hover:bg-gray-100"
+          className="w-full group rounded-full px-6 py-4 text-green-900 bg-white hover:bg-green-50 border border-green-100"
         >
           <Link href={href}>
             {buttonText} <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

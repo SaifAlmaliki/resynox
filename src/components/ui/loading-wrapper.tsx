@@ -62,7 +62,7 @@ export function TopLoadingBar({ isLoading }: { isLoading: boolean }) {
   
   return (
     <div className="fixed top-0 left-0 right-0 z-50">
-      <div className="h-1 bg-gradient-to-r from-green-400 to-green-600 progress-bar"></div>
+      <div className="h-1 bg-gradient-to-r from-green-900 to-green-800 progress-bar"></div>
     </div>
   );
 } 

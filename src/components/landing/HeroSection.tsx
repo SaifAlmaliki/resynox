@@ -33,7 +33,7 @@ export function HeroSection({
       
       <div className="flex flex-col md:flex-row h-[750px] md:h-[600px]">
         <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-start md:justify-center pt-4 md:pt-0">
-          <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-100 to-green-900 tracking-tight">
             {title}
           </h1>
           
@@ -57,7 +57,7 @@ export function HeroSection({
               asChild
               size="lg"
               variant="outline"
-              className="group rounded-full px-8 py-6 text-lg bg-transparent border-white text-white hover:bg-white/20 hover:text-white"
+              className="group rounded-full px-8 py-6 text-lg bg-transparent border-green-800 text-green-100 hover:bg-green-900/20 hover:text-green-100"
             >
               <a href={secondaryCTA.href}>
                 {secondaryCTA.text}

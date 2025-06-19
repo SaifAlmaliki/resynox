@@ -12,15 +12,21 @@ interface CTA {
 interface CTASectionProps {
   title: string;
   subtitle: string;
-  ctas: CTA[];
+  ctas: Array<{
+    icon: any;
+    title: string;
+    description: string;
+    buttonText: string;
+    href: string;
+  }>;
 }
 
 export function CTASection({ title, subtitle, ctas }: CTASectionProps) {
   return (
-    <div id="cta-section" className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-8 shadow-md text-white mb-16 animate-fade-in-up" style={{ animationDelay: '1s' }}>
+    <div id="cta-section" className="bg-gradient-to-r from-green-900 to-green-800 rounded-xl p-8 shadow-md text-white mb-16 animate-fade-in-up border border-green-700/30" style={{ animationDelay: '1s' }}>
       <div className="text-center mb-10">
         <h2 className="text-3xl font-bold mb-4">{title}</h2>
-        <p className="max-w-2xl mx-auto">
+        <p className="max-w-2xl mx-auto text-green-100">
           {subtitle}
         </p>
       </div>
