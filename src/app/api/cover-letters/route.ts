@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { getUserSubscriptionLevel } from "@/lib/subscription";
 
 export async function POST(req: Request) {
   try {
@@ -11,40 +10,52 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { resumeId, jobDescription, title, content } = body;
+    const { resumeId, jobDescription, title, content, basicInfo } = body;
 
-    if (!resumeId || !jobDescription || !content) {
-      return new NextResponse("Missing required fields", { status: 400 });
+    if (!jobDescription || !content) {
+      return new NextResponse("Job description and content are required", { status: 400 });
     }
 
-    // Get user's subscription level using the centralized function
-    const subscriptionLevel = await getUserSubscriptionLevel(userId);
-
-    // Check cover letter limit based on subscription
-    const coverLetterCount = await db.coverLetter.count({
-      where: { userId },
-    });
-
-    // Set limits based on subscription level
-    let limit = 1; // Default for free users
-    if (subscriptionLevel === "pro_plus") {
-      limit = 10;
-    } else if (subscriptionLevel === "pro") {
-      limit = 3;
+    // Validate that either resumeId or basicInfo is provided
+    if (!resumeId && !basicInfo) {
+      return new NextResponse("Either resume ID or basic info is required", { status: 400 });
     }
 
-    if (coverLetterCount >= limit) {
-      return new NextResponse(`Cover letter limit reached for ${subscriptionLevel} users (${limit} cover letters)`, { status: 403 });
+    // If basicInfo is provided, validate required fields
+    if (basicInfo && (!basicInfo.firstName || !basicInfo.lastName || !basicInfo.email)) {
+      return new NextResponse("First name, last name, and email are required when not using a resume", { status: 400 });
+    }
+
+    // Cover letter creation is now unlimited for all users
+
+    // Prepare the cover letter data
+    const coverLetterData: any = {
+      userId,
+      jobDescription,
+      content: content,
+      title: title || "Untitled Cover Letter",
+    };
+
+    // Add resumeId if provided, otherwise it will be null
+    if (resumeId) {
+      coverLetterData.resumeId = resumeId;
+    }
+
+    // Store basic info as metadata if provided (when not using resume)
+    if (basicInfo) {
+      coverLetterData.metadata = JSON.stringify({
+        basicInfo: {
+          firstName: basicInfo.firstName,
+          lastName: basicInfo.lastName,
+          email: basicInfo.email,
+          phone: basicInfo.phone || null,
+        },
+        createdWithoutResume: true,
+      });
     }
 
     const coverLetter = await db.coverLetter.create({
-      data: {
-        userId,
-        resumeId,
-        jobDescription,
-        content: content,
-        title: title || "Untitled Cover Letter",
-      },
+      data: coverLetterData,
     });
 
     return NextResponse.json(coverLetter);
@@ -61,12 +72,37 @@ export async function GET(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const coverLetters = await db.coverLetter.findMany({
+    const coverLetters = await (db.coverLetter.findMany as any)({
       where: { userId },
       orderBy: { createdAt: "desc" },
+      include: {
+        resume: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
     });
 
-    return NextResponse.json(coverLetters);
+    // Parse metadata for cover letters created without resume
+    const coverLettersWithMetadata = coverLetters.map((coverLetter: any) => {
+      let parsedMetadata = null;
+      if (coverLetter.metadata) {
+        try {
+          parsedMetadata = JSON.parse(coverLetter.metadata);
+        } catch (error) {
+          console.error("Error parsing cover letter metadata:", error);
+        }
+      }
+
+      return {
+        ...coverLetter,
+        parsedMetadata,
+      };
+    });
+
+    return NextResponse.json(coverLettersWithMetadata);
   } catch (error) {
     console.error("[COVER_LETTER_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });

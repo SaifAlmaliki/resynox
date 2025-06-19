@@ -45,6 +45,7 @@ model Resume {
   educations      Education[]      // A resume can have multiple education entries.
   skills          String[]         // A list of skills associated with the resume.
   languages       LanguageSkill[]  // A resume can have multiple language skills.
+  coverLetters    CoverLetter[]    // A resume can be associated with multiple cover letters.
 
   // Timestamps.
   createdAt DateTime @default(now())  // Automatically set when the resume is created.
@@ -168,10 +169,14 @@ model Feedback {
 model CoverLetter {
   id              String   @id @default(cuid())
   userId          String   // Foreign key to associate the cover letter with a user
-  resumeId        String   // Foreign key to associate with the base resume
+  resumeId        String?  // Optional foreign key to associate with the base resume
   jobDescription  String   // The job description the cover letter is tailored for
   content         String   // The generated cover letter content
   title           String?  // Optional title for the cover letter
+  metadata        String?  // Optional JSON metadata for storing basic info when no resume is used
+  
+  // Relationship to Resume (optional)
+  resume          Resume?  @relation(fields: [resumeId], references: [id], onDelete: SetNull)
   
   // Timestamps
   createdAt       DateTime @default(now())

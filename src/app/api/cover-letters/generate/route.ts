@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import openai from "@/lib/openai";
 
 export async function POST(req: Request) {
   try {
@@ -10,29 +11,48 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { resumeId, jobDescription } = body;
+    const { resumeId, jobDescription, basicInfo } = body;
 
-    if (!resumeId || !jobDescription) {
-      return new NextResponse("Missing required fields", { status: 400 });
+    if (!jobDescription) {
+      return new NextResponse("Job description is required", { status: 400 });
     }
 
-    // Fetch the resume data to use in the cover letter
-    const resume = await db.resume.findUnique({
-      where: { id: resumeId },
-      include: {
-        workExperiences: true,
-        educations: true,
-      },
-    });
-
-    if (!resume) {
-      return new NextResponse("Resume not found", { status: 404 });
+    // Validate that either resumeId or basicInfo is provided
+    if (!resumeId && !basicInfo) {
+      return new NextResponse("Either resume ID or basic info is required", { status: 400 });
     }
 
-    // AI-powered job description analysis
+    let resume = null;
+    let userInfo = null;
+
+    if (resumeId) {
+      // Fetch the resume data to use in the cover letter
+      resume = await db.resume.findUnique({
+        where: { id: resumeId },
+        include: {
+          workExperiences: true,
+          educations: true,
+        },
+      });
+
+      if (!resume) {
+        return new NextResponse("Resume not found", { status: 404 });
+      }
+    } else {
+      // Use basic info provided by user
+      userInfo = basicInfo;
+      
+      // Validate basic info
+      if (!userInfo.firstName || !userInfo.lastName || !userInfo.email) {
+        return new NextResponse("First name, last name, and email are required", { status: 400 });
+      }
+    }
+
+    // AI-powered job description analysis using OpenAI
     const analyzeJobDescription = async (jobDesc: string) => {
-      const analysisPrompt = `
-Analyze the following job description and extract key information in JSON format:
+      try {
+        const analysisPrompt = `
+Analyze the following job description and extract key information. Pay special attention to company names with special characters, accents, or non-English letters (like TÜV SÜD, Nestlé, etc.).
 
 Job Description:
 """
@@ -41,133 +61,83 @@ ${jobDesc}
 
 Please extract and return ONLY a valid JSON object with the following structure:
 {
-  "jobTitle": "extracted job title",
-  "companyName": "extracted company name or 'Unknown' if not found",
+  "jobTitle": "exact job title from the posting",
+  "companyName": "exact company name (preserve all special characters, accents, symbols like TÜV SÜD)",
   "keyResponsibilities": ["responsibility 1", "responsibility 2", "responsibility 3"],
   "requiredSkills": ["skill 1", "skill 2", "skill 3", "skill 4", "skill 5"],
-  "companyGoals": "brief description of company mission/goals or 'Not specified' if not found",
-  "experienceLevel": "entry/mid/senior level or 'Not specified'",
-  "workType": "remote/hybrid/onsite or 'Not specified'"
+  "experienceRequired": "minimum years of experience required or specific experience level",
+  "companyMission": "company mission, values, or what they do briefly",
+  "location": "job location if mentioned",
+  "degreeRequirement": "required education level or field of study",
+  "workArrangement": "remote/hybrid/onsite preference if mentioned",
+  "hiringManagerName": "hiring manager name if mentioned, otherwise 'Hiring Manager'",
+  "companyAddress": "company address if mentioned"
 }
 
-Focus on extracting the most relevant information. If any field cannot be determined, use appropriate default values.
+Instructions:
+- Extract the EXACT company name preserving all special characters, accents, and formatting
+- For job title, use the exact title from the posting, not a generic version
+- Focus on the most important and specific requirements
+- Look for minimum experience requirements (e.g., "5+ years", "minimum 3 years")
+- Include technical skills, soft skills, and specific tools/technologies mentioned
+- If information is not clearly stated, use "Not specified" for that field
+- Ensure the JSON is valid and properly formatted
 `;
 
-      try {
-        // Using a simple AI analysis approach
-        // In a real implementation, you would use OpenAI, Claude, or another AI service
-        // For now, we'll create a structured analysis based on common patterns
-        
-        const jobDescLower = jobDesc.toLowerCase();
-        
-        // Extract job title (improved logic)
-        let jobTitle = "this position";
-        const titlePatterns = [
-          /(?:position|role|job title|title|we are looking for a|seeking a|hiring a|join us as a|apply for)\s*:?\s*([^\n\r,.!?]+)/i,
-          /^([A-Z][a-zA-Z\s\-()]+(?:Engineer|Developer|Manager|Analyst|Specialist|Coordinator|Assistant|Director|Lead|Senior|Junior|Architect|Consultant|Administrator|Technician))/,
-        ];
-        
-        for (const pattern of titlePatterns) {
-          const match = jobDesc.match(pattern);
-          if (match && match[1]) {
-            jobTitle = match[1].trim().replace(/[^\w\s\-()]/g, '');
-            break;
-          }
-        }
-
-        // Extract company name
-        let companyName = "your organization";
-        const companyPatterns = [
-          /(?:company|organization|firm|at|join)\s*:?\s*([A-Z][a-zA-Z\s&.,\-()]{2,40})(?:\s*(?:is|are|seeks|looking|hiring|invites|offers))/i,
-          /([A-Z][a-zA-Z\s&.,\-()]{2,40})(?:\s+(?:is|are)\s+(?:seeking|looking|hiring|searching))/,
-        ];
-        
-        for (const pattern of companyPatterns) {
-          const match = jobDesc.match(pattern);
-          if (match && match[1]) {
-            companyName = match[1].trim().replace(/[^\w\s&.,\-()]/g, '');
-            break;
-          }
-        }
-
-        // Extract responsibilities
-        const responsibilities: string[] = [];
-        const lines = jobDesc.split('\n');
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (trimmedLine.match(/^[•\-\*]\s*/) || 
-              trimmedLine.toLowerCase().includes('responsible for') ||
-              trimmedLine.toLowerCase().includes('will be') ||
-              trimmedLine.toLowerCase().includes('you will')) {
-            if (trimmedLine.length > 10 && trimmedLine.length < 150) {
-              responsibilities.push(trimmedLine.replace(/^[•\-\*]\s*/, ''));
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert at analyzing job descriptions and extracting structured information. Always return valid JSON only, no additional text or formatting."
+            },
+            {
+              role: "user",
+              content: analysisPrompt
             }
-          }
+          ],
+          temperature: 0.1,
+          max_tokens: 1000,
+        });
+
+        const analysisText = response.choices[0]?.message?.content?.trim();
+        if (!analysisText) {
+          throw new Error("No response from OpenAI");
         }
 
-        // Extract skills
-        const techKeywords = [
-          'Azure', 'AWS', 'Cloud', 'Docker', 'Kubernetes', 'Python', 'Java', 'JavaScript', 'React', 'Node.js',
-          'SQL', 'NoSQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Git', 'CI/CD', 'DevOps', 'Microservices',
-          'API', 'REST', 'GraphQL', 'Machine Learning', 'AI', 'Data Science', 'Analytics', 'Tableau',
-          'Power BI', 'Salesforce', 'SAP', 'Oracle', 'Microsoft', 'Linux', 'Windows', 'Agile', 'Scrum'
-        ];
+        // Parse the JSON response
+        const jobAnalysis = JSON.parse(analysisText);
         
-        const requiredSkills: string[] = [];
-        for (const skill of techKeywords) {
-          if (jobDescLower.includes(skill.toLowerCase())) {
-            requiredSkills.push(skill);
-          }
-        }
-
-        // Extract company goals/mission
-        let companyGoals = "Not specified";
-        if (jobDescLower.includes('mission') || jobDescLower.includes('vision') || jobDescLower.includes('goal')) {
-          const goalMatch = jobDesc.match(/(?:mission|vision|goal|purpose)[^.!?]*[.!?]/i);
-          if (goalMatch) {
-            companyGoals = goalMatch[0].trim();
-          }
-        }
-
-        // Determine experience level
-        let experienceLevel = "Not specified";
-        if (jobDescLower.includes('senior') || jobDescLower.includes('lead')) {
-          experienceLevel = "senior";
-        } else if (jobDescLower.includes('junior') || jobDescLower.includes('entry')) {
-          experienceLevel = "entry";
-        } else if (jobDescLower.includes('mid') || jobDescLower.includes('intermediate')) {
-          experienceLevel = "mid";
-        }
-
-        // Determine work type
-        let workType = "Not specified";
-        if (jobDescLower.includes('remote')) {
-          workType = "remote";
-        } else if (jobDescLower.includes('hybrid')) {
-          workType = "hybrid";
-        } else if (jobDescLower.includes('onsite') || jobDescLower.includes('on-site')) {
-          workType = "onsite";
-        }
-
+        // Validate and provide defaults for critical fields
         return {
-          jobTitle,
-          companyName,
-          keyResponsibilities: responsibilities.slice(0, 3),
-          requiredSkills: requiredSkills.slice(0, 5),
-          companyGoals,
-          experienceLevel,
-          workType
+          jobTitle: jobAnalysis.jobTitle || "this position",
+          companyName: jobAnalysis.companyName || "your organization",
+          keyResponsibilities: Array.isArray(jobAnalysis.keyResponsibilities) ? jobAnalysis.keyResponsibilities.slice(0, 3) : [],
+          requiredSkills: Array.isArray(jobAnalysis.requiredSkills) ? jobAnalysis.requiredSkills.slice(0, 5) : [],
+          experienceRequired: jobAnalysis.experienceRequired || "Not specified",
+          companyMission: jobAnalysis.companyMission || "Not specified",
+          location: jobAnalysis.location || "Not specified",
+          degreeRequirement: jobAnalysis.degreeRequirement || "Not specified",
+          workArrangement: jobAnalysis.workArrangement || "Not specified",
+          hiringManagerName: jobAnalysis.hiringManagerName || "Hiring Manager",
+          companyAddress: jobAnalysis.companyAddress || ""
         };
       } catch (error) {
-        console.error("Error analyzing job description:", error);
+        console.error("Error analyzing job description with OpenAI:", error);
+        
+        // Simple fallback if OpenAI analysis fails
         return {
           jobTitle: "this position",
-          companyName: "your organization",
+          companyName: "your organization", 
           keyResponsibilities: [],
           requiredSkills: [],
-          companyGoals: "Not specified",
-          experienceLevel: "Not specified",
-          workType: "Not specified"
+          experienceRequired: "Not specified",
+          companyMission: "Not specified",
+          location: "Not specified",
+          degreeRequirement: "Not specified",
+          workArrangement: "Not specified",
+          hiringManagerName: "Hiring Manager",
+          companyAddress: ""
         };
       }
     };
@@ -175,51 +145,163 @@ Focus on extracting the most relevant information. If any field cannot be determ
     // Analyze the job description
     const jobAnalysis = await analyzeJobDescription(jobDescription);
 
-    // Find matching skills between resume and job requirements
-    const matchingSkills = resume.skills?.filter(skill => 
-      jobAnalysis.requiredSkills.some(jobSkill => 
-        skill.toLowerCase().includes(jobSkill.toLowerCase()) || 
-        jobSkill.toLowerCase().includes(skill.toLowerCase())
-      )
-    ) || [];
+    // Generate tailored cover letter using OpenAI
+    const generateTailoredCoverLetter = async (analysis: any, resume: any, userInfo: any) => {
+      try {
+        let contextPrompt = "";
+        
+        if (resume) {
+          // Build resume context
+          const workExperience = resume.workExperiences?.length > 0 
+            ? resume.workExperiences.map((exp: any) => `${exp.position} at ${exp.company}: ${exp.description || ''}`).join('\n')
+            : 'No work experience provided';
+          
+          const education = resume.educations?.length > 0
+            ? resume.educations.map((edu: any) => `${edu.degree} in ${edu.fieldOfStudy} from ${edu.institution}`).join('\n')
+            : 'No education provided';
 
-    // Generate a highly tailored cover letter
-    const coverLetter = `
-Dear Hiring Manager,
+          contextPrompt = `
+Resume Information:
+Name: ${resume.firstName} ${resume.lastName}
+Current Role: ${resume.jobTitle || 'Not specified'}
+Summary: ${resume.summary || 'Not provided'}
+Skills: ${resume.skills?.join(', ') || 'Not specified'}
 
-I am writing to express my strong interest in the ${jobAnalysis.jobTitle} position at ${jobAnalysis.companyName}. With my background as ${resume.jobTitle || "a professional in this field"}, I am excited about the opportunity to contribute to your team.
+Work Experience:
+${workExperience}
 
-${resume.summary || "I bring extensive experience and expertise to this role."}
+Education:
+${education}
+`;
+        } else {
+          contextPrompt = `
+Applicant Information:
+Name: ${userInfo.firstName} ${userInfo.lastName}
+Email: ${userInfo.email}
+Phone: ${userInfo.phone || 'Not provided'}
+Address: ${userInfo.address || 'Not provided'}
+City: ${userInfo.city || 'Not provided'}
+State: ${userInfo.state || 'Not provided'}
+ZIP Code: ${userInfo.zipCode || 'Not provided'}
+`;
+        }
 
-Based on my analysis of the ${jobAnalysis.jobTitle} role, I believe my experience aligns perfectly with your requirements:
+        // Get current date
+        const currentDate = new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
 
-${resume.workExperiences && resume.workExperiences.length > 0 
-  ? `• In my role as ${resume.workExperiences[0].position} at ${resume.workExperiences[0].company}, I developed expertise in ${jobAnalysis.requiredSkills.length > 0 ? jobAnalysis.requiredSkills.slice(0, 2).join(' and ') : 'key technologies'} that are essential for success in the ${jobAnalysis.jobTitle} position.`
-  : `• My professional experience has equipped me with the skills necessary for the ${jobAnalysis.jobTitle} role.`
-}
+        const coverLetterPrompt = `
+Write a professional, compelling cover letter with proper business letter formatting based on the following information:
 
-${matchingSkills.length > 0 
-  ? `• My technical expertise includes: ${matchingSkills.slice(0, 4).join(", ")}, which directly align with the requirements for the ${jobAnalysis.jobTitle} position.`
-  : resume.skills && resume.skills.length > 0 
-    ? `• My technical skills include: ${resume.skills.slice(0, 4).join(", ")}, which are valuable for the ${jobAnalysis.jobTitle} role.`
-    : ""
-}
+${contextPrompt}
 
-${jobAnalysis.keyResponsibilities.length > 0 
-  ? `• I am particularly excited about the opportunity to ${jobAnalysis.keyResponsibilities[0].toLowerCase().replace(/^(you will|will be|responsible for)\s*/i, '')} as outlined in the ${jobAnalysis.jobTitle} role.`
-  : `• I am particularly excited about contributing to ${jobAnalysis.companyName}'s mission in the ${jobAnalysis.jobTitle} capacity.`
-}
+Job Information:
+Position: ${analysis.jobTitle}
+Company: ${analysis.companyName}
+Location: ${analysis.location}
+Experience Required: ${analysis.experienceRequired}
+Key Responsibilities: ${analysis.keyResponsibilities.join(', ')}
+Required Skills: ${analysis.requiredSkills.join(', ')}
+Education Requirement: ${analysis.degreeRequirement}
+Company Mission: ${analysis.companyMission}
+Work Arrangement: ${analysis.workArrangement}
+Hiring Manager: ${analysis.hiringManagerName}
+Company Address: ${analysis.companyAddress}
 
-${jobAnalysis.companyGoals !== "Not specified" 
-  ? `• I am drawn to ${jobAnalysis.companyName} because of your commitment to ${jobAnalysis.companyGoals.toLowerCase()}.`
-  : ""
-}
+Current Date: ${currentDate}
 
-I would welcome the opportunity to discuss how my background and enthusiasm can contribute to your team's success in the ${jobAnalysis.jobTitle} role. Thank you for considering my application.
+Instructions:
+1. Format as a proper business letter with the following structure:
+   - Applicant's address at the top
+   - Date: ${currentDate}
+   - Company name and address (if available)
+   - Professional greeting using ${analysis.hiringManagerName === 'Hiring Manager' ? '"Dear Hiring Manager,"' : '"Dear ' + analysis.hiringManagerName + ',"'}
+   
+2. Create a cohesive, flowing cover letter body without bullet points or segmented sections
+3. Express genuine interest in the specific role and company
+4. ${resume ? 'Highlight relevant experience and skills from the resume that match the job requirements' : 'Express enthusiasm and potential fit for the role'}
+5. Reference the company by name and show knowledge of what they do
+6. Connect the applicant's background to the specific job requirements
+7. Mention 2-3 most relevant skills or experiences that align with the job
+8. Show enthusiasm for the company's mission and values
+9. End with a professional closing and signature
+10. Keep it concise but impactful (3-4 paragraphs for the body)
+11. Make it feel personal and tailored, not generic
+12. Use the exact company name and job title provided
+13. Do NOT include any placeholder text like [Your Address] or [Date] - use actual information provided
+`;
+
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert career coach and writer who creates compelling, personalized cover letters. Write in a professional but warm tone that shows genuine interest and creates a strong connection between the applicant and the role."
+            },
+            {
+              role: "user",
+              content: coverLetterPrompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 800,
+        });
+
+        return response.choices[0]?.message?.content?.trim() || "";
+      } catch (error) {
+        console.error("Error generating cover letter with OpenAI:", error);
+        
+        // Fallback to basic template
+        const applicantName = resume ? `${resume.firstName} ${resume.lastName}` : `${userInfo.firstName} ${userInfo.lastName}`;
+        const currentDate = new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // Format applicant address
+        let applicantAddress = "";
+        if (userInfo && userInfo.address) {
+          applicantAddress = `${userInfo.address}
+${userInfo.city}${userInfo.state ? `, ${userInfo.state}` : ''}${userInfo.zipCode ? ` ${userInfo.zipCode}` : ''}
+
+`;
+        }
+        
+        // Format company address
+        let companyAddress = "";
+        if (analysis.companyAddress) {
+          companyAddress = `${analysis.companyName}
+${analysis.companyAddress}
+
+`;
+        } else {
+          companyAddress = `${analysis.companyName}
+
+`;
+        }
+        
+        return `${applicantAddress}${currentDate}
+
+${companyAddress}Dear ${analysis.hiringManagerName},
+
+I am writing to express my strong interest in the ${analysis.jobTitle} position at ${analysis.companyName}. ${analysis.companyMission !== "Not specified" ? `I am impressed by ${analysis.companyName}'s commitment to ${analysis.companyMission.toLowerCase()} and` : ""} I am excited about the opportunity to contribute to your team.
+
+${resume?.summary || `With my background and enthusiasm for this field, I believe I would be a valuable addition to your ${analysis.jobTitle} team.`} ${analysis.experienceRequired !== "Not specified" ? `I understand that you are looking for someone with ${analysis.experienceRequired.toLowerCase()} of experience, and I am eager to bring my skills and dedication to this role.` : ""}
+
+${analysis.requiredSkills.length > 0 ? `I am particularly drawn to this position because of my interests in ${analysis.requiredSkills.slice(0, 3).join(", ").toLowerCase()}, which align perfectly with the key requirements for the ${analysis.jobTitle} role.` : ""} ${analysis.location !== "Not specified" ? `The opportunity to work ${analysis.location} is also very appealing to me.` : ""}
+
+I would welcome the opportunity to discuss how my background and enthusiasm can contribute to ${analysis.companyName}'s continued success. Thank you for considering my application.
 
 Best regards,
-${resume.firstName || ""} ${resume.lastName || ""}
-    `.trim();
+${applicantName}${userInfo?.email ? `\n${userInfo.email}` : ""}${userInfo?.phone ? `\n${userInfo.phone}` : ""}`;
+      }
+    };
+
+    const coverLetter = await generateTailoredCoverLetter(jobAnalysis, resume, userInfo);
 
     return NextResponse.json({ content: coverLetter });
   } catch (error) {
