@@ -10,7 +10,6 @@ import logo from "@/assets/logo.png";
 import ThemeToggle from "@/components/ThemeToggle";
 import { NavLink } from "@/components/ui/nav-link";
 
-
 const getUserButtonAppearance = (theme: string | undefined) => ({
   baseTheme: theme === "dark" ? dark : undefined,
   elements: {
@@ -25,53 +24,80 @@ export default function Navbar() {
   const { theme } = useTheme();
 
   return (
-    <header className="shadow-sm">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 p-3">
-
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src={logo}
-              alt="Logo"
-              width={35}
-              height={35}
-              className="rounded-full"
-            />
-            <span className="text-xl font-bold tracking-tight">
-              RESYNOX
-            </span>
-          </Link>
-        </div>
-
-
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4">
-            <NavLink href="/resumes" className="font-medium hover:text-primary transition-colors">
-              Resumes
-            </NavLink>
-            <NavLink href="/cover-letters" className="font-medium hover:text-primary transition-colors">
-              Cover Letters
-            </NavLink>
-            <NavLink href="/interview" className="font-medium hover:text-primary transition-colors">
-              Interviews
-            </NavLink>
+    <header className="sticky top-0 z-40 w-full">
+      <div className="bg-green-900/90 backdrop-blur-md border-b border-green-800/30 shadow-lg">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-6 py-2.5">
+          {/* Logo and Brand */}
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Image
+                src={logo}
+                alt="RESYNOX Logo"
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+              <span className="text-lg font-bold tracking-tight text-white">
+                RESYNOX
+              </span>
+            </Link>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
 
-            <UserButton appearance={getUserButtonAppearance(theme)}>
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  label="Billing"
-                  labelIcon={<CreditCard className="size-4" />}
-                  href="/billing"
-                />
-              </UserButton.MenuItems>
-            </UserButton>
+          {/* Navigation Links */}
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-1">
+              <NavLink 
+                href="/resumes" 
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+              >
+                Resumes
+              </NavLink>
+              <NavLink 
+                href="/cover-letters" 
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+              >
+                Cover Letters
+              </NavLink>
+              <NavLink 
+                href="/interview" 
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+              >
+                Interviews
+              </NavLink>
+            </div>
+            
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-3">
+              {/* Theme Toggle with dark green styling */}
+              <div className="p-1 rounded-full hover:bg-green-800/50 transition-colors">
+                <ThemeToggle />
+              </div>
+
+              {/* User Button */}
+              <UserButton 
+                appearance={{
+                  ...getUserButtonAppearance(theme),
+                  elements: {
+                    ...getUserButtonAppearance(theme).elements,
+                    avatarBox: {
+                      ...getUserButtonAppearance(theme).elements?.avatarBox,
+                      border: '2px solid rgba(255, 255, 255, 0.2)',
+                    },
+                  },
+                }}
+              >
+                <UserButton.MenuItems>
+                  <UserButton.Link
+                    label="Billing"
+                    labelIcon={<CreditCard className="size-4" />}
+                    href="/billing"
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
     </header>
   );
 }
