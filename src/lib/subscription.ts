@@ -21,25 +21,9 @@ export const getUserSubscriptionLevel = cache(
       return "free";
     }
 
-    // Get the subscription plan type from the database if available
-    if (subscription.planType) {
-      if (subscription.planType === "pro") {
-        return "pro";
-      }
-      if (subscription.planType === "pro_plus") {
-        return "pro_plus";
-      }
-    }
-
-    // If we have a provider field and it's set to 'stripe', check the price ID
-    if (subscription.provider === 'stripe' && subscription.stripePriceId) {
-      // Check if the subscription has a status field and it's active
-      if (subscription.status && subscription.status !== 'active') {
-        return 'free';
-      }
-      
-      // Determine subscription level based on price ID
-      // We'll check against the current environment variable
+    // Determine subscription level based on price ID
+    if (subscription.stripePriceId) {
+      // Check against environment variables for exact matches
       if (subscription.stripePriceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY) {
         return 'pro';
       }
