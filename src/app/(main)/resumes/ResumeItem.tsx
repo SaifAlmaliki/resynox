@@ -24,6 +24,7 @@ import { mapToResumeValues } from "@/lib/utils";
 import { formatDate } from "date-fns";
 import { MoreVertical, Printer, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { useReactToPrint } from "react-to-print";
 import { deleteResume } from "./actions";
@@ -90,6 +91,7 @@ function MoreMenu({ resumeId, onPrintClick }: MoreMenuProps) {
             variant="ghost"
             size="icon"
             className="absolute right-0.5 top-0.5 md:opacity-0 opacity-100 transition-opacity group-hover:opacity-100 p-2 md:p-1"
+            onClick={(e) => e.stopPropagation()}
           >
             <MoreVertical className="size-4" />
           </Button>
@@ -98,7 +100,10 @@ function MoreMenu({ resumeId, onPrintClick }: MoreMenuProps) {
         <DropdownMenuContent>
           <DropdownMenuItem
             className="flex items-center gap-2"
-            onClick={() => setShowDeleteConfirmation(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDeleteConfirmation(true);
+            }}
           >
             <Trash2 className="size-4" />
             Delete
@@ -106,7 +111,10 @@ function MoreMenu({ resumeId, onPrintClick }: MoreMenuProps) {
 
           <DropdownMenuItem
             className="flex items-center gap-2"
-            onClick={onPrintClick}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrintClick();
+            }}
           >
             <Printer className="size-4" />
             Download / Print
@@ -131,6 +139,7 @@ interface DeleteConfirmationDialogProps {
 
 function DeleteConfirmationDialog({ resumeId, open, onOpenChange }: DeleteConfirmationDialogProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   async function handleDelete() {
@@ -138,6 +147,10 @@ function DeleteConfirmationDialog({ resumeId, open, onOpenChange }: DeleteConfir
       try {
         await deleteResume(resumeId);
         onOpenChange(false);
+        toast({
+          description: "Resume deleted successfully.",
+        });
+        router.push("/resumes");
       } catch (error) {
         console.error(error);
         toast({

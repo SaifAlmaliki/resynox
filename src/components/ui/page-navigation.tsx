@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { ProgressToast } from './instant-feedback';
 
 // Global navigation state
 let isNavigatingGlobally = false;
@@ -15,7 +14,7 @@ export function useNavigationState() {
   useEffect(() => {
     const listener = (loading: boolean) => setIsLoading(loading);
     navigationListeners.push(listener);
-    
+
     return () => {
       navigationListeners = navigationListeners.filter(l => l !== listener);
     };
@@ -67,13 +66,6 @@ export function NavigationProgress() {
                style={{ width: `${progress}%` }} />
         </div>
       )}
-      
-      {/* Progress toast for long loads */}
-      <ProgressToast 
-        isVisible={isLoading && progress > 20} 
-        message="Loading page..."
-        progress={progress}
-      />
     </>
   );
-} 
+}
