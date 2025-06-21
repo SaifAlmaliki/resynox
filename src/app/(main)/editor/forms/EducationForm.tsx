@@ -228,8 +228,8 @@ function EducationItem({ id, form, index, remove }: EducationItemProps) {
               <FormControl>
                 <Input
                   {...field}
-                  type="date" // Date input
-                  value={field.value?.slice(0, 10)} // Normalize date format
+                  type="date"
+                  value={field.value ? field.value.slice(0, 10) : ""} // Handle empty string properly
                 />
               </FormControl>
               <FormMessage />
@@ -245,8 +245,8 @@ function EducationItem({ id, form, index, remove }: EducationItemProps) {
               <FormControl>
                 <Input
                   {...field}
-                  type="date" // Date input
-                  value={field.value?.slice(0, 10)} // Normalize date format
+                  type="date"
+                  value={field.value ? field.value.slice(0, 10) : ""} // Handle empty string properly
                 />
               </FormControl>
               <FormMessage />

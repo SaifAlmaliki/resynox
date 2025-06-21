@@ -1,17 +1,39 @@
 "use client";
 
-// Import necessary dependencies and components
-import useUnloadWarning from "@/hooks/useUnloadWarning"; // Hook to warn users about unsaved changes
-import { ResumeServerData } from "@/lib/types"; // Type for resume server data
-import { cn, mapToResumeValues } from "@/lib/utils"; // Utility functions for class names and mapping data
-import { ResumeValues } from "@/lib/validation"; // Validation schema for resume data
-import { useSearchParams } from "next/navigation"; // Hook for managing search params in Next.js
-import { useState } from "react"; // React state management
-import Breadcrumbs from "./Breadcrumbs"; // Breadcrumb navigation component
-import Footer from "./Footer"; // Footer component for navigation and controls
-import ResumePreviewSection from "./ResumePreviewSection"; // Resume preview component
-import { steps } from "./steps"; // Step configuration for the form
-import useAutoSaveResume from "./useAutoSaveResume"; // Hook for auto-saving resume data
+import useUnloadWarning from "@/hooks/useUnloadWarning";
+import { ResumeServerData } from "@/lib/types";
+import { cn, mapToResumeValues } from "@/lib/utils";
+import { ResumeValues } from "@/lib/validation";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import Breadcrumbs from "./Breadcrumbs";
+import Footer from "./Footer";
+import ResumePreviewSection from "./ResumePreviewSection";
+import { steps } from "./steps";
+import useAutoSaveResume from "./useAutoSaveResume";
+
+// Default values for a new resume to prevent uncontrolled to controlled input issues
+const defaultResumeValues: ResumeValues = {
+  title: "",
+  description: "",
+  firstName: "",
+  lastName: "",
+  jobTitle: "",
+  city: "",
+  country: "",
+  phone: "",
+  email: "",
+  photo: undefined,
+  workExperiences: [],
+  educations: [],
+  skills: [],
+  languages: [],
+  summary: "",
+  colorHex: "#000000",
+  borderStyle: "squircle",
+  jobDescription: "",
+  coverLetter: "",
+};
 
 // Interface for the props of the ResumeEditor component
 interface ResumeEditorProps {
@@ -23,9 +45,9 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
   // Fetch search params for navigation between steps
   const searchParams = useSearchParams();
 
-  // State for managing the resume data; initialize with mapped data or an empty object
+  // Initialize with proper default values instead of empty object
   const [resumeData, setResumeData] = useState<ResumeValues>(
-    resumeToEdit ? mapToResumeValues(resumeToEdit) : {}
+    resumeToEdit ? mapToResumeValues(resumeToEdit) : defaultResumeValues
   );
 
   // State for toggling the small resume preview visibility

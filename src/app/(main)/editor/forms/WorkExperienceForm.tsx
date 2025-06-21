@@ -109,7 +109,7 @@ export default function WorkExperienceForm({resumeData, setResumeData }: EditorF
               type="button"
               onClick={() =>
                 append({
-                  position: "", // Default empty values
+                  position: "", // Ensure these are always strings, not undefined
                   company: "",
                   startDate: "",
                   endDate: "",
@@ -214,7 +214,10 @@ function WorkExperienceItem({id, form, index, remove}: WorkExperienceItemProps) 
             <FormItem>
               <FormLabel>Start date</FormLabel>
               <FormControl>
-                <Input {...field} type="date" value={field.value?.slice(0, 10)} // Format date value
+                <Input 
+                  {...field} 
+                  type="date" 
+                  value={field.value ? field.value.slice(0, 10) : ""} // Handle empty string properly
                 />
               </FormControl>
               <FormMessage />
@@ -228,7 +231,10 @@ function WorkExperienceItem({id, form, index, remove}: WorkExperienceItemProps) 
             <FormItem>
               <FormLabel>End date</FormLabel>
               <FormControl>
-                <Input {...field} type="date" value={field.value?.slice(0, 10)} // Format date value
+                <Input 
+                  {...field} 
+                  type="date" 
+                  value={field.value ? field.value.slice(0, 10) : ""} // Handle empty string properly
                 />
               </FormControl>
               <FormMessage />

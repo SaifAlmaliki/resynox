@@ -4,26 +4,26 @@ import useDebounce from "@/hooks/useDebounce";
 import { fileReplacer } from "@/lib/utils";
 import { ResumeValues } from "@/lib/validation";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { saveResume } from "./actions";
-
 
 export default function useAutoSaveResume(resumeData: ResumeValues) {
   const searchParams = useSearchParams();
-
   const { toast } = useToast();
-
   const debouncedResumeData = useDebounce(resumeData, 1500);
 
   const [resumeId, setResumeId] = useState(resumeData.id);
   const [lastSavedData, setLastSavedData] = useState(structuredClone(resumeData));
-
   const [isSaving, setIsSaving] = useState(false);
-
   const [isError, setIsError] = useState(false);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return JSON.stringify(debouncedResumeData, fileReplacer) !== JSON.stringify(lastSavedData, fileReplacer);
+  }, [debouncedResumeData, lastSavedData]);
+
   useEffect(() => {
     setIsError(false);
-}, [debouncedResumeData]);
+  }, [debouncedResumeData]);
 
   useEffect(() => {
     async function save() {
@@ -32,7 +32,6 @@ export default function useAutoSaveResume(resumeData: ResumeValues) {
         setIsError(false);
 
         const newData = structuredClone(debouncedResumeData);
-
         const photoUnchanged = JSON.stringify(lastSavedData.photo, fileReplacer) === JSON.stringify(newData.photo, fileReplacer);
 
         const updatedResume = await saveResume({
@@ -71,18 +70,13 @@ export default function useAutoSaveResume(resumeData: ResumeValues) {
       }
     }
 
-    console.log("debouncedResumeData", JSON.stringify(debouncedResumeData, fileReplacer));
-    console.log("lastSavedData", JSON.stringify(lastSavedData, fileReplacer));
-
-    const hasUnsavedChanges = JSON.stringify(debouncedResumeData, fileReplacer) !== JSON.stringify(lastSavedData, fileReplacer);
-
     if (hasUnsavedChanges && debouncedResumeData && !isSaving && !isError) {
       save();
     }
-  }, [debouncedResumeData, isSaving, lastSavedData, isError, resumeId, searchParams, toast]);
+  }, [hasUnsavedChanges, debouncedResumeData, isSaving, isError, resumeId, searchParams, toast, lastSavedData]);
 
   return {
     isSaving,
-    hasUnsavedChanges: JSON.stringify(resumeData) !== JSON.stringify(lastSavedData),
+    hasUnsavedChanges,
   };
 }

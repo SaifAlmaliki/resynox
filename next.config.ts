@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "4mb",
     },
+    optimizeCss: true,
   },
 
   // The 'images' configuration specifies allowed domains and patterns for remote images.
@@ -27,7 +28,14 @@ const nextConfig: NextConfig = {
         // are considered allowed and can be optimized by Next.js.
       }
     ]
-  }
+  },
+
+  // Add these optimizations:
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  poweredByHeader: false,
+  compress: true,
 };
 
 export default nextConfig;

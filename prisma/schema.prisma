@@ -52,6 +52,8 @@ model Resume {
   updatedAt DateTime @updatedAt       // Automatically updated whenever the resume is modified.
 
   @@map("resumes") // Maps this model to the `resumes` table in the database.
+  @@index([userId])
+  @@index([updatedAt])
 }
 
 // WorkExperience model: Represents work experience entries for resumes.
@@ -138,6 +140,8 @@ model Interview {
   updatedAt DateTime @updatedAt
 
   @@map("interviews")
+  @@index([userId])
+  @@index([createdAt])
 }
 
 // Feedback model: Represents AI-generated feedback for interviews
@@ -183,4 +187,6 @@ model CoverLetter {
   updatedAt       DateTime @updatedAt
 
   @@map("cover_letters")
+  @@index([userId])
+  @@index([resumeId])
 }

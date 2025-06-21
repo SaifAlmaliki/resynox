@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { ResumeValues } from "@/lib/validation";
 import { formatDate } from "date-fns";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Badge } from "./ui/badge";
 
 interface ResumePreviewProps {
@@ -17,15 +17,17 @@ export default function ResumePreview({ resumeData, contentRef, className }: Res
   const containerRef = useRef<HTMLDivElement>(null);
   const { width } = useDimensions(containerRef);
 
+  const zoomStyle = useMemo(() => ({
+    zoom: (1 / 794) * width,
+  }), [width]);
+
   return (
     <div className={cn("aspect-[210/297] h-fit w-full bg-white text-black", className)}
       ref={containerRef}
     >
       <div
         className={cn("space-y-6 p-6", !width && "invisible")}
-        style={{
-          zoom: (1 / 794) * width,
-        }}
+        style={zoomStyle}
         ref={contentRef}
         id="resumePreviewContent"
       >
