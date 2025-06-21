@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ResumeServerData } from "@/lib/types";
 import { mapToResumeValues } from "@/lib/utils";
 import { formatDate } from "date-fns";
-import { MoreVertical, Printer, Trash2 } from "lucide-react";
+import { MoreVertical, Printer, Download, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
@@ -39,7 +39,32 @@ export default function ResumeItem({ resume }: ResumeItemProps) {
   const reactToPrintFn = useReactToPrint({
     contentRef,
     documentTitle: resume.title || "Resume",
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 0.75in;
+      }
+      @media print {
+        body {
+          font-size: 12pt;
+          line-height: 1.4;
+          color: #000;
+          background: white;
+        }
+      }
+    `,
   });
+
+  const handleDownloadPDF = () => {
+    // Enhanced print trigger that opens browser's print dialog
+    // User can then choose "Save as PDF" or print directly
+    reactToPrintFn();
+  };
+
+  const handleDirectPrint = () => {
+    // Same function but with clearer intent for direct printing
+    reactToPrintFn();
+  };
 
   const wasUpdated = resume.updatedAt !== resume.createdAt;
 
@@ -70,7 +95,11 @@ export default function ResumeItem({ resume }: ResumeItemProps) {
         </div>
       </div>
 
-      <MoreMenu resumeId={resume.id} onPrintClick={reactToPrintFn} />
+      <MoreMenu 
+        resumeId={resume.id} 
+        onPrintClick={handleDirectPrint}
+        onDownloadClick={handleDownloadPDF}
+      />
     </ClickableCard>
   );
 }
@@ -78,9 +107,10 @@ export default function ResumeItem({ resume }: ResumeItemProps) {
 interface MoreMenuProps {
   resumeId: string;
   onPrintClick: () => void;
+  onDownloadClick: () => void;
 }
 
-function MoreMenu({ resumeId, onPrintClick }: MoreMenuProps) {
+function MoreMenu({ resumeId, onPrintClick, onDownloadClick }: MoreMenuProps) {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   return (
@@ -102,11 +132,11 @@ function MoreMenu({ resumeId, onPrintClick }: MoreMenuProps) {
             className="flex items-center gap-2"
             onClick={(e) => {
               e.stopPropagation();
-              setShowDeleteConfirmation(true);
+              onDownloadClick();
             }}
           >
-            <Trash2 className="size-4" />
-            Delete
+            <Download className="size-4" />
+            Download PDF
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -117,7 +147,18 @@ function MoreMenu({ resumeId, onPrintClick }: MoreMenuProps) {
             }}
           >
             <Printer className="size-4" />
-            Download / Print
+            Print Resume
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="flex items-center gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDeleteConfirmation(true);
+            }}
+          >
+            <Trash2 className="size-4" />
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { ResumeValues } from "@/lib/validation";
 import { formatDate } from "date-fns";
 import Image from "next/image";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Badge } from "./ui/badge";
 
 interface ResumePreviewProps {
@@ -17,21 +17,26 @@ export default function ResumePreview({ resumeData, contentRef, className }: Res
   const containerRef = useRef<HTMLDivElement>(null);
   const { width } = useDimensions(containerRef);
 
-  const zoomStyle = useMemo(() => ({
-    zoom: (1 / 794) * width,
-  }), [width]);
+  // Only apply zoom for screen display, not for print
+  const screenZoomStyle = React.useMemo(() => {
+    if (!width) return { visibility: 'hidden' as const };
+    return {
+      zoom: (1 / 794) * width,
+      visibility: 'visible' as const,
+    };
+  }, [width]);
 
   return (
-    <div className={cn("aspect-[210/297] h-fit w-full bg-white text-black", className)}
+    <div 
+      className={cn("aspect-[210/297] h-fit w-full bg-white text-black", className)}
       ref={containerRef}
     >
       <div
-        className={cn("space-y-6 p-6", !width && "invisible")}
-        style={zoomStyle}
+        className="space-y-6 p-6 print:p-0 print:space-y-4"
+        style={screenZoomStyle}
         ref={contentRef}
         id="resumePreviewContent"
       >
-
         <PersonalInfoHeader resumeData={resumeData} />
         <SummarySection resumeData={resumeData} />
         <WorkExperienceSection resumeData={resumeData} />
@@ -60,15 +65,14 @@ function PersonalInfoHeader({ resumeData }: ResumeSectionProps) {
   }, [photo]);
 
   return (
-    <div className="flex items-center gap-6">
-
+    <div className="flex items-center gap-6 print:gap-4">
       {photoSrc && (
         <Image
           src={photoSrc}
           width={100}
           height={100}
           alt="Author photo"
-          className="aspect-square object-cover"
+          className="aspect-square object-cover print:w-20 print:h-20"
           style={{
             borderRadius:
               borderStyle === BorderStyles.SQUARE
@@ -79,18 +83,17 @@ function PersonalInfoHeader({ resumeData }: ResumeSectionProps) {
           }}
         />
       )}
-      <div className="space-y-2.5">
-
+      <div className="space-y-2.5 print:space-y-2">
         <div className="space-y-1">
-          <p className="text-3xl font-bold" style={{ color: colorHex }}>
+          <p className="text-3xl font-bold print:text-lg print:font-bold" style={{ color: colorHex }}>
             {firstName} {lastName}
           </p>
-          <p className="font-medium" style={{ color: colorHex }}>
+          <p className="font-medium print:text-sm print:font-medium" style={{ color: colorHex }}>
             {jobTitle}
           </p>
         </div>
 
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 print:text-xs">
           {city}
           {city && country ? ", " : ""}
           {country}
@@ -109,12 +112,12 @@ function SummarySection({ resumeData }: ResumeSectionProps) {
 
   return (
     <>
-      <hr className="border-2" style={{ borderColor: colorHex }} />
-      <div className="break-inside-avoid space-y-3">
-        <p className="text-lg font-semibold" style={{ color: colorHex }}>
+      <hr className="border-2 print:border-1" style={{ borderColor: colorHex }} />
+      <div className="break-inside-avoid space-y-3 print:space-y-2">
+        <p className="text-lg font-semibold print:text-base print:font-semibold" style={{ color: colorHex }}>
           Professional Profile
         </p>
-        <div className="whitespace-pre-line text-sm">{summary}</div>
+        <div className="whitespace-pre-line text-sm print:text-sm">{summary}</div>
       </div>
     </>
   );
@@ -131,15 +134,15 @@ function WorkExperienceSection({ resumeData }: ResumeSectionProps) {
 
   return (
     <>
-      <hr className="border-2" style={{ borderColor: colorHex }} />
-      <div className="space-y-3">
-        <p className="text-lg font-semibold" style={{ color: colorHex }}>
+      <hr className="border-2 print:border-1" style={{ borderColor: colorHex }} />
+      <div className="space-y-3 print:space-y-2">
+        <p className="text-lg font-semibold print:text-base print:font-semibold" style={{ color: colorHex }}>
           Work Experience
         </p>
         {workExperiencesNotEmpty.map((exp, index) => (
           <div key={index} className="break-inside-avoid space-y-1">
             <div
-              className="flex items-center justify-between text-sm font-semibold"
+              className="flex items-center justify-between text-sm font-semibold print:text-sm print:font-semibold"
               style={{ color: colorHex }}
             >
               <span>{exp.position}</span>
@@ -150,8 +153,8 @@ function WorkExperienceSection({ resumeData }: ResumeSectionProps) {
                 </span>
               )}
             </div>
-            <p className="text-xs font-semibold">{exp.company}</p>
-            <div className="whitespace-pre-line text-xs">{exp.description}</div>
+            <p className="text-xs font-semibold print:text-xs print:font-semibold">{exp.company}</p>
+            <div className="whitespace-pre-line text-xs print:text-xs">{exp.description}</div>
           </div>
         ))}
       </div>
@@ -170,15 +173,15 @@ function EducationSection({ resumeData }: ResumeSectionProps) {
 
   return (
     <>
-      <hr className="border-2" style={{ borderColor: colorHex }} />
-      <div className="space-y-3">
-        <p className="text-lg font-semibold" style={{ color: colorHex }}>
+      <hr className="border-2 print:border-1" style={{ borderColor: colorHex }} />
+      <div className="space-y-3 print:space-y-2">
+        <p className="text-lg font-semibold print:text-base print:font-semibold" style={{ color: colorHex }}>
           Education
         </p>
         {educationsNotEmpty.map((edu, index) => (
           <div key={index} className="break-inside-avoid space-y-1">
             <div
-              className="flex items-center justify-between text-sm font-semibold"
+              className="flex items-center justify-between text-sm font-semibold print:text-sm print:font-semibold"
               style={{ color: colorHex }}
             >
               <span>{edu.degree}</span>
@@ -189,7 +192,7 @@ function EducationSection({ resumeData }: ResumeSectionProps) {
                 </span>
               )}
             </div>
-            <p className="text-xs font-semibold">{edu.school}</p>
+            <p className="text-xs font-semibold print:text-xs print:font-semibold">{edu.school}</p>
           </div>
         ))}
       </div>
@@ -204,51 +207,39 @@ function LanguageSkillsSection({ resumeData }: ResumeSectionProps) {
 
   return (
     <>
-      <hr className="border-2" style={{ borderColor: colorHex }} />
-      <section className="space-y-2">
-        <p className="text-lg font-semibold" style={{ color: colorHex }}>
+      <hr className="border-2 print:border-1" style={{ borderColor: colorHex }} />
+      <div className="break-inside-avoid space-y-3 print:space-y-2">
+        <p className="text-lg font-semibold print:text-base print:font-semibold" style={{ color: colorHex }}>
           Languages
         </p>
-        <div className="space-y-1">
+        <div className="space-y-2 print:space-y-1">
           {languages.map((lang, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <span className="font-medium">{lang.language}</span>
-              <span className="text-gray-600 capitalize">{lang.level}</span>
+            <div key={index} className="flex justify-between items-center">
+              <span className="text-sm print:text-sm">{lang.language}</span>
+              <span className="text-xs capitalize print:text-xs">{lang.level}</span>
             </div>
           ))}
         </div>
-      </section>
+      </div>
     </>
   );
 }
 
 function SkillsSection({ resumeData }: ResumeSectionProps) {
-  const { skills, colorHex, borderStyle } = resumeData;
+  const { skills, colorHex } = resumeData;
 
   if (!skills?.length) return null;
 
   return (
     <>
-      <hr className="border-2" style={{ borderColor: colorHex }} />
-      <div className="break-inside-avoid space-y-3">
-        <p className="text-lg font-semibold" style={{ color: colorHex }}>
+      <hr className="border-2 print:border-1" style={{ borderColor: colorHex }} />
+      <div className="break-inside-avoid space-y-3 print:space-y-2">
+        <p className="text-lg font-semibold print:text-base print:font-semibold" style={{ color: colorHex }}>
           Skills
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 print:gap-1">
           {skills.map((skill, index) => (
-            <Badge
-              key={index}
-              className="rounded-md bg-black text-white hover:bg-black"
-              style={{
-                backgroundColor: colorHex,
-                borderRadius:
-                  borderStyle === BorderStyles.SQUARE
-                    ? "0px"
-                    : borderStyle === BorderStyles.CIRCLE
-                    ? "9999px"
-                    : "8px", // Style badge corners based on borderStyle
-              }}
-            >
+            <Badge key={index} variant="secondary" className="print:text-xs print:px-2 print:py-1">
               {skill}
             </Badge>
           ))}

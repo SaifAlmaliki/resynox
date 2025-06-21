@@ -244,12 +244,151 @@ body {
   }
 }
 
+/* Enhanced Print Styles for A4 Resume */
 @media print {
+  @page {
+    size: A4;
+    margin: 0.75in; /* Standard document margins */
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    font-size: 12pt !important;
+    line-height: 1.4 !important;
+    color: #000 !important;
+    background: white !important;
+  }
+
+  /* Hide everything except the resume content */
+  body * {
+    visibility: hidden;
+  }
+
+  #resumePreviewContent,
+  #resumePreviewContent * {
+    visibility: visible;
+  }
+
   #resumePreviewContent {
-    transform: scale(1) !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    zoom: 1 !important;
+    scale: 1 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+
+  /* Optimize text sizes for print */
+  #resumePreviewContent h1,
+  #resumePreviewContent .text-3xl {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+    margin-bottom: 8pt !important;
+  }
+
+  #resumePreviewContent h2,
+  #resumePreviewContent .text-2xl {
+    font-size: 16pt !important;
+    font-weight: bold !important;
+    margin-bottom: 6pt !important;
+  }
+
+  #resumePreviewContent h3,
+  #resumePreviewContent .text-xl {
+    font-size: 14pt !important;
+    font-weight: bold !important;
+    margin-bottom: 4pt !important;
+  }
+
+  #resumePreviewContent .text-lg {
+    font-size: 13pt !important;
+    font-weight: 600 !important;
+  }
+
+  #resumePreviewContent .text-sm {
+    font-size: 10pt !important;
+  }
+
+  #resumePreviewContent .text-xs {
+    font-size: 9pt !important;
+  }
+
+  /* Optimize spacing for print */
+  #resumePreviewContent .space-y-6 > * + * {
+    margin-top: 16pt !important;
+  }
+
+  #resumePreviewContent .space-y-3 > * + * {
+    margin-top: 8pt !important;
+  }
+
+  #resumePreviewContent .space-y-2\.5 > * + * {
+    margin-top: 6pt !important;
+  }
+
+  #resumePreviewContent .space-y-2 > * + * {
+    margin-top: 4pt !important;
+  }
+
+  #resumePreviewContent .space-y-1 > * + * {
+    margin-top: 2pt !important;
+  }
+
+  /* Optimize padding for print */
+  #resumePreviewContent .p-6 {
+    padding: 0 !important;
+  }
+
+  #resumePreviewContent .p-3 {
+    padding: 6pt !important;
+  }
+
+  /* Ensure colors print correctly */
+  #resumePreviewContent hr {
+    border-color: currentColor !important;
+    opacity: 1 !important;
+  }
+
+  /* Optimize image sizing for print */
+  #resumePreviewContent img {
+    max-width: 80pt !important;
+    max-height: 80pt !important;
     width: auto !important;
     height: auto !important;
-    box-shadow: none !important;
+  }
+
+  /* Page breaks */
+  #resumePreviewContent {
+    page-break-inside: avoid;
+  }
+
+  .break-inside-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Skills badges optimization */
+  #resumePreviewContent .badge,
+  #resumePreviewContent [class*="badge"] {
+    border: 1pt solid currentColor !important;
+    padding: 2pt 6pt !important;
+    margin: 1pt !important;
+    display: inline-block !important;
+    font-size: 9pt !important;
   }
 }
 
