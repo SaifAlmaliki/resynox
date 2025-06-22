@@ -14,7 +14,60 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "4mb",
     },
+    // Re-enabled after adding critters dependency
     optimizeCss: true,
+  },
+
+
+
+  // Performance optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Fix webpack cache performance warning
+    if (dev) {
+      config.cache = {
+        type: 'memory',
+        maxGenerations: 1,
+      };
+    } else {
+      // For production, use filesystem cache but with optimized settings
+      config.cache = {
+        type: 'filesystem',
+        cacheDirectory: require('path').resolve(__dirname, '.next/cache/webpack'),
+        compression: 'gzip',
+      };
+    }
+
+    if (!dev && !isServer) {
+      // Optimize bundle splitting for production
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        maxInitialRequests: 25,
+        maxAsyncRequests: 25,
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          // Vendor chunk
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /node_modules/,
+            priority: 20,
+            maxSize: 244000, // Limit size to prevent large string serialization
+          },
+          // Common chunk
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true,
+            maxSize: 244000, // Limit size to prevent large string serialization
+          },
+        },
+      };
+    }
+    return config;
   },
 
   // The 'images' configuration specifies allowed domains and patterns for remote images.
@@ -37,6 +90,19 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   compress: true,
+  
+  // Development performance
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
+  
+  // Reduce bundle size
+  modularizeImports: {
+    lodash: {
+      transform: 'lodash/{{member}}',
+    },
+  },
 };
 
 export default withSentryConfig(nextConfig, {
@@ -48,6 +114,14 @@ project: "ai-interview-preperation",
 
 // Only print logs for uploading source maps in CI
 silent: !process.env.CI,
+
+// Disable telemetry to speed up builds
+telemetry: false,
+
+// Skip source map upload if no auth token (prevents build failures)  
+sourcemaps: {
+  disable: !process.env.SENTRY_AUTH_TOKEN,
+},
 
 // For all available options, see:
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/

@@ -4,6 +4,7 @@
 
 generator client {
   provider = "prisma-client-js" // Generates the Prisma Client for JavaScript/TypeScript.
+  output   = "../node_modules/@prisma/client" // Explicit output path to prevent deprecation warning
 }
 
 // Datasource block: Configures the database connection.
