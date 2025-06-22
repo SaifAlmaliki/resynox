@@ -7,6 +7,10 @@ import { useVapiEvents } from "./hooks/useVapiEvents";
 import { InterviewInterface } from "./ui/InterviewInterface";
 import { createFeedback } from "@/lib/actions/interview.actions";
 import { AgentProps, CallStatus, SavedMessage } from "@/types/interview";
+import { useInterviewSession } from "./hooks/useInterviewSession";
+import { vapiErrorHandler } from "@/lib/vapi-error-handler";
+import { vapiPerformance } from "@/lib/vapi-performance";
+import { interviewAnalytics } from "@/lib/interview-analytics";
 
 export const Agent = ({
   userName,
@@ -21,7 +25,31 @@ export const Agent = ({
 }: AgentProps) => {
   const router = useRouter();
   
-  // Initialize the VAPI interview hook
+  // Use enhanced session management
+  const sessionManager = useInterviewSession({
+    interviewId: interviewId || 'generated',
+    userId: userId || 'anonymous',
+    maxReconnectAttempts: 3,
+    sessionTimeout: 30 * 60 * 1000 // 30 minutes
+  });
+
+  // Initialize performance monitoring
+  useEffect(() => {
+    vapiPerformance.startSession();
+    vapiPerformance.optimizeConnection({
+      preloadAssistant: true,
+      warmupConnection: true,
+      priorityQueue: true
+    });
+
+    return () => {
+      // Cleanup on unmount
+      const report = vapiPerformance.getPerformanceReport();
+      console.log('Final performance report:', report);
+    };
+  }, []);
+  
+  // Initialize the VAPI interview hook 
   const {
     callStatus,
     error,
@@ -38,6 +66,32 @@ export const Agent = ({
     type,
     questions
   });
+
+  // Enhanced error handling
+  useEffect(() => {
+    if (error) {
+      const vapiError = vapiErrorHandler.createVapiError(error);
+      vapiErrorHandler.logError(vapiError, {
+        interviewId,
+        userId,
+        type
+      });
+      sessionManager.addError(vapiError);
+      vapiPerformance.recordError();
+    }
+  }, [error, interviewId, userId, type, sessionManager]);
+
+  // Enhanced connection status management
+  useEffect(() => {
+    if (callStatus === CallStatus.CONNECTING) {
+      sessionManager.updateStatus(CallStatus.CONNECTING);
+      vapiPerformance.recordConnectionStart();
+    } else if (callStatus === CallStatus.ACTIVE) {
+      sessionManager.updateStatus(CallStatus.ACTIVE);
+      vapiPerformance.recordConnectionSuccess();
+      vapiPerformance.recordFirstResponse();
+    }
+  }, [callStatus, sessionManager]);
   
   // Handle generating feedback when the interview is complete
   const handleGenerateFeedback = useCallback(async (messages: SavedMessage[]) => {

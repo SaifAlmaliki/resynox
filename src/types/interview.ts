@@ -88,10 +88,14 @@ export interface TechIconProps {
   techStack: string[];
 }
 
+// Enhanced call status with more granular states
 export enum CallStatus {
   INACTIVE = "INACTIVE",
-  CONNECTING = "CONNECTING",
+  INITIALIZING = "INITIALIZING",
+  CONNECTING = "CONNECTING", 
   ACTIVE = "ACTIVE",
+  PAUSED = "PAUSED",
+  FINISHING = "FINISHING",
   FINISHED = "FINISHED",
   ERROR = "ERROR"
 }
@@ -114,4 +118,25 @@ export interface InterviewEvaluationCriteria {
   strengths: string[];
   weaknesses: string[];
   recommendations: string[];
+}
+
+// Add interview session management
+export interface InterviewSession {
+  id: string;
+  status: CallStatus;
+  startTime?: Date;
+  endTime?: Date;
+  duration?: number;
+  errorCount: number;
+  reconnectAttempts: number;
+  lastActivity?: Date;
+}
+
+// Enhanced error tracking
+export interface VapiError {
+  code: string;
+  message: string;
+  timestamp: Date;
+  context?: Record<string, any>;
+  recoverable: boolean;
 }

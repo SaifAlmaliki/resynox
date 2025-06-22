@@ -1,11 +1,10 @@
 "use client";
 
-// Import only what we need
-// import { vapiEnhancedAssistantApi } from "./vapi.assistant.enhanced";
 import { AgentType } from "@/types/interview";
 import { createTechnicalInterviewPrompt } from "./vapi-prompt-template";
 import { vapiLogger } from "./vapi.logger";
 import { vapi } from "./vapi.sdk";
+
 
 // Get the pre-created assistant ID from environment variables
 const VAPI_ASSISTANT_ID = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID || '';
@@ -23,83 +22,7 @@ export interface TechnicalInterviewParams {
   userId?: string;
 }
 
-// We'll use a simpler approach with type assertion instead of defining the full type
 
-// Helper function to create a system prompt for the VAPI assistant based on interview type
-export const createSystemPrompt = (
-  type: AgentType,
-  role: string,
-  techstack: string | string[],
-  experienceLevel: string = "Mid-level",
-  questions: string[] = [],
-  interviewDuration: string = "15 minutes"
-): string => {
-  // Format the tech stack string
-  const techStackString = Array.isArray(techstack) ? techstack.join(", ") : techstack;
-  
-  // Format questions with numbers
-  const formattedQuestions = questions.length > 0
-    ? questions.map((q, index) => `${index + 1}. ${q}`).join('\n')
-    : '';
-  
-  // Create different prompts based on interview type
-  switch (type) {
-    case "generate":
-    case "interview":
-      return `You are an AI interviewer for a technical position. Your task is to conduct a professional interview based on the candidate's role and tech stack.
-
-Role: ${role}
-Tech Stack: ${techStackString}
-Experience Level: ${experienceLevel}
-Interview Duration: ${interviewDuration}
-
-Ask relevant technical questions about the technologies mentioned in the tech stack. The questions should be appropriate for the candidate's experience level.
-
-Questions to ask:
-${formattedQuestions}
-
-Start by introducing yourself and explaining the interview process. Then proceed with the questions one by one.
-Be conversational and encouraging, but also professional.
-Provide feedback on the candidate's answers when appropriate.
-At the end of the interview, thank the candidate for their time and explain the next steps in the hiring process.`;
-    
-    case "feedback":
-      return `You are an AI interviewer providing feedback on a technical interview. Your task is to discuss the candidate's performance and provide constructive feedback.
-
-Role: ${role}
-Tech Stack: ${techStackString}
-Experience Level: ${experienceLevel}
-Interview Duration: ${interviewDuration}
-
-Discussion points:
-${formattedQuestions}
-
-Start by introducing yourself and explaining that this is a feedback session. Then proceed with the discussion points one by one.
-Be conversational, encouraging, and constructive in your feedback.
-Focus on both strengths and areas for improvement.
-At the end, summarize the key points and provide actionable advice for the candidate.`;
-    
-    default:
-      return `You are an AI interviewer for a technical position. Your task is to conduct a professional interview based on the candidate's role and tech stack.
-
-Role: ${role}
-Tech Stack: ${techStackString}
-Experience Level: ${experienceLevel}
-Interview Duration: ${interviewDuration}
-
-Questions to ask:
-${formattedQuestions}
-
-Start by introducing yourself and explaining the interview process. Then proceed with the questions one by one.
-Be conversational and encouraging, but also professional.
-At the end of the interview, thank the candidate for their time and explain the next steps in the hiring process.`;
-  }
-};
-
-/**
- * NEW COMPREHENSIVE TECHNICAL INTERVIEW FUNCTION
- * Starts a comprehensive technical interview with full candidate context
- */
 export const startComprehensiveTechnicalInterview = async (
   params: TechnicalInterviewParams
 ): Promise<{ success: boolean; error?: string }> => {
@@ -138,6 +61,38 @@ export const startComprehensiveTechnicalInterview = async (
       };
       variableValues?: Record<string, any>;
       recordingEnabled?: boolean;
+      voice?: {
+        provider: string;
+        voiceId: string;
+        model: string;
+        speed: number;
+        stability: number;
+        similarity_boost: number;
+        style: number;
+        use_speaker_boost: boolean;
+      };
+      transcriber?: {
+        provider: string;
+        model: string;
+        language: string;
+        smart_format: boolean;
+        endpointing?: {
+          end_of_speech_silence_threshold: number;
+          utterance_end_ms: number;
+          vad_threshold: number;
+          min_utterance_length: number;
+        };
+        keywords?: string[];
+        punctuate: boolean;
+        diarize: boolean;
+        multichannel: boolean;
+      };
+      backgroundSound?: string;
+      backchannelingEnabled?: boolean;
+      backgroundDenoisingEnabled?: boolean;
+      modelOutputInMessagesEnabled?: boolean;
+      serverUrl?: string | null;
+      serverUrlSecret?: string | null;
     };
 
     // Prepare comprehensive variables for VAPI
@@ -193,6 +148,26 @@ export const startComprehensiveTechnicalInterview = async (
       recordingEnabled: true
     };
 
+    // Apply minimal, safe voice configuration to prevent interruptions
+    const finalAssistantOverrides = {
+      ...assistantOverrides,
+      // Safe voice settings that are proven to work with VAPI
+      voice: {
+        provider: "11labs",
+        voiceId: "sarah",
+        speed: 0.9,
+        stability: 0.8
+      },
+      // Minimal transcriber configuration (removing endpointing due to API limits)
+      transcriber: {
+        provider: "deepgram",
+        model: "nova-2",
+        language: "en-US"
+      },
+      // Disable interrupting sounds
+      backchannelingEnabled: false
+    };
+
     console.log('VAPI comprehensive interview setup:', {
       assistantId: VAPI_ASSISTANT_ID,
       candidateName: params.candidateName,
@@ -215,9 +190,9 @@ export const startComprehensiveTechnicalInterview = async (
 
       // Start the comprehensive technical interview
       // The improved vapi.start() method handles initialization, retries, and error handling
-      await vapi.start(VAPI_ASSISTANT_ID, assistantOverrides as any);
+      await vapi.start(VAPI_ASSISTANT_ID, finalAssistantOverrides as any);
       
-      vapiLogger.info(`Successfully started comprehensive technical interview`, {
+      vapiLogger.info('Successfully started comprehensive technical interview', {
         assistantId: VAPI_ASSISTANT_ID,
         candidateName: params.candidateName,
         role: params.role,
@@ -241,7 +216,7 @@ export const startComprehensiveTechnicalInterview = async (
     }
 
   } catch (error: any) {
-    vapiLogger.error(`Error in comprehensive technical interview setup`, {
+    vapiLogger.error('Error in comprehensive technical interview setup', {
       error: error?.message || error,
       candidateName: params.candidateName,
       role: params.role

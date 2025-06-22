@@ -6,8 +6,9 @@ import { google } from "@ai-sdk/google";
 import prisma from "@/lib/prisma";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { CreateFeedbackParams, GetFeedbackByInterviewIdParams, GetLatestInterviewsParams } from "@/types/interview";
+import { CreateFeedbackParams, GetFeedbackByInterviewIdParams, GetLatestInterviewsParams, SavedMessage } from "@/types/interview";
 import { z } from "zod";
+import { interviewAnalytics } from "../interview-analytics";
 
 /**
  * Get the current authenticated user
@@ -30,7 +31,7 @@ export async function getCurrentUser() {
  * Creates or updates feedback for an interview using AI analysis
  */
 export async function createFeedback(params: CreateFeedbackParams) {
-  const { interviewId, userId, transcript, feedbackId } = params;
+  const { interviewId, userId, transcript, feedbackId, additionalContext } = params;
 
   try {
     // Format the transcript into a readable string for the AI
@@ -57,6 +58,13 @@ export async function createFeedback(params: CreateFeedbackParams) {
       }),
       prompt: `
         You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
+        
+        ${additionalContext ? `
+        Interview Context:
+        - Role: ${additionalContext.role || 'Not specified'}
+        - Level: ${additionalContext.level || 'Not specified'}
+        - Tech Stack: ${additionalContext.techstack?.join(', ') || 'Not specified'}
+        ` : ''}
         
         Transcript:
         ${formattedTranscript}
@@ -516,4 +524,121 @@ function getDefaultQuestions(role: string, techstack: string[]): string[] {
     ...technicalQuestions,
     ...behavioralQuestions
   ];
+}
+
+/**
+ * Enhanced feedback creation that complements the existing feedback system
+ * This adds analytics insights while preserving the original feedback structure
+ */
+export async function createEnhancedFeedback(params: CreateFeedbackParams & {
+  sessionMetrics?: any;
+  performanceData?: any;
+  includeAnalytics?: boolean; // Optional flag to enable analytics
+}) {
+  const { 
+    interviewId, 
+    userId, 
+    transcript, 
+    feedbackId, 
+    sessionMetrics, 
+    performanceData,
+    includeAnalytics = false // Default to false to preserve existing behavior
+  } = params;
+
+  try {
+    // Always create the standard feedback first (your existing approach)
+    const standardFeedback = await createFeedback({
+      interviewId,
+      userId,
+      transcript,
+      feedbackId
+    });
+
+    // If analytics are not requested, return the standard feedback
+    if (!includeAnalytics || !standardFeedback.success) {
+      return standardFeedback;
+    }
+
+    // Only add analytics if explicitly requested and we have session data
+    if (sessionMetrics) {
+      // Convert transcript to SavedMessage format
+      const formattedMessages: SavedMessage[] = transcript.map(msg => ({
+        role: (msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system') 
+          ? (msg.role as 'user' | 'assistant' | 'system')
+          : 'user',
+        content: msg.content
+      }));
+
+      // Generate analytics as supplementary data
+      const analytics = interviewAnalytics.generateFullAnalysis(
+        formattedMessages,
+        sessionMetrics,
+        performanceData?.errors || []
+      );
+
+      // Fetch the created feedback to add analytics
+      const existingFeedback = await getFeedbackByInterviewId({
+        interviewId,
+        userId
+      });
+
+      if (existingFeedback) {
+                 // Store analytics as JSON metadata to avoid schema conflicts
+         const analyticsData = JSON.stringify({
+           metrics: analytics.metrics,
+           insights: analytics.insights,
+           recommendations: analytics.recommendations,
+           skillsAssessed: analytics.skillsAssessed,
+           behavioralIndicators: analytics.behavioralIndicators,
+           interviewQuality: analytics.interviewQuality
+         });
+
+         // Update only the updatedAt field and add analytics as metadata
+         // Store analytics in finalAssessment as additional context (non-destructive)
+         const enhancedAssessment = `${existingFeedback.finalAssessment}
+
+--- Analytics Insights ---
+${analytics.insights.map(insight => `• ${insight}`).join('\n')}
+
+--- Additional Recommendations ---
+${analytics.recommendations.map(rec => `• ${rec}`).join('\n')}
+
+--- Skills Demonstrated ---
+${analytics.skillsAssessed.join(', ')}
+
+Interview Quality: ${analytics.interviewQuality}`;
+
+         const enhancedData = {
+           finalAssessment: enhancedAssessment,
+           updatedAt: new Date()
+         };
+
+        await prisma.feedback.update({
+          where: { id: existingFeedback.id },
+          data: enhancedData
+        });
+
+        return { 
+          success: true, 
+          feedbackId: existingFeedback.id, 
+          analytics,
+          enhanced: true 
+        };
+      }
+    }
+
+    // Return standard feedback if analytics couldn't be added
+    return { ...standardFeedback, enhanced: false };
+
+  } catch (error) {
+    console.error("Error creating enhanced feedback:", error);
+    
+    // Fallback to standard feedback creation if enhancement fails
+    return createFeedback({
+      interviewId,
+      userId,
+      transcript,
+      feedbackId
+    });
+  }
 }
