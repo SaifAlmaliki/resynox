@@ -45,7 +45,7 @@ export default function DebugVapiPage() {
         // Simple test parameters with required provider
         model: {
           provider: "openai",
-          model: "gpt-4o",
+          model: "gpt-4.1-mini",
           messages: [{ role: "system", content: "You are a test assistant." }]
         },
         variableValues: {

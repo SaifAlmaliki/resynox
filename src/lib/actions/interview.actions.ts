@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
+import { google, GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 import prisma from "@/lib/prisma";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -42,9 +42,16 @@ export async function createFeedback(params: CreateFeedbackParams) {
       )
       .join("");
 
-    // Generate AI feedback using Google's Gemini model
+    // Generate AI feedback using Google's Gemini model with thinking capabilities
     const result = await generateObject({
-      model: google("gemini-2.0-flash-exp"),
+      model: google("gemini-2.5-flash-preview-04-17"),
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingBudget: 2048,
+          },
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
       schema: z.object({
         totalScore: z.number().min(0).max(100).describe("Overall score from 0-100"),
         categoryScores: z.array(z.object({
@@ -456,9 +463,16 @@ export async function generateInterviewQuestions(params: {
     const jobTitle = (resumeData.jobTitle as string) || role;
     const summary = (resumeData.summary as string) || "";
     
-    // Use AI to generate personalized interview questions
+    // Use AI to generate personalized interview questions with thinking capabilities
     const result = await generateObject({
-      model: google("gemini-2.0-flash"),
+      model: google("gemini-2.5-flash-preview-04-17"),
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingBudget: 2048,
+          },
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
       output: "no-schema",
       prompt: `
         Generate 20 interview questions for a ${experienceLevel} ${role} position.

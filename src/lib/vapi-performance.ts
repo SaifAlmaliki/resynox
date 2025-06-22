@@ -101,7 +101,7 @@ class VapiPerformanceManager {
     // For now, return a placeholder
     return {
       id: assistantId,
-      model: 'gpt-4o',
+      model: 'gpt-4.1-mini',
       voice: 'default'
     };
   }
