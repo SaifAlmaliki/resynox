@@ -4,6 +4,7 @@ import { AgentType } from "@/types/interview";
 import { createTechnicalInterviewPrompt } from "./vapi-prompt-template";
 import { vapiLogger } from "./vapi.logger";
 import { vapi } from "./vapi.sdk";
+import { mergeVoiceConfigWithOverrides } from "./vapi/voice-config";
 
 
 // Get the pre-created assistant ID from environment variables
@@ -148,25 +149,11 @@ export const startComprehensiveTechnicalInterview = async (
       recordingEnabled: true
     };
 
-    // Apply minimal, safe voice configuration to prevent interruptions
-    const finalAssistantOverrides = {
-      ...assistantOverrides,
-      // Safe voice settings that are proven to work with VAPI
-      voice: {
-        provider: "11labs",
-        voiceId: "sarah",
-        speed: 0.9,
-        stability: 0.8
-      },
-      // Minimal transcriber configuration (removing endpointing due to API limits)
-      transcriber: {
-        provider: "deepgram",
-        model: "nova-2",
-        language: "en-US"
-      },
-      // Disable interrupting sounds
-      backchannelingEnabled: false
-    };
+    // Apply optimized voice configuration to prevent interruptions
+    const finalAssistantOverrides = mergeVoiceConfigWithOverrides(
+      assistantOverrides,
+      'interview'
+    );
 
     console.log('VAPI comprehensive interview setup:', {
       assistantId: VAPI_ASSISTANT_ID,

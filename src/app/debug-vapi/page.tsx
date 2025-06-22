@@ -74,6 +74,64 @@ export default function DebugVapiPage() {
     }
   };
 
+  const testEmptyErrorFix = async () => {
+    setStatus("Testing empty error fix...");
+    addLog("🔍 Testing VAPI empty error handling");
+    
+    const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
+    const webToken = process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN;
+    
+    if (!assistantId || !webToken) {
+      addLog("❌ Missing environment variables");
+      addLog(`Assistant ID: ${assistantId ? '✅ Present' : '❌ Missing'}`);
+      addLog(`Web Token: ${webToken ? '✅ Present' : '❌ Missing'}`);
+      setStatus("❌ Configuration Error");
+      return;
+    }
+    
+    addLog(`🔑 Using Assistant ID: ${assistantId}`);
+    addLog(`🔑 Web Token length: ${webToken.length} characters`);
+    
+    try {
+      // Test the specific scenario that's failing
+      const result = await startVapiInterview(
+        "Test User",
+        "test-user-123",
+        "test-interview-456",
+        "Software Developer",
+        ["JavaScript", "React"],
+        "Mid-level",
+        [],
+        "interview"
+      );
+      
+      if (result.success) {
+        addLog("✅ Empty error test passed - interview started successfully");
+        setStatus("✅ Empty error fix working");
+        
+        // Stop the test call
+        setTimeout(async () => {
+          try {
+            await vapi.stop();
+            addLog("🛑 Test call stopped");
+          } catch (e) {
+            addLog("⚠️ Failed to stop test call gracefully");
+          }
+        }, 2000);
+      } else {
+        addLog(`❌ Empty error test failed: ${result.error}`);
+        setStatus("❌ Empty error test failed");
+      }
+    } catch (error: any) {
+      addLog(`❌ Caught error in test: ${error.message || 'No message'}`);
+      addLog(`❌ Error type: ${typeof error}`);
+      addLog(`❌ Error constructor: ${error?.constructor?.name || 'Unknown'}`);
+      addLog(`❌ Error keys: ${JSON.stringify(Object.keys(error || {}))}`);
+      addLog(`❌ Full error object: ${JSON.stringify(error, null, 2)}`);
+      setStatus("❌ Empty error test failed");
+    }
+  };
+
   const testAssistantIntegration = async () => {
     setStatus("Testing complete assistant integration...");
     addLog("Starting comprehensive assistant integration test");
@@ -143,7 +201,7 @@ export default function DebugVapiPage() {
         {/* Test Controls */}
         <div className="bg-gray-800 p-4 rounded-lg mb-6">
           <h2 className="text-xl font-semibold mb-4">Test Controls</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <button
               onClick={testBasicConnection}
               className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors"
@@ -156,6 +214,13 @@ export default function DebugVapiPage() {
               className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition-colors"
             >
               First-Click Fix Test
+            </button>
+            
+            <button
+              onClick={testEmptyErrorFix}
+              className="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded transition-colors"
+            >
+              Empty Error Test
             </button>
             
             <button
@@ -186,6 +251,9 @@ export default function DebugVapiPage() {
               <strong>First-Click Fix Test:</strong> Tests the enhanced retry mechanism for first-click reliability
             </div>
             <div>
+              <strong>Empty Error Test:</strong> Tests the VAPI's handling of empty error objects
+            </div>
+            <div>
               <strong>Assistant Test:</strong> Tests the complete interview integration with realistic parameters
             </div>
           </div>
@@ -212,6 +280,7 @@ export default function DebugVapiPage() {
           <ul className="space-y-2 text-sm">
             <li><strong>Basic Connection:</strong> Tests VAPI client initialization and token validation</li>
             <li><strong>First-Click Fix:</strong> Tests the enhanced retry mechanism for reliable first-click starts</li>
+            <li><strong>Empty Error Test:</strong> Tests the VAPI's handling of empty error objects</li>
             <li><strong>Assistant Test:</strong> Tests the complete interview integration with realistic parameters</li>
           </ul>
         </div>

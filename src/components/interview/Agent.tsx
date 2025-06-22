@@ -8,8 +8,7 @@ import { InterviewInterface } from "./ui/InterviewInterface";
 import { createFeedback } from "@/lib/actions/interview.actions";
 import { AgentProps, CallStatus, SavedMessage } from "@/types/interview";
 import { useInterviewSession } from "./hooks/useInterviewSession";
-import { vapiErrorHandler } from "@/lib/vapi-error-handler";
-import { vapiPerformance } from "@/lib/vapi-performance";
+import { vapiErrorHandler, vapiPerformance } from "@/lib/vapi";
 import { interviewAnalytics } from "@/lib/interview-analytics";
 
 export const Agent = ({

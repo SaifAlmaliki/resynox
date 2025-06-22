@@ -38,6 +38,9 @@ const ensureVapiInitialized = async (): Promise<Vapi> => {
     }
 
     console.log("🔑 Creating VAPI client with token...");
+    console.log("🔑 Token length:", webToken.length);
+    console.log("🔑 Token format check:", webToken.match(/^[a-f0-9-]+$/i) ? "✅ Valid UUID format" : "⚠️ Unusual token format");
+    
     vapiInstance = new Vapi(webToken);
     
     // Give it more time to fully initialize and "warm up"
@@ -49,6 +52,9 @@ const ensureVapiInitialized = async (): Promise<Vapi> => {
 
   } catch (error) {
     console.error("❌ Error initializing VAPI client:", error);
+    console.error("❌ Error type:", typeof error);
+    console.error("❌ Error constructor:", error?.constructor?.name);
+    console.error("❌ Error keys:", Object.keys(error || {}));
     throw error;
   } finally {
     isInitializing = false;
@@ -76,12 +82,27 @@ const extractErrorInfo = (error: any): string => {
     if (error.error.message) return error.error.message;
   }
   
+  // Check for VAPI-specific error formats
+  if (error.code && error.details) {
+    return `VAPI Error ${error.code}: ${error.details}`;
+  }
+  
   // Try to stringify if it's an object
   try {
     const str = JSON.stringify(error);
     if (str && str !== '{}') return str;
+    
+    // If we get an empty object, provide more context
+    if (str === '{}') {
+      return "Empty error object - this may indicate a VAPI initialization or permission issue. Check browser console for more details.";
+    }
   } catch (e) {
     // Stringify failed
+  }
+  
+  // Check if it's a TypeError or other native error
+  if (error.name && error.message) {
+    return `${error.name}: ${error.message}`;
   }
   
   // Last resort
@@ -93,6 +114,21 @@ export const vapi = {
   // Initialize and start call with retry mechanism
   async start(assistantId: string, overrides?: any) {
     console.log("🎯 Starting VAPI call with proper initialization...");
+    
+    // First, check if we have the required environment variables
+    const webToken = process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN;
+    if (!webToken) {
+      const errorMsg = "VAPI Web Token is missing. Please check that NEXT_PUBLIC_VAPI_WEB_TOKEN is set in your environment variables.";
+      console.error("❌", errorMsg);
+      throw new Error(errorMsg);
+    }
+    
+    if (!assistantId) {
+      const errorMsg = "VAPI Assistant ID is missing. Please check that NEXT_PUBLIC_VAPI_ASSISTANT_ID is set in your environment variables.";
+      console.error("❌", errorMsg);
+      throw new Error(errorMsg);
+    }
+    
     const client = await ensureVapiInitialized();
     
     // Retry mechanism for the first-call issue
@@ -116,6 +152,9 @@ export const vapi = {
         
         console.warn(`⚠️ Attempt ${attempt} failed: ${errorMsg}`);
         console.warn(`⚠️ Full error object:`, error);
+        console.warn(`⚠️ Error type:`, typeof error);
+        console.warn(`⚠️ Error constructor:`, error?.constructor?.name);
+        console.warn(`⚠️ Error keys:`, Object.keys(error || {}));
         
         // If it's not the last attempt, wait before retrying
         if (attempt < 3) {
@@ -130,8 +169,17 @@ export const vapi = {
     console.error("❌", finalErrorMsg);
     console.error("❌ Last error object:", lastError);
     
-    // Create a clear error to throw
-    const finalError = new Error(finalErrorMsg);
+    // Create a clear error to throw with troubleshooting info
+    const troubleshootingInfo = `
+Troubleshooting:
+1. Check that NEXT_PUBLIC_VAPI_WEB_TOKEN is set correctly
+2. Check that NEXT_PUBLIC_VAPI_ASSISTANT_ID is set correctly
+3. Verify your VAPI account has sufficient credits
+4. Check browser console for additional error details
+5. Try refreshing the page and trying again
+    `;
+    
+    const finalError = new Error(finalErrorMsg + troubleshootingInfo);
     (finalError as any).originalError = lastError;
     throw finalError;
   },
