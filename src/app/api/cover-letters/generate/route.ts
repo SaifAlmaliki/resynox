@@ -2,12 +2,20 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import openai from "@/lib/openai";
+import { getUserSubscriptionLevel } from "@/lib/subscription";
+import { canUseAITools } from "@/lib/permissions";
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    // Check subscription level for AI tools
+    const subscriptionLevel = await getUserSubscriptionLevel(userId);
+    if (!canUseAITools(subscriptionLevel)) {
+      return new NextResponse("Please upgrade your subscription to use AI tools", { status: 403 });
     }
 
     const body = await req.json();
@@ -163,6 +171,10 @@ Instructions:
           contextPrompt = `
 Resume Information:
 Name: ${resume.firstName} ${resume.lastName}
+Email: ${resume.email || 'Not provided'}
+Phone: ${resume.phone || 'Not provided'}
+City: ${resume.city || 'Not provided'}
+Country: ${resume.country || 'Not provided'}
 Current Role: ${resume.jobTitle || 'Not specified'}
 Summary: ${resume.summary || 'Not provided'}
 Skills: ${resume.skills?.join(', ') || 'Not specified'}
@@ -215,7 +227,7 @@ Current Date: ${currentDate}
 
 Instructions:
 1. Format as a proper business letter with the following structure:
-   - Applicant's address at the top
+   - Applicant's contact information at the top (use ACTUAL information provided, no placeholders)
    - Date: ${currentDate}
    - Company name and address (if available)
    - Professional greeting using ${analysis.hiringManagerName === 'Hiring Manager' ? '"Dear Hiring Manager,"' : '"Dear ' + analysis.hiringManagerName + ',"'}
@@ -231,7 +243,9 @@ Instructions:
 10. Keep it concise but impactful (3-4 paragraphs for the body)
 11. Make it feel personal and tailored, not generic
 12. Use the exact company name and job title provided
-13. Do NOT include any placeholder text like [Your Address] or [Date] - use actual information provided
+13. CRITICAL: Use ONLY the actual contact information provided in the context. Never use placeholders like [Your Address], [Email Address], [Phone Number] etc.
+14. ${resume ? 'For the applicant address section, format it as: Name, City, Country (if provided), Email, Phone' : 'Use the actual basic info provided'}
+15. If specific contact information is not available, omit that field entirely rather than using placeholders
 `;
 
         const response = await openai.chat.completions.create({
@@ -262,11 +276,23 @@ Instructions:
           day: 'numeric'
         });
         
-        // Format applicant address
-        let applicantAddress = "";
-        if (userInfo && userInfo.address) {
-          applicantAddress = `${userInfo.address}
+        // Format applicant contact information
+        let applicantContactInfo = "";
+        if (resume) {
+          // Use resume data
+          applicantContactInfo = `${resume.firstName} ${resume.lastName}
+${resume.city ? resume.city : ''}${resume.country ? `, ${resume.country}` : ''}
+${resume.email ? resume.email : ''}
+${resume.phone ? resume.phone : ''}
+
+`;
+        } else if (userInfo) {
+          // Use basic info provided
+          applicantContactInfo = `${userInfo.firstName} ${userInfo.lastName}
+${userInfo.address ? userInfo.address : ''}
 ${userInfo.city}${userInfo.state ? `, ${userInfo.state}` : ''}${userInfo.zipCode ? ` ${userInfo.zipCode}` : ''}
+${userInfo.email}
+${userInfo.phone ? userInfo.phone : ''}
 
 `;
         }
@@ -284,7 +310,7 @@ ${analysis.companyAddress}
 `;
         }
         
-        return `${applicantAddress}${currentDate}
+        return `${applicantContactInfo}${currentDate}
 
 ${companyAddress}Dear ${analysis.hiringManagerName},
 
@@ -297,15 +323,33 @@ ${analysis.requiredSkills.length > 0 ? `I am particularly drawn to this position
 I would welcome the opportunity to discuss how my background and enthusiasm can contribute to ${analysis.companyName}'s continued success. Thank you for considering my application.
 
 Best regards,
-${applicantName}${userInfo?.email ? `\n${userInfo.email}` : ""}${userInfo?.phone ? `\n${userInfo.phone}` : ""}`;
+${applicantName}${resume?.email ? `\n${resume.email}` : userInfo?.email ? `\n${userInfo.email}` : ""}${resume?.phone ? `\n${resume.phone}` : userInfo?.phone ? `\n${userInfo.phone}` : ""}`;
       }
     };
 
     const coverLetter = await generateTailoredCoverLetter(jobAnalysis, resume, userInfo);
 
+    if (!coverLetter || coverLetter.trim().length === 0) {
+      console.error("Empty cover letter generated");
+      return new NextResponse("Failed to generate cover letter content", { status: 500 });
+    }
+
     return NextResponse.json({ content: coverLetter });
   } catch (error) {
     console.error("[COVER_LETTER_GENERATE]", error);
+    
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes("API key")) {
+        return new NextResponse("AI service configuration error", { status: 500 });
+      } else if (error.message.includes("rate limit") || error.message.includes("quota")) {
+        return new NextResponse("AI service temporarily unavailable. Please try again in a few minutes.", { status: 429 });
+      } else if (error.message.includes("Unauthorized")) {
+        return new NextResponse("Please upgrade your subscription to use AI tools", { status: 403 });
+      }
+      return new NextResponse(`Generation failed: ${error.message}`, { status: 500 });
+    }
+    
     return new NextResponse("Internal Error", { status: 500 });
   }
 } 

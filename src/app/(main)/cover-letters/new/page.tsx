@@ -292,22 +292,42 @@ export default function NewCoverLetterPage() {
         },
         body: JSON.stringify(requestBody),
       });
+      
       if (!response.ok) {
-        throw new Error("Failed to generate cover letter");
+        // Get the error message from the response
+        const errorData = await response.text();
+        console.error("Cover letter generation failed:", response.status, errorData);
+        
+        if (response.status === 401) {
+          throw new Error("Please sign in to generate cover letters");
+        } else if (response.status === 403) {
+          throw new Error("Please upgrade your subscription to use AI tools");
+        } else if (response.status === 429) {
+          throw new Error("Too many requests. Please wait a moment and try again");
+        } else {
+          throw new Error(`Failed to generate cover letter: ${errorData || 'Unknown error'}`);
+        }
       }
+      
       const data = await response.json();
+      if (!data.content) {
+        throw new Error("No content received from AI service");
+      }
       setCoverLetter(data.content);
     } catch (error) {
       console.error("Error generating cover letter:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate cover letter. Please try again.";
       toast({
         variant: "destructive",
         title: "Generation Failed",
-        description: "Failed to generate cover letter. Please try again."
+        description: errorMessage
       });
     } finally {
       setGeneratingCoverLetter(false);
     }
   };
+
+
 
   const enhanceParagraph = async (paragraphIndex: number) => {
     if (!coverLetter?.trim()) return;
