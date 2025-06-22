@@ -39,7 +39,7 @@ export function InterviewInterface({
       <div className="bg-muted rounded-lg p-4 mb-4 flex items-center">
         <div className="relative w-10 h-10 mr-3">
           <Image
-            src="/assets/images/ai-avatar.png"
+            src="/ai-avatar.jpg"
             alt="AI Interviewer"
             fill
             className="rounded-full object-cover"
