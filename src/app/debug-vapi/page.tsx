@@ -132,6 +132,89 @@ export default function DebugVapiPage() {
     }
   };
 
+  const testCallDurationLimits = async () => {
+    setStatus("Testing call duration and account limits...");
+    addLog("🕐 Testing VAPI call duration limits and account status");
+    
+    const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
+    const webToken = process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN;
+    
+    if (!assistantId || !webToken) {
+      addLog("❌ Missing environment variables");
+      setStatus("❌ Configuration Error");
+      return;
+    }
+    
+    try {
+      // Start a test call with minimal configuration
+      addLog("📞 Starting test call to check account limits...");
+      
+      const result = await startVapiInterview(
+        "Duration Test User",
+        "duration-test-123",
+        "duration-test-456",
+        "Software Developer",
+        ["JavaScript"],
+        "Mid-level",
+        [],
+        "interview"
+      );
+      
+      if (result.success) {
+        addLog("✅ Test call started successfully");
+        addLog("⏱️ Monitoring call for premature termination...");
+        setStatus("✅ Monitoring call duration...");
+        
+        // Monitor the call for 30 seconds to see if it gets terminated
+        let callEnded = false;
+        const client = await vapi.getClient();
+        
+        const endHandler = (details?: any) => {
+          callEnded = true;
+          addLog(`🛑 Call ended: ${details ? JSON.stringify(details) : 'No details'}`);
+          if (details && details.reason) {
+            addLog(`📋 End reason: ${details.reason}`);
+          }
+        };
+        
+        const errorHandler = (error?: any) => {
+          callEnded = true;
+          addLog(`❌ Call error: ${JSON.stringify(error, null, 2)}`);
+        };
+        
+        client.on("call-end", endHandler);
+        client.on("error", errorHandler);
+        
+        // Monitor for 30 seconds
+        setTimeout(async () => {
+          if (!callEnded) {
+            addLog("✅ Call survived 30 seconds - manually ending test");
+            try {
+              await vapi.stop();
+              addLog("🛑 Test call stopped manually");
+            } catch (e) {
+              addLog("⚠️ Failed to stop test call gracefully");
+            }
+          }
+          
+          // Clean up event listeners
+          client.off("call-end", endHandler);
+          client.off("error", errorHandler);
+          
+          setStatus(callEnded ? "❌ Call ended prematurely" : "✅ Call duration test passed");
+        }, 30000);
+        
+      } else {
+        addLog(`❌ Test call failed to start: ${result.error}`);
+        setStatus("❌ Call duration test failed");
+      }
+    } catch (error: any) {
+      addLog(`❌ Duration test error: ${error.message || 'Unknown error'}`);
+      addLog(`❌ Full error: ${JSON.stringify(error, null, 2)}`);
+      setStatus("❌ Duration test failed");
+    }
+  };
+
   const testAssistantIntegration = async () => {
     setStatus("Testing complete assistant integration...");
     addLog("Starting comprehensive assistant integration test");
@@ -201,7 +284,7 @@ export default function DebugVapiPage() {
         {/* Test Controls */}
         <div className="bg-gray-800 p-4 rounded-lg mb-6">
           <h2 className="text-xl font-semibold mb-4">Test Controls</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <button
               onClick={testBasicConnection}
               className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors"
@@ -221,6 +304,13 @@ export default function DebugVapiPage() {
               className="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded transition-colors"
             >
               Empty Error Test
+            </button>
+            
+            <button
+              onClick={testCallDurationLimits}
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors"
+            >
+              Duration Limits Test
             </button>
             
             <button
@@ -254,6 +344,9 @@ export default function DebugVapiPage() {
               <strong>Empty Error Test:</strong> Tests the VAPI's handling of empty error objects
             </div>
             <div>
+              <strong>Duration Limits Test:</strong> Tests the VAPI's handling of call duration and account limits
+            </div>
+            <div>
               <strong>Assistant Test:</strong> Tests the complete interview integration with realistic parameters
             </div>
           </div>
@@ -281,6 +374,7 @@ export default function DebugVapiPage() {
             <li><strong>Basic Connection:</strong> Tests VAPI client initialization and token validation</li>
             <li><strong>First-Click Fix:</strong> Tests the enhanced retry mechanism for reliable first-click starts</li>
             <li><strong>Empty Error Test:</strong> Tests the VAPI's handling of empty error objects</li>
+            <li><strong>Duration Limits Test:</strong> Tests the VAPI's handling of call duration and account limits</li>
             <li><strong>Assistant Test:</strong> Tests the complete interview integration with realistic parameters</li>
           </ul>
         </div>

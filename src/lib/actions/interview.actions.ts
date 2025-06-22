@@ -140,6 +140,16 @@ export async function createFeedback(params: CreateFeedbackParams) {
       }) as unknown as FeedbackData;
     }
 
+    // Update the interview's updatedAt timestamp to reflect when it was completed
+    // This ensures the duration calculation works correctly in the feedback page
+    await (prisma as PrismaClient).interview.update({
+      where: { id: interviewId },
+      data: { 
+        finalized: true,
+        updatedAt: new Date()
+      }
+    });
+
     revalidatePath(`/interview/${interviewId}/feedback`);
     return { success: true, feedbackId: feedback.id };
   } catch (error) {

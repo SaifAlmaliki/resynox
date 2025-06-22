@@ -4,7 +4,7 @@ import { Agent } from "@/components/interview/Agent";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, Briefcase, Code, Layers, Mic, AlertTriangle } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 
 // In Next.js 15, params is a Promise
 async function InterviewDetailPage({
@@ -31,7 +31,7 @@ async function InterviewDetailPage({
   const duration = resolvedSearchParams.duration;
 
   // Format the date
-  const formattedDate = interview.createdAt ? formatDistanceToNow(new Date(interview.createdAt), { addSuffix: true }) : "";
+  const formattedDate = interview.createdAt ? format(new Date(interview.createdAt), 'MMMM d, yyyy') : "";
 
   return (
     <div className="container py-8 max-w-7xl mx-auto">
@@ -113,25 +113,6 @@ async function InterviewDetailPage({
               </li>
             ))}
           </ul>
-        </CardContent>
-      </Card>
-
-      {/* Agent component */}
-      <Card className="border shadow-sm mb-8">
-        <CardHeader className="bg-muted/30">
-          <CardTitle className="flex items-center text-xl">
-            <Mic className="h-5 w-5 mr-2" />
-            Start Your Interview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <Agent
-            userName={user?.name || 'User'}
-            userId={user?.id}
-            interviewId={interview.id}
-            type="interview"
-            questions={interview.questions}
-          />
         </CardContent>
       </Card>
     </div>

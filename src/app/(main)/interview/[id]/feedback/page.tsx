@@ -37,8 +37,24 @@ async function FeedbackPage({
   }
 
   // Calculate interview duration in minutes
-  const interviewDurationMs = new Date(interview.updatedAt || interview.createdAt).getTime() - new Date(interview.createdAt).getTime();
-  const interviewDurationMinutes = interviewDurationMs / (1000 * 60);
+  // First try using updatedAt vs createdAt, but fallback to checking if the interview is finalized
+  let interviewDurationMs: number;
+  let interviewDurationMinutes: number;
+  
+  if (interview.updatedAt && interview.updatedAt !== interview.createdAt) {
+    // Normal case: interview was properly completed and updatedAt was set
+    interviewDurationMs = new Date(interview.updatedAt).getTime() - new Date(interview.createdAt).getTime();
+    interviewDurationMinutes = interviewDurationMs / (1000 * 60);
+  } else if (interview.finalized) {
+    // Fallback: if interview is marked as finalized but updatedAt wasn't set properly,
+    // assume it was at least long enough (bypass the too-short check)
+    interviewDurationMinutes = MIN_INTERVIEW_DURATION_MINUTES;
+    console.warn('Interview duration could not be calculated properly, but interview is marked as finalized');
+  } else {
+    // Interview might not be properly completed
+    interviewDurationMs = new Date(interview.updatedAt || interview.createdAt).getTime() - new Date(interview.createdAt).getTime();
+    interviewDurationMinutes = interviewDurationMs / (1000 * 60);
+  }
 
   // Check if interview meets minimum duration requirement
   if (interviewDurationMinutes < MIN_INTERVIEW_DURATION_MINUTES) {

@@ -5,6 +5,7 @@ import { CreditCard } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import logo from "@/assets/logo.png";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -22,6 +23,12 @@ const getUserButtonAppearance = (theme: string | undefined) => ({
 
 export default function Navbar() {
   const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering theme-dependent content after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 w-full">
@@ -73,27 +80,49 @@ export default function Navbar() {
                 <ThemeToggle />
               </div>
 
-              {/* User Button */}
-              <UserButton 
-                appearance={{
-                  ...getUserButtonAppearance(theme),
-                  elements: {
-                    ...getUserButtonAppearance(theme).elements,
-                    avatarBox: {
-                      ...getUserButtonAppearance(theme).elements?.avatarBox,
-                      border: '2px solid rgba(255, 255, 255, 0.2)',
+              {/* User Button - only render theme-dependent appearance after mount */}
+              {mounted ? (
+                <UserButton 
+                  appearance={{
+                    ...getUserButtonAppearance(theme),
+                    elements: {
+                      ...getUserButtonAppearance(theme).elements,
+                      avatarBox: {
+                        ...getUserButtonAppearance(theme).elements?.avatarBox,
+                        border: '2px solid rgba(255, 255, 255, 0.2)',
+                      },
                     },
-                  },
-                }}
-              >
-                <UserButton.MenuItems>
-                  <UserButton.Link
-                    label="Billing"
-                    labelIcon={<CreditCard className="size-4" />}
-                    href="/billing"
-                  />
-                </UserButton.MenuItems>
-              </UserButton>
+                  }}
+                >
+                  <UserButton.MenuItems>
+                    <UserButton.Link
+                      label="Billing"
+                      labelIcon={<CreditCard className="size-4" />}
+                      href="/billing"
+                    />
+                  </UserButton.MenuItems>
+                </UserButton>
+              ) : (
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: {
+                        width: 35,
+                        height: 35,
+                        border: '2px solid rgba(255, 255, 255, 0.2)',
+                      },
+                    },
+                  }}
+                >
+                  <UserButton.MenuItems>
+                    <UserButton.Link
+                      label="Billing"
+                      labelIcon={<CreditCard className="size-4" />}
+                      href="/billing"
+                    />
+                  </UserButton.MenuItems>
+                </UserButton>
+              )}
             </div>
           </div>
         </nav>

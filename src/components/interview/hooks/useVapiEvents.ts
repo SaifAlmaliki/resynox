@@ -52,7 +52,22 @@ export function useVapiEvents({
         };
 
         // Handler for when call ends
-        const onCallEnd = () => {
+        const onCallEnd = (details?: any) => {
+          console.log("VAPI call ended", details);
+          
+          // Check if this is a premature termination
+          if (details && details.reason) {
+            console.log("Call end reason:", details.reason);
+            
+            // Handle specific termination reasons
+            if (details.reason.includes("ejection") || details.reason.includes("Meeting has ended")) {
+              console.error("Call was terminated by VAPI server:", details.reason);
+              setError(`Call terminated: ${details.reason}. This may be due to account limits, network issues, or configuration problems.`);
+              setCallStatus(CallStatus.ERROR);
+              return;
+            }
+          }
+          
           // Only set to finished if we're not trying to reconnect
           if (reconnectAttempts < maxReconnectAttempts) {
             console.log(`Call ended unexpectedly. Reconnect attempt ${reconnectAttempts + 1}/${maxReconnectAttempts}`);
@@ -66,12 +81,19 @@ export function useVapiEvents({
 
         // Handler for new messages
         const onMessage = (message: Record<string, any>) => {
-          // Only log important messages to reduce console noise
-          if (message.type && (
-              message.type === 'conversation-update' || 
-              message.type === 'call-status-update' || 
-              message.type === 'error')) {
-            console.log("VAPI important message:", message);
+          // Log all messages to help debug issues
+          console.log("VAPI message:", message);
+          
+          // Check for specific error messages in the message content
+          if (message.type === 'error' || (message.content && message.content.toLowerCase().includes('error'))) {
+            console.error("VAPI error message:", message);
+            
+            // Handle specific Daily.co errors
+            if (message.content && message.content.includes('Meeting ended due to ejection')) {
+              setError("Meeting was terminated by the server. This may be due to account limits, network issues, or call duration limits.");
+              setCallStatus(CallStatus.ERROR);
+              return;
+            }
           }
           
           // Add the message to our state if it has role and content
