@@ -31,72 +31,47 @@ type User = {
   email: string;
 };
 
-// Inline implementation of Step and Stepper components
-interface StepProps {
-  label: string;
-  description?: string;
-  icon?: React.ReactNode;
-  isCompleted?: boolean;
-  isActive?: boolean;
-}
-
-const Step: React.FC<StepProps> = ({ 
-  label, 
-  description, 
-  icon, 
-  isCompleted, 
-  isActive 
-}) => {
-  return (
-    <div className="flex flex-col items-center">
-      <div
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-medium",
-          isActive && "border-primary bg-primary text-primary-foreground",
-          isCompleted && "border-primary bg-primary text-primary-foreground",
-          !isActive && !isCompleted && "border-muted-foreground/20 bg-background text-muted-foreground"
-        )}
-      >
-        {icon || (isCompleted ? "✓" : label.charAt(0))}
-      </div>
-      <div className="mt-2 text-center">
-        <div className={cn(
-          "text-sm font-medium",
-          isActive && "text-foreground",
-          !isActive && "text-muted-foreground"
-        )}>
-          {label}
-        </div>
-        {description && (
-          <div className="text-xs text-muted-foreground">{description}</div>
-        )}
-      </div>
-    </div>
-  );
-};
-
+// Inline Stepper implementation
 interface StepperProps {
-  activeStep: number;
-  children: React.ReactNode;
-  className?: string;
+  steps: string[];
+  currentStep: number;
+  onStepClick: (step: number) => void;
 }
 
-const Stepper: React.FC<StepperProps> = ({ activeStep, children, className }) => {
-  const steps = React.Children.toArray(children);
-
+const Stepper: React.FC<StepperProps> = ({ steps, currentStep, onStepClick }) => {
   return (
-    <div className={cn("flex w-full justify-between", className)}>
-      {steps.map((step, index) => {
-        if (React.isValidElement<StepProps>(step)) {
-          return React.cloneElement(step, {
-            ...step.props,
-            key: index,
-            isActive: activeStep === index,
-            isCompleted: activeStep > index,
-          });
-        }
-        return step;
-      })}
+    <div className="flex items-center justify-between w-full mb-8">
+      {steps.map((step, index) => (
+        <React.Fragment key={index}>
+          <div 
+            className={cn(
+              "flex items-center cursor-pointer",
+              index <= currentStep ? "text-primary" : "text-muted-foreground"
+            )}
+            onClick={() => onStepClick(index)}
+          >
+            <div 
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2",
+                index <= currentStep 
+                  ? "bg-primary text-primary-foreground border-primary" 
+                  : "bg-background border-muted-foreground"
+              )}
+            >
+              {index + 1}
+            </div>
+            <span className="ml-2 text-sm font-medium hidden sm:inline">{step}</span>
+          </div>
+          {index < steps.length - 1 && (
+            <div 
+              className={cn(
+                "flex-1 h-0.5 mx-4",
+                index < currentStep ? "bg-primary" : "bg-muted-foreground/30"
+              )}
+            />
+          )}
+        </React.Fragment>
+      ))}
     </div>
   );
 };
@@ -129,6 +104,25 @@ const InterviewGeneratePage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [interviewId, setInterviewId] = useState<string | null>(null);
   const [isStartingInterview, setIsStartingInterview] = useState(false);
+  const [voiceUsageStatus, setVoiceUsageStatus] = useState<{ canUse: boolean; used: number; limit: number }>({ canUse: false, used: 0, limit: 0 });
+
+  // Check voice interview usage status
+  useEffect(() => {
+    const checkVoiceUsage = async () => {
+      if (hasVoiceAgentAccess) {
+        try {
+          const response = await fetch('/api/voice-interview-status');
+          if (response.ok) {
+            const status = await response.json();
+            setVoiceUsageStatus(status);
+          }
+        } catch (error) {
+          console.error('Error checking voice usage:', error);
+        }
+      }
+    };
+    checkVoiceUsage();
+  }, [hasVoiceAgentAccess]);
 
   // Check access and show upgrade prompt if needed
   if (!hasVoiceAgentAccess) {
@@ -143,15 +137,13 @@ const InterviewGeneratePage = () => {
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-orange-700 text-lg">
-              Advanced AI voice interviewer with real-time feedback is available exclusively for Pro Plus subscribers.
+              Advanced AI voice interviewer with feedback is available exclusively for Pro Plus subscribers.
             </p>
             <div className="bg-white/80 rounded-lg p-4 space-y-2">
               <h4 className="font-semibold text-orange-800">Pro Plus Features Include:</h4>
               <ul className="text-sm text-orange-700 space-y-1">
-                <li>• AI Voice Agent Mock Interviews</li>
-                <li>• Real-time Interview Feedback</li>
-                <li>• Advanced Performance Analytics</li>
-                <li>• Unlimited Interview Sessions</li>
+                <li>• 5 voice agent interviews per month</li>
+                <li>• AI interview feedback & analysis</li>
                 <li>• Plus all Pro features</li>
               </ul>
             </div>
@@ -170,368 +162,417 @@ const InterviewGeneratePage = () => {
       </div>
     );
   }
-  
-  // Fetch user and resumes on component mount
+
+  // Check if user has reached their monthly limit
+  if (!voiceUsageStatus.canUse && voiceUsageStatus.limit > 0) {
+    return (
+      <div className="container py-8 max-w-4xl mx-auto">
+        <Card className="border-2 border-red-200 bg-red-50/50">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <Lock className="h-8 w-8 text-red-600" />
+            </div>
+            <CardTitle className="text-2xl text-red-800">Monthly Voice Interview Limit Reached</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-red-700 text-lg">
+              You've used all {voiceUsageStatus.limit} voice interviews for this billing period.
+            </p>
+            <div className="bg-white/80 rounded-lg p-4 space-y-2">
+              <h4 className="font-semibold text-red-800">Usage Summary:</h4>
+              <p className="text-sm text-red-700">
+                {voiceUsageStatus.used} of {voiceUsageStatus.limit} interviews completed this month
+              </p>
+              <p className="text-sm text-red-600">
+                Your limit will reset on your next billing cycle.
+              </p>
+            </div>
+            <div className="pt-4">
+              <Button asChild size="lg" variant="outline">
+                <Link href="/interview">
+                  Back to Interviews <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const steps = ["Select Resume", "Configure Interview", "Generate Questions", "Start Interview"];
+
+  // Load user data and resumes on component mount
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userData = await getCurrentUser();
-      if (userData) {
-        setUser(userData as User);
-      }
-      
-      if (userData?.id) {
-        const userResumes = await getUserResumes(userData.id);
-        setResumes(userResumes);
-        
-        // Select the most recent resume by default if available
-        if (userResumes.length > 0) {
-          const sortedResumes = [...userResumes].sort((a, b) => 
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-          );
-          setSelectedResumeId(sortedResumes[0].id);
-          setSelectedResume(sortedResumes[0]);
-          setTargetRole(sortedResumes[0].jobTitle || "");
-          setTechStack(sortedResumes[0].skills || []);
+    const loadData = async () => {
+      try {
+        const userData = await getCurrentUser();
+        if (userData) {
+          setUser(userData);
+          const resumeData = await getUserResumes(userData.id);
+          setResumes(resumeData);
         }
+      } catch (error) {
+        console.error("Error loading data:", error);
       }
     };
-    
-    fetchUserData();
+
+    loadData();
   }, []);
-  
-  // Update selected resume when selection changes
+
+  // Handle resume selection
   const handleResumeSelect = (resumeId: string) => {
     setSelectedResumeId(resumeId);
     const resume = resumes.find(r => r.id === resumeId);
+    setSelectedResume(resume || null);
+    
+    // Auto-populate fields from resume
     if (resume) {
-      setSelectedResume(resume);
       setTargetRole(resume.jobTitle || "");
-      setTechStack(resume.skills || []);
+      if (resume.skills && resume.skills.length > 0) {
+        setTechStack(resume.skills);
+      }
     }
   };
-  
-  // Add a new technology to the tech stack
-  const addTechItem = () => {
+
+  // Add technology to stack
+  const addTech = () => {
     if (newTech.trim() && !techStack.includes(newTech.trim())) {
       setTechStack([...techStack, newTech.trim()]);
       setNewTech("");
     }
   };
-  
-  // Remove a technology from the tech stack
-  const removeTechItem = (tech: string) => {
+
+  // Remove technology from stack
+  const removeTech = (tech: string) => {
     setTechStack(techStack.filter(t => t !== tech));
   };
-  
-  // Generate interview questions based on resume and additional info
-  const generateQuestions = async () => {
-    if (!selectedResume || !targetRole || !experienceLevel || techStack.length === 0 || !user) {
+
+     // Generate interview questions
+   const handleGenerateQuestions = async () => {
+     if (!targetRole || techStack.length === 0 || !user) {
+       alert("Please fill in the target role and add at least one technology.");
+       return;
+     }
+
+     setIsGenerating(true);
+     try {
+       // Prepare resume data for the API call
+       const resumeData = selectedResume ? {
+         jobTitle: selectedResume.jobTitle || "",
+         summary: selectedResume.summary || "",
+         skills: selectedResume.skills || [],
+       } : {};
+
+       const questions = await generateInterviewQuestions({
+         userId: user.id,
+         role: targetRole,
+         level: experienceLevel,
+         techstack: techStack,
+         resumeData: resumeData
+       });
+
+       if (Array.isArray(questions) && questions.length > 0) {
+         setGeneratedQuestions(questions);
+         setActiveStep(3);
+       } else {
+         throw new Error("Failed to generate questions");
+       }
+     } catch (error) {
+       console.error("Error generating questions:", error);
+       alert("Failed to generate questions. Please try again.");
+     } finally {
+       setIsGenerating(false);
+     }
+   };
+
+  // Start the interview
+  const handleStartInterview = async () => {
+    if (!user || generatedQuestions.length === 0) {
+      alert("Please generate questions first.");
       return;
     }
-    
-    setIsGenerating(true);
-    
-    try {
-      // Prepare resume data for question generation
-      const resumeData = {
-        jobTitle: selectedResume.jobTitle || "",
-        summary: selectedResume.summary || "",
-        skills: selectedResume.skills || [],
-        // Add any other relevant resume fields
-      };
-      
-      // Generate questions using the interview actions
-      const questions = await generateInterviewQuestions({
-        userId: user.id,
-        role: targetRole,
-        level: experienceLevel,
-        techstack: techStack,
-        resumeData,
-      });
-      
-      setGeneratedQuestions(questions);
-      setActiveStep(2); // Move to questions preview step
-    } catch (error) {
-      console.error("Error generating questions:", error);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-  
-  // Start the interview with generated questions
-  const startInterview = async () => {
-    if (generatedQuestions.length === 0 || !user) return;
-    
+
     setIsStartingInterview(true);
-    
     try {
-      // Create a new interview in the database
       const result = await createInterview({
         userId: user.id,
         role: targetRole,
         level: experienceLevel,
         questions: generatedQuestions,
         techstack: techStack,
-        type: "ai-mock",
-        skipQuestionSelection: true,
+        type: "voice"
       });
-      
-      if (result?.interviewId) {
-        setInterviewId(result.interviewId);
-        setActiveStep(3); // Move to interview step
-      }
+
+             if (result.success && result.interviewId) {
+         setInterviewId(result.interviewId);
+         // The Agent component will handle the actual interview start
+       } else {
+         throw new Error("Failed to create interview");
+       }
     } catch (error) {
       console.error("Error starting interview:", error);
-    } finally {
+      alert("Failed to start interview. Please try again.");
       setIsStartingInterview(false);
     }
   };
-  
-  // Format date for display
-  const formatDate = (dateString: Date) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-  
+
+  // Show usage status at the top
   return (
-    <div className="container py-8 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4 text-center">Personalized Interview</h1>
-      
-      <div className="max-w-3xl mx-auto mb-8 text-center">
-        <p className="text-muted-foreground">
-          Create a personalized interview based on your resume data and preferences.
-          Our AI will generate tailored questions to help you practice for your target role.
-        </p>
-      </div>
-      
-      {/* Stepper for wizard navigation */}
-      <Stepper activeStep={activeStep} className="mb-8">
-        <Step label="Select Resume" />
-        <Step label="Interview Details" />
-        <Step label="Review Questions" />
-        <Step label="Start Interview" />
-      </Stepper>
-      
-      {/* Step 1: Resume Selection */}
-      {activeStep === 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Select a Resume</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {resumes.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {resumes.map((resume) => (
-                  <div 
-                    key={resume.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedResumeId === resume.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
-                    onClick={() => handleResumeSelect(resume.id)}
-                  >
-                    <div className="font-medium text-lg">{resume.title || 'Untitled Resume'}</div>
-                    <div className="text-sm text-muted-foreground">{resume.jobTitle || 'No job title'}</div>
-                    <div className="text-xs text-muted-foreground mt-2">Updated: {formatDate(resume.updatedAt)}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">You don&apos;t have any resumes yet.</p>
-                <Button asChild>
-                  <a href="/resumes/create">Create a Resume</a>
-                </Button>
-              </div>
-            )}
-            
-            <div className="flex justify-end mt-6">
-              <Button 
-                onClick={() => setActiveStep(1)}
-                disabled={!selectedResumeId}
-              >
-                Continue
-              </Button>
+    <div className="container py-8 max-w-4xl mx-auto">
+      {/* Usage Status Card */}
+      <Card className="mb-6 border-green-200 bg-green-50/50">
+        <CardContent className="pt-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-green-800">Voice Interview Usage</h3>
+              <p className="text-sm text-green-700">
+                {voiceUsageStatus.used} of {voiceUsageStatus.limit} interviews used this month
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-right">
+              <div className="text-xl font-bold text-green-800">
+                {voiceUsageStatus.limit - voiceUsageStatus.used}
+              </div>
+              <div className="text-xs text-green-600">remaining</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Show Agent component if interview is started */}
+      {interviewId && (
+        <Agent
+          userName={user?.name || "User"}
+          userId={user?.id || ""}
+          interviewId={interviewId}
+          type="interview"
+          questions={generatedQuestions}
+          role={targetRole}
+          level={experienceLevel}
+          techstack={techStack}
+        />
       )}
-      
-      {/* Step 2: Interview Details */}
-      {activeStep === 1 && (
+
+      {/* Interview Setup Wizard */}
+      {!interviewId && (
         <Card>
           <CardHeader>
-            <CardTitle>Interview Details</CardTitle>
+            <CardTitle>Create New Voice Interview</CardTitle>
+            <Stepper 
+              steps={steps} 
+              currentStep={activeStep} 
+              onStepClick={setActiveStep}
+            />
           </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {/* Target Role */}
-              <div className="space-y-2">
-                <Label htmlFor="role">Target Role</Label>
-                <Input 
-                  id="role" 
-                  value={targetRole} 
-                  onChange={(e) => setTargetRole(e.target.value)}
-                  placeholder="e.g. Frontend Developer"
-                />
-              </div>
-              
-              {/* Experience Level */}
-              <div className="space-y-2">
-                <Label htmlFor="experience">Experience Level</Label>
-                <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                  <SelectTrigger id="experience">
-                    <SelectValue placeholder="Select experience level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {experienceLevels.map((level) => (
-                      <SelectItem key={level.value} value={level.value}>
-                        {level.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {/* Technology Stack */}
-              <div className="space-y-2">
-                <Label>Technology Stack</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {techStack.map((tech) => (
-                    <Badge key={tech} variant="secondary" className="flex items-center gap-1">
-                      {tech}
-                      <button 
-                        type="button" 
-                        onClick={() => removeTechItem(tech)}
-                        className="ml-1 rounded-full hover:bg-muted p-1"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
+          <CardContent className="space-y-6">
+            {/* Step 1: Select Resume */}
+            {activeStep === 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Select a Resume (Optional)</h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose a resume to auto-populate interview details, or skip to configure manually.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {resumes.map((resume) => (
+                    <Card 
+                      key={resume.id} 
+                      className={cn(
+                        "cursor-pointer transition-colors hover:bg-muted/50",
+                        selectedResumeId === resume.id && "ring-2 ring-primary"
+                      )}
+                      onClick={() => handleResumeSelect(resume.id)}
+                    >
+                      <CardContent className="pt-4">
+                        <h4 className="font-medium">{resume.title || "Untitled Resume"}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {resume.jobTitle || "No job title"}
+                        </p>
+                        {resume.skills && resume.skills.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {resume.skills.slice(0, 3).map((skill) => (
+                              <Badge key={skill} variant="secondary" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                            {resume.skills.length > 3 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{resume.skills.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
-                <div className="flex gap-2">
-                  <Input 
-                    value={newTech} 
-                    onChange={(e) => setNewTech(e.target.value)}
-                    placeholder="Add technology"
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTechItem())}
-                  />
-                  <Button type="button" onClick={addTechItem} size="icon">
-                    <Plus className="h-4 w-4" />
+
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setActiveStep(1)}>
+                    Skip Resume Selection
+                  </Button>
+                  <Button 
+                    onClick={() => setActiveStep(1)}
+                    disabled={!selectedResumeId}
+                  >
+                    Continue with Selected Resume
                   </Button>
                 </div>
               </div>
-            </div>
-            
-            <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={() => setActiveStep(0)}>
-                Back
-              </Button>
-              <Button 
-                onClick={generateQuestions}
-                disabled={!targetRole || !experienceLevel || techStack.length === 0 || isGenerating}
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  'Generate Questions'
-                )}
-              </Button>
-            </div>
+            )}
+
+            {/* Step 2: Configure Interview */}
+            {activeStep === 1 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Configure Interview</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="targetRole">Target Role</Label>
+                    <Input
+                      id="targetRole"
+                      value={targetRole}
+                      onChange={(e) => setTargetRole(e.target.value)}
+                      placeholder="e.g., Frontend Developer, Data Scientist"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="experienceLevel">Experience Level</Label>
+                    <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {experienceLevels.map((level) => (
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Technology Stack</Label>
+                    <div className="flex gap-2 mb-2">
+                      <Input
+                        value={newTech}
+                        onChange={(e) => setNewTech(e.target.value)}
+                        placeholder="Add a technology (e.g., React, Python)"
+                        onKeyPress={(e) => e.key === 'Enter' && addTech()}
+                      />
+                      <Button type="button" onClick={addTech} size="sm">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {techStack.map((tech) => (
+                        <Badge key={tech} variant="secondary" className="cursor-pointer">
+                          {tech}
+                          <X 
+                            className="h-3 w-3 ml-1" 
+                            onClick={() => removeTech(tech)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setActiveStep(0)}>
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={() => setActiveStep(2)}
+                    disabled={!targetRole || techStack.length === 0}
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Generate Questions */}
+            {activeStep === 2 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Generate Interview Questions</h3>
+                
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">Interview Summary</h4>
+                  <p><strong>Role:</strong> {targetRole}</p>
+                  <p><strong>Level:</strong> {experienceLevels.find(l => l.value === experienceLevel)?.label}</p>
+                  <p><strong>Technologies:</strong> {techStack.join(", ")}</p>
+                </div>
+
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setActiveStep(1)}>
+                    Back
+                  </Button>
+                  <Button onClick={handleGenerateQuestions} disabled={isGenerating}>
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      "Generate Questions"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Start Interview */}
+            {activeStep === 3 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Ready to Start Interview</h3>
+                
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">Generated Questions Preview</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    {generatedQuestions.slice(0, 3).map((question, index) => (
+                      <li key={index}>{question}</li>
+                    ))}
+                    {generatedQuestions.length > 3 && (
+                      <li className="text-muted-foreground">
+                        +{generatedQuestions.length - 3} more questions...
+                      </li>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-blue-800">Before You Start</h4>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• Make sure you're in a quiet environment</li>
+                    <li>• Allow microphone access when prompted</li>
+                    <li>• Speak clearly and at a normal pace</li>
+                    <li>• Take your time to think before answering</li>
+                  </ul>
+                </div>
+
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setActiveStep(2)}>
+                    Back
+                  </Button>
+                  <Button onClick={handleStartInterview} disabled={isStartingInterview}>
+                    {isStartingInterview ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Starting...
+                      </>
+                    ) : (
+                      "Start Interview"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
-      
-      {/* Step 3: Review Generated Questions */}
-      {activeStep === 2 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Review Interview Questions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="bg-muted p-4 rounded-lg">
-                <div className="font-medium mb-2">Interview Details:</div>
-                <div className="text-sm">Role: {targetRole}</div>
-                <div className="text-sm">Experience: {experienceLevels.find(l => l.value === experienceLevel)?.label}</div>
-                <div className="text-sm">Technologies: {techStack.join(', ')}</div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="font-medium">Generated Questions:</div>
-                <ol className="list-decimal list-inside space-y-2">
-                  {generatedQuestions.map((question, index) => (
-                    <li key={index} className="p-3 bg-card border rounded-lg">{question}</li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-            
-            <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={() => setActiveStep(1)}>
-                Back
-              </Button>
-              <div className="space-x-2">
-                <Button 
-                  variant="outline" 
-                  onClick={generateQuestions}
-                  disabled={isGenerating}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Regenerating...
-                    </>
-                  ) : (
-                    'Regenerate Questions'
-                  )}
-                </Button>
-                <Button 
-                  onClick={startInterview}
-                  disabled={generatedQuestions.length === 0 || isStartingInterview}
-                >
-                  {isStartingInterview ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Starting...
-                    </>
-                  ) : (
-                    'Start Interview'
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Step 4: Conduct Interview */}
-      {activeStep === 3 && interviewId && (
-        <div>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Interview in Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Your personalized interview is ready. Click the button below to start speaking with our AI interviewer.
-                Answer the questions naturally as you would in a real interview.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Agent
-            userName={selectedResume?.firstName || user?.name || 'User'}
-            userId={user?.id}
-            interviewId={interviewId}
-            type="interview"
-            questions={generatedQuestions}
-          />
-        </div>
       )}
     </div>
   );

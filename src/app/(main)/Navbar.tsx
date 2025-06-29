@@ -71,6 +71,12 @@ export default function Navbar() {
               >
                 Interviews
               </NavLink>
+              <NavLink 
+                href="/billing" 
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+              >
+                Billing
+              </NavLink>
             </div>
             
             {/* Right Side Actions */}

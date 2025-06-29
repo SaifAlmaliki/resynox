@@ -37,19 +37,19 @@ export default function PricingPage() {
                   <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-green-800"></div>
                   </div>
-                  <span>3 resume templates</span>
+                  <span>1 resume</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-green-800"></div>
                   </div>
-                  <span>5 mock interviews per month</span>
+                  <span>1 cover letter (manual only)</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-green-800"></div>
                   </div>
-                  <span>Basic cover letter generator</span>
+                  <span>ATS-friendly resume format</span>
                 </li>
               </ul>
               <button className="w-full py-3 px-6 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -58,7 +58,7 @@ export default function PricingPage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-gradient-to-br from-green-900 to-green-800 rounded-2xl p-8 shadow-xl text-white relative transform scale-105 border border-green-700">
+            <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-2xl p-8 shadow-xl text-white relative transform scale-105 border border-blue-700">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full text-sm font-medium">
                   Most Popular
@@ -66,7 +66,7 @@ export default function PricingPage() {
               </div>
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold mb-2">Pro</h3>
-                <div className="text-4xl font-bold mb-4">$19<span className="text-lg opacity-80">/month</span></div>
+                <div className="text-4xl font-bold mb-4">$3.99<span className="text-lg opacity-80">/month</span></div>
                 <p className="opacity-90">For serious job seekers</p>
               </div>
               <ul className="space-y-4 mb-8">
@@ -74,67 +74,73 @@ export default function PricingPage() {
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>Unlimited resume templates</span>
+                  <span>Unlimited resumes</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>Unlimited mock interviews</span>
+                  <span>3 cover letters</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>AI-powered cover letters</span>
+                  <span>AI-powered resume enhancement</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>Priority support</span>
+                  <span>AI cover letters matching job descriptions</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-white"></div>
+                  </div>
+                  <span>Format and coloring customizations</span>
                 </li>
               </ul>
-              <button className="w-full py-3 px-6 rounded-lg bg-white text-green-900 hover:bg-green-50 transition-colors font-medium">
+              <button className="w-full py-3 px-6 rounded-lg bg-white text-blue-900 hover:bg-blue-50 transition-colors font-medium">
                 Start Pro Trial
               </button>
             </div>
 
-            {/* Enterprise Plan */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+            {/* Pro Plus Plan */}
+            <div className="bg-gradient-to-br from-green-900 to-green-800 rounded-2xl p-8 shadow-lg border border-green-700 text-white">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-                <div className="text-4xl font-bold mb-4">$99<span className="text-lg opacity-80">/month</span></div>
-                <p className="opacity-90">For teams and organizations</p>
+                <h3 className="text-2xl font-bold mb-2">Pro Plus</h3>
+                <div className="text-4xl font-bold mb-4">$7.99<span className="text-lg opacity-80">/month</span></div>
+                <p className="opacity-90">For advanced interview preparation</p>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-800"></div>
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
                   <span>Everything in Pro</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-800"></div>
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>Team collaboration</span>
+                  <span>10 cover letters</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-800"></div>
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>Custom branding</span>
+                  <span>5 voice agent interviews per month</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-800"></div>
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>Dedicated support</span>
+                  <span>AI interview feedback & analysis</span>
                 </li>
               </ul>
-              <button className="w-full py-3 px-6 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                Contact Sales
+              <button className="w-full py-3 px-6 rounded-lg bg-white text-green-900 hover:bg-green-50 transition-colors font-medium">
+                Get Pro Plus
               </button>
             </div>
           </div>

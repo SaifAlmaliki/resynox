@@ -115,6 +115,10 @@ model UserSubscription {
   stripeCurrentPeriodEnd  DateTime                      // End date of the current billing period.
   stripeCancelAtPeriodEnd Boolean  @default(false)      // Indicates whether the subscription will be canceled at the end of the current period.
 
+  // Voice interview tracking for Pro Plus users
+  voiceInterviewsUsed     Int      @default(0)          // Number of voice interviews used in current billing period
+  voiceInterviewsResetDate DateTime?                    // Date when voice interview count was last reset (matches billing period)
+
   // Timestamps.
   createdAt DateTime @default(now()) // Automatically set when created.
   updatedAt DateTime @updatedAt      // Automatically updated on modification.

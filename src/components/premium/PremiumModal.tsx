@@ -14,8 +14,10 @@ const proFeatures = [
   "AI Personalized Cover Letter",
   "AI Professional career summaries",
   "Unlimited resumes",
-  "Advanced design customizations",
-  "All AI features included"
+  "3 cover letters",
+  "AI-powered resume enhancement",
+  "AI cover letters matching job descriptions",
+  "Format and coloring customizations"
 ];
 
 // Pro Plus plan features
@@ -70,7 +72,7 @@ export default function PremiumModal() {
             {/* Pro Plan */}
             <div className="flex flex-col space-y-5 border rounded-lg p-6">
               <h3 className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-center text-lg font-bold text-transparent">
-                Pro
+                Pro - $3.99/month
               </h3>
               <ul className="list-inside space-y-2 flex-grow">
                 {proFeatures.map((feature) => (
@@ -101,7 +103,7 @@ export default function PremiumModal() {
                 </span>
               </div>
               <h3 className="bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-center text-lg font-bold text-transparent">
-                Pro Plus
+                Pro Plus - $7.99/month
               </h3>
               <ul className="list-inside space-y-2 flex-grow">
                 {proPlusFeatures.map((feature) => (

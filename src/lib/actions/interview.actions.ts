@@ -284,58 +284,66 @@ export async function createInterview(data: {
   skipQuestionSelection?: boolean;
 }) {
   try {
-    // Fetch the user's most recent resume to personalize the interview
-    const userResume = await prisma.resume.findFirst({
-      where: { userId: data.userId },
-      orderBy: { updatedAt: 'desc' }
-    });
+    const { userId, role, level, questions, techstack, type } = data;
 
-    // If we have resume data, use it to personalize the interview
-    let personalizedTechstack = data.techstack;
-    let personalizedRole = data.role;
-    
-    if (userResume) {
-      // Use skills from resume if available
-      if (userResume.skills && userResume.skills.length > 0) {
-        personalizedTechstack = userResume.skills;
-      }
-      
-      // Use job title from resume if available
-      if (userResume.jobTitle) {
-        personalizedRole = userResume.jobTitle;
-      }
-
-      console.log(`Personalizing interview for ${userResume.firstName || 'user'} based on resume data`);
+    // Validate required fields
+    if (!userId || !role || !level || !questions.length || !techstack.length) {
+      return { success: false };
     }
 
-    // Generate personalized questions based on resume data and provided role/techstack
-    const personalizedQuestions = await generatePersonalizedQuestions({
-      role: personalizedRole,
-      level: data.level,
-      techstack: personalizedTechstack,
-      resumeData: userResume
+    // If this is a voice interview, check and increment usage
+    if (type === "voice") {
+      const subscription = await (prisma as PrismaClient).userSubscription.findUnique({
+        where: { userId }
+      });
+
+      if (subscription) {
+        const now = new Date();
+        const periodEnd = new Date(subscription.stripeCurrentPeriodEnd);
+        
+        // Check if we need to reset the counter (new billing period)
+        if (now > periodEnd) {
+          await (prisma as PrismaClient).userSubscription.update({
+            where: { userId },
+            data: {
+              voiceInterviewsUsed: 1,
+              voiceInterviewsResetDate: periodEnd
+            }
+          });
+        } else {
+          // Increment the usage count
+          await (prisma as PrismaClient).userSubscription.update({
+            where: { userId },
+            data: {
+              voiceInterviewsUsed: (subscription.voiceInterviewsUsed || 0) + 1
+            }
+          });
+        }
+      }
+    }
+
+    // Create the interview
+    const interview = await (prisma as PrismaClient).interview.create({
+      data: {
+        userId,
+        role,
+        level,
+        questions,
+        techstack,
+        type,
+        finalized: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     });
 
-    // Create the interview with personalized data
-    const interview = await prisma.interview.create({
-      data: {
-        userId: data.userId,
-        role: personalizedRole,
-        level: data.level,
-        questions: personalizedQuestions.questions || [],
-        techstack: personalizedTechstack,
-        type: data.type,
-        finalized: true
-      }
-    });
-    
-    revalidatePath('/interview');
+    revalidatePath("/interview");
     return { 
       success: true, 
       interviewId: interview.id,
-      questions: personalizedQuestions.questions || [],
-      techstack: personalizedTechstack,
-      role: personalizedRole
+      questions,
+      techstack,
+      role
     };
   } catch (error) {
     console.error("Error creating interview:", error);

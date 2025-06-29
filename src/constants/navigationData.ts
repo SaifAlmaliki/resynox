@@ -85,6 +85,11 @@ export const floatingHeaderData: FloatingHeaderData = {
       icon: "Mic"
     },
     {
+      label: "Billing",
+      href: "/billing",
+      icon: "CreditCard"
+    },
+    {
       label: "Pricing",
       href: "/pricing",
       icon: "CreditCard"
