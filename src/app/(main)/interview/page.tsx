@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Mic, Lock, Sparkles, Zap, Target } from "lucide-react";
+import { ArrowRight, Mic, Lock, Sparkles, Zap, Target, Check, Star } from "lucide-react";
 import InterviewCard from "@/components/interview/InterviewCard";
 import { getCurrentUser, getInterviewsByUserId } from "@/lib/actions/interview.actions";
 import { Interview } from "@/types/interview";
@@ -40,36 +40,137 @@ const InterviewPage = async () => {
     return (
       <main className="mx-auto w-full max-w-7xl space-y-6 px-3 py-6">
         <div className="animate-fade-in-up">
-          <Card className="border-2 border-orange-200 bg-orange-50/50">
-            <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                <Lock className="h-8 w-8 text-orange-600" />
-              </div>
-              <CardTitle className="text-2xl text-orange-800">Voice Agent Interviews - Pro Plus Feature</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-orange-700 text-lg">
-                Advanced AI voice interviewer with feedback is available exclusively for Pro Plus subscribers.
-              </p>
-              <div className="bg-white/80 rounded-lg p-4 space-y-2">
-                <h4 className="font-semibold text-orange-800">Pro Plus Features Include:</h4>
-                <ul className="text-sm text-orange-700 space-y-1">
-                  <li>• 5 voice agent interviews per month</li>
-                  <li>• AI interview feedback & analysis</li>
-                  <li>• Plus all Pro features</li>
-                </ul>
-              </div>
-              <div className="pt-4 flex gap-3 justify-center">
-                <Button asChild className="bg-orange-600 hover:bg-orange-700">
-                  <Link href="/billing">
-                    Upgrade to Pro Plus <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button variant="outline">
-                  <Link href="/pricing">View All Plans</Link>
-                </Button>
-              </div>
-            </CardContent>
+          {/* Enhanced Pro Plus Upgrade Card */}
+          <Card className="relative overflow-hidden border-0 shadow-xl">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50"></div>
+            
+            {/* Content */}
+            <div className="relative">
+              <CardHeader className="text-center pb-8 pt-12">
+                {/* Icon with premium badge */}
+                <div className="relative mx-auto w-20 h-20 mb-6">
+                  <div className="w-full h-full bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Mic className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Star className="h-4 w-4 text-white fill-current" />
+                  </div>
+                </div>
+
+                {/* Title and badge */}
+                <div className="space-y-4">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200">
+                    <Zap className="h-4 w-4 text-green-700 mr-2" />
+                    <span className="text-green-800 font-semibold text-sm">Pro Plus Feature</span>
+                  </div>
+                  
+                  <CardTitle className="text-3xl font-bold text-gray-900">
+                    Voice Agent Interviews
+                  </CardTitle>
+                  
+                  <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                    Experience the future of interview preparation with our advanced AI voice interviewer and comprehensive feedback system.
+                  </p>
+                </div>
+              </CardHeader>
+
+              <CardContent className="pb-12">
+                {/* Features Grid */}
+                <div className="grid md:grid-cols-3 gap-6 mb-10">
+                  {[
+                    { 
+                      icon: Mic, 
+                      title: "5 Voice Interviews", 
+                      desc: "Monthly limit with renewal",
+                      highlight: "Per Month"
+                    },
+                    { 
+                      icon: Target, 
+                      title: "AI Feedback", 
+                      desc: "Detailed analysis & insights",
+                      highlight: "Comprehensive"
+                    },
+                    { 
+                      icon: Sparkles, 
+                      title: "Plus All Pro", 
+                      desc: "Complete feature access",
+                      highlight: "Everything Included"
+                    }
+                  ].map((feature, index) => (
+                    <div key={index} className="group">
+                      <Card className="h-full border border-green-200/50 bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                        <CardContent className="p-6 text-center">
+                          <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <feature.icon className="h-7 w-7 text-white" />
+                          </div>
+                          <h4 className="font-semibold text-gray-900 mb-2">{feature.title}</h4>
+                          <p className="text-sm text-gray-600 mb-3">{feature.desc}</p>
+                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                            <Check className="h-3 w-3 mr-1" />
+                            {feature.highlight}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+
+                {/* What's Included Section */}
+                <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 mb-8 border border-green-200/50">
+                  <h4 className="font-semibold text-gray-900 mb-6 text-center text-lg">What's Included in Pro Plus</h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {[
+                      "5 voice agent interviews per month",
+                      "AI interview feedback & analysis",
+                      "Unlimited resumes & cover letters",
+                      "Advanced AI tools & customizations",
+                      "Priority customer support",
+                      "All future Pro Plus features"
+                    ].map((feature, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                          <Check className="h-3 w-3 text-white" />
+                        </div>
+                        <span className="text-gray-700 text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <Button asChild size="lg" className="bg-gradient-to-r from-green-700 to-emerald-700 hover:from-green-800 hover:to-emerald-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                    <Link href="/billing" className="flex items-center">
+                      Upgrade to Pro Plus
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="outline" size="lg" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+                    <Link href="/pricing">View All Plans</Link>
+                  </Button>
+                </div>
+
+                {/* Trust Indicators */}
+                <div className="mt-8 text-center">
+                  <div className="inline-flex items-center space-x-6 text-sm text-gray-500">
+                    <div className="flex items-center">
+                      <Check className="h-4 w-4 text-green-500 mr-1" />
+                      Cancel anytime
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="h-4 w-4 text-green-500 mr-1" />
+                      Instant access
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="h-4 w-4 text-green-500 mr-1" />
+                      30-day guarantee
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </div>
           </Card>
         </div>
       </main>
