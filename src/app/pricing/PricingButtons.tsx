@@ -65,7 +65,8 @@ export default function PricingButtons({
       <Button 
         onClick={handleUpgrade}
         disabled={loading}
-        className="w-full py-3 px-6 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors font-medium"
+        variant="secondary"
+        className="w-full py-3 px-6 rounded-lg !bg-gray-200 !text-gray-700 hover:!bg-gray-300 transition-colors font-medium border-0"
       >
         {loading ? "Processing..." : "Upgrade to Pro Plus"}
       </Button>
@@ -75,7 +76,7 @@ export default function PricingButtons({
   // If user has pro_plus and looking at pro, show manage subscription
   if (plan === "pro" && currentSubscription === "pro_plus") {
     return (
-      <Button asChild className="w-full py-3 px-6 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors font-medium">
+      <Button asChild variant="secondary" className="w-full py-3 px-6 rounded-lg !bg-gray-200 !text-gray-700 hover:!bg-gray-300 transition-colors font-medium border-0">
         <Link href="/billing">
           Manage Subscription
         </Link>
@@ -90,7 +91,8 @@ export default function PricingButtons({
     <Button 
       onClick={handleUpgrade}
       disabled={loading}
-      className="w-full py-3 px-6 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors font-medium"
+      variant="secondary"
+      className="w-full py-3 px-6 rounded-lg !bg-gray-200 !text-gray-700 hover:!bg-gray-300 transition-colors font-medium border-0"
     >
       {loading ? "Processing..." : buttonText}
     </Button>
