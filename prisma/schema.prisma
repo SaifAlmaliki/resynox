@@ -195,3 +195,23 @@ model CoverLetter {
   @@index([userId])
   @@index([resumeId])
 }
+
+// ResumeAnalysis model: Represents AI analysis of uploaded resumes
+model ResumeAnalysis {
+  id              String   @id @default(cuid())
+  userId          String   // Foreign key to associate the analysis with a user
+  pdfFileUrl      String   // URL to the uploaded PDF file in Vercel storage
+  jobDescription  String   // The job description to analyze against
+  analysisResult  String?  // JSON string containing AI analysis results (strengths, weaknesses)
+  status          String   @default("pending") // Status: pending, processing, completed, failed
+  errorMessage    String?  // Error message if analysis fails
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("resume_analyses")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}

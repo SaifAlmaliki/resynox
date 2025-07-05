@@ -122,6 +122,19 @@ export const coverLetterSchema = z.object({
 // Type inference for cover letter
 export type CoverLetterValues = z.infer<typeof coverLetterSchema>;
 
+// Schema for resume analysis
+export const resumeAnalysisSchema = z.object({
+  resumePdf: z
+    .custom<File>()
+    .refine((file) => file instanceof File, "PDF file is required")
+    .refine((file) => file.type === "application/pdf", "File must be a PDF")
+    .refine((file) => file.size <= 1024 * 1024 * 10, "File must be less than 10MB"),
+  jobDescription: z.string().min(10, "Job description must be at least 10 characters"),
+});
+
+// Types
+export type ResumeAnalysisValues = z.infer<typeof resumeAnalysisSchema>;
+
 // Comprehensive schema for a resume, combining all the above schemas
 export const resumeSchema = z.object({
   ...generalInfoSchema.shape,     // Unpacks all fields from `generalInfoSchema`

@@ -16,6 +16,7 @@ export const env = createEnv({
     OPENAI_API_KEY: z.string().min(1),                  // API key for OpenAI services
     STRIPE_SECRET_KEY: z.string().min(1),               // Stripe secret key for handling payments
     STRIPE_WEBHOOK_SECRET: z.string().min(1),           // Stripe webhook secret for verifying incoming webhook events
+    N8N_RESUME_ANALYSIS_WEBHOOK_URL: z.string().min(1), // N8N webhook URL for resume analysis
   },
 
   // Define client-side environment variables

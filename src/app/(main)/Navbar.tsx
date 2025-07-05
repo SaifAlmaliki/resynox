@@ -66,6 +66,12 @@ export default function Navbar() {
                 Cover Letters
               </NavLink>
               <NavLink 
+                href="/resume-analysis" 
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+              >
+                Resume Analysis
+              </NavLink>
+              <NavLink 
                 href="/interview" 
                 className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
               >
