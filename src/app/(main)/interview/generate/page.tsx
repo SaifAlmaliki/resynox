@@ -105,6 +105,7 @@ const InterviewGeneratePage = () => {
   const [interviewId, setInterviewId] = useState<string | null>(null);
   const [isStartingInterview, setIsStartingInterview] = useState(false);
   const [voiceUsageStatus, setVoiceUsageStatus] = useState<{ canUse: boolean; used: number; limit: number }>({ canUse: false, used: 0, limit: 0 });
+  const [showAllQuestions, setShowAllQuestions] = useState(false);
 
   // Check voice interview usage status
   useEffect(() => {
@@ -531,12 +532,24 @@ const InterviewGeneratePage = () => {
                 <h3 className="text-lg font-semibold">Ready to Start Interview</h3>
                 
                 <div className="bg-muted/50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Generated Questions Preview</h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Generated Questions Preview</h4>
+                    {generatedQuestions.length > 3 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setShowAllQuestions(!showAllQuestions)}
+                        className="text-xs"
+                      >
+                        {showAllQuestions ? 'Show Less' : `Show All ${generatedQuestions.length}`}
+                      </Button>
+                    )}
+                  </div>
                   <ul className="list-disc list-inside space-y-1 text-sm">
-                    {generatedQuestions.slice(0, 3).map((question, index) => (
+                    {(showAllQuestions ? generatedQuestions : generatedQuestions.slice(0, 3)).map((question, index) => (
                       <li key={index}>{question}</li>
                     ))}
-                    {generatedQuestions.length > 3 && (
+                    {!showAllQuestions && generatedQuestions.length > 3 && (
                       <li className="text-muted-foreground">
                         +{generatedQuestions.length - 3} more questions...
                       </li>

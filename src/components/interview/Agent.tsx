@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useVapiInterview } from "./hooks/useVapiInterview";
-import { useVapiEvents } from "./hooks/useVapiEvents";
+import { useElevenLabsInterview } from "./hooks/useElevenLabsInterview";
+
 import { InterviewInterface } from "./ui/InterviewInterface";
 import { createFeedback } from "@/lib/actions/interview.actions";
 import { AgentProps, CallStatus, SavedMessage } from "@/types/interview";
 import { useInterviewSession } from "./hooks/useInterviewSession";
-import { vapiErrorHandler, vapiPerformance } from "@/lib/vapi";
+import { elevenLabsLogger } from "@/lib/elevenlabs.logger";
 import { interviewAnalytics } from "@/lib/interview-analytics";
 
 export const Agent = ({
@@ -34,21 +34,15 @@ export const Agent = ({
 
   // Initialize performance monitoring
   useEffect(() => {
-    vapiPerformance.startSession();
-    vapiPerformance.optimizeConnection({
-      preloadAssistant: true,
-      warmupConnection: true,
-      priorityQueue: true
-    });
+    elevenLabsLogger.info('ElevenLabs session started');
 
     return () => {
       // Cleanup on unmount
-      const report = vapiPerformance.getPerformanceReport();
-      console.log('Final performance report:', report);
+      elevenLabsLogger.info('ElevenLabs session ended');
     };
   }, []);
   
-  // Initialize the VAPI interview hook 
+  // Initialize the ElevenLabs interview hook 
   const {
     callStatus,
     error,
@@ -56,9 +50,8 @@ export const Agent = ({
     personalizedRole,
     personalizedTechstack,
     startInterview,
-    setCallStatus,
-    setError
-  } = useVapiInterview({
+    stopInterview
+  } = useElevenLabsInterview({
     userName,
     userId,
     interviewId,
@@ -69,14 +62,14 @@ export const Agent = ({
   // Enhanced error handling
   useEffect(() => {
     if (error) {
-      const vapiError = vapiErrorHandler.createVapiError(error);
-      vapiErrorHandler.logError(vapiError, {
+      elevenLabsLogger.error('Interview error', {
+        error,
         interviewId,
         userId,
         type
       });
-      sessionManager.addError(vapiError);
-      vapiPerformance.recordError();
+      // Log error for debugging
+      console.error('Interview error:', error);
     }
   }, [error, interviewId, userId, type, sessionManager]);
 
@@ -84,11 +77,10 @@ export const Agent = ({
   useEffect(() => {
     if (callStatus === CallStatus.CONNECTING) {
       sessionManager.updateStatus(CallStatus.CONNECTING);
-      vapiPerformance.recordConnectionStart();
+      elevenLabsLogger.info('ElevenLabs connection starting');
     } else if (callStatus === CallStatus.ACTIVE) {
       sessionManager.updateStatus(CallStatus.ACTIVE);
-      vapiPerformance.recordConnectionSuccess();
-      vapiPerformance.recordFirstResponse();
+      elevenLabsLogger.info('ElevenLabs connection active');
     }
   }, [callStatus, sessionManager]);
   
@@ -97,7 +89,6 @@ export const Agent = ({
     try {
       if (!interviewId && !createdInterviewId) {
         console.error("No interview ID available for feedback");
-        setError("Failed to generate feedback. Missing interview ID.");
         return;
       }
       
@@ -121,33 +112,32 @@ export const Agent = ({
         router.push(`/interview/${targetInterviewId}/feedback`);
       } else {
         console.error("Failed to create feedback");
-        setError("Failed to generate feedback. Please try again.");
       }
     } catch (error) {
       console.error("Error generating feedback:", error);
-      setError("An error occurred while generating feedback.");
     }
-  }, [interviewId, createdInterviewId, userId, feedbackId, personalizedRole, personalizedTechstack, role, techstack, level, router, setError]);
+  }, [interviewId, createdInterviewId, userId, feedbackId, personalizedRole, personalizedTechstack, role, techstack, level, router]);
   
-  // Initialize the VAPI events hook
-  const {
-    messages,
-    isSpeaking,
-    lastMessage,
-    handleDisconnect
-  } = useVapiEvents({
-    callStatus,
-    setCallStatus,
-    setError,
-    onCallFinished: handleGenerateFeedback
-  });
+  // Temporary state for messages and speaking status
+  const [messages, setMessages] = useState<SavedMessage[]>([]);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [lastMessage, setLastMessage] = useState("");
   
-  // Start the interview automatically when the component mounts
+  // Handle disconnect
+  const handleDisconnect = useCallback(async () => {
+    await stopInterview();
+  }, [stopInterview]);
+  
+  // Start the interview automatically when the component mounts (only once)
   useEffect(() => {
-    if (callStatus === CallStatus.INACTIVE) {
-      startInterview();
+    if (callStatus === CallStatus.INACTIVE && !error) {
+      const timer = setTimeout(() => {
+        startInterview();
+      }, 1000); // Add a small delay to prevent immediate restart
+      
+      return () => clearTimeout(timer);
     }
-  }, [callStatus, startInterview]);
+  }, []); // Remove dependencies to prevent infinite loop
   
   // Handle navigation when call is finished
   useEffect(() => {

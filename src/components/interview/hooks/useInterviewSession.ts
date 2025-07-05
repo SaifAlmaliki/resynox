@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { CallStatus, InterviewSession, VapiError } from "@/types/interview";
+import { CallStatus, InterviewSession, VoiceInterviewError } from "@/types/interview";
 
 interface UseInterviewSessionProps {
   interviewId: string;
@@ -23,7 +23,7 @@ export function useInterviewSession({
     reconnectAttempts: 0
   });
 
-  const [errors, setErrors] = useState<VapiError[]>([]);
+  const [errors, setErrors] = useState<VoiceInterviewError[]>([]);
   const sessionRef = useRef<InterviewSession>(session);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -54,8 +54,8 @@ export function useInterviewSession({
   }, [sessionTimeout]);
 
   // Add error with deduplication
-  const addError = useCallback((error: Omit<VapiError, 'timestamp'>) => {
-    const newError: VapiError = {
+  const addError = useCallback((error: Omit<VoiceInterviewError, 'timestamp'>) => {
+    const newError: VoiceInterviewError = {
       ...error,
       timestamp: new Date()
     };
@@ -84,10 +84,15 @@ export function useInterviewSession({
   // Update session status with validation
   const updateStatus = useCallback((newStatus: CallStatus) => {
     setSession(prev => {
+      // Skip if status is already the same
+      if (prev.status === newStatus) {
+        return prev;
+      }
+      
       // Validate status transitions
       const validTransitions: Record<CallStatus, CallStatus[]> = {
-        [CallStatus.INACTIVE]: [CallStatus.INITIALIZING],
-        [CallStatus.INITIALIZING]: [CallStatus.CONNECTING, CallStatus.ERROR],
+        [CallStatus.INACTIVE]: [CallStatus.INITIALIZING, CallStatus.CONNECTING, CallStatus.ACTIVE], // Allow direct to ACTIVE
+        [CallStatus.INITIALIZING]: [CallStatus.CONNECTING, CallStatus.ACTIVE, CallStatus.ERROR], // Allow direct to ACTIVE
         [CallStatus.CONNECTING]: [CallStatus.ACTIVE, CallStatus.ERROR],
         [CallStatus.ACTIVE]: [CallStatus.PAUSED, CallStatus.FINISHING, CallStatus.ERROR],
         [CallStatus.PAUSED]: [CallStatus.ACTIVE, CallStatus.FINISHING, CallStatus.ERROR],

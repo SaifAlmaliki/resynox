@@ -20,14 +20,14 @@ const InterviewCard = ({
     : "Unknown date";
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="font-semibold text-lg">{role}</div>
         <Badge variant="outline" className="capitalize">
           {type}
         </Badge>
       </CardHeader>
-      <CardContent className="pb-2">
+      <CardContent className="pb-2 flex-1">
         <div className="flex flex-wrap gap-2 mb-4">
           {techstack.map((tech) => (
             <Badge key={tech} variant="secondary" className="capitalize">
@@ -37,7 +37,7 @@ const InterviewCard = ({
         </div>
         <p className="text-sm text-muted-foreground">{formattedDate}</p>
       </CardContent>
-      <CardFooter className="pt-2">
+      <CardFooter className="pt-2 mt-auto">
         {interviewId ? (
           <Button asChild className="w-full">
             <Link href={`/interview/${interviewId}`}>View Details</Link>

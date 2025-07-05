@@ -1,4 +1,4 @@
-import { SavedMessage, InterviewSession, VapiError } from "@/types/interview";
+import { SavedMessage, InterviewSession, VoiceInterviewError } from "@/types/interview";
 
 export interface InterviewMetrics {
   totalDuration: number;
@@ -281,7 +281,7 @@ class InterviewAnalyticsEngine {
     return insights;
   }
 
-  generateRecommendations(metrics: InterviewMetrics, errors: VapiError[]): string[] {
+  generateRecommendations(metrics: InterviewMetrics, errors: VoiceInterviewError[]): string[] {
     const recommendations: string[] = [];
     
     // Technical recommendations
@@ -324,7 +324,7 @@ class InterviewAnalyticsEngine {
   generateFullAnalysis(
     messages: SavedMessage[], 
     session: InterviewSession, 
-    errors: VapiError[]
+    errors: VoiceInterviewError[]
   ): InterviewAnalytics {
     const metrics = this.analyzeMessages(messages);
     const insights = this.generateInsights(metrics, session);

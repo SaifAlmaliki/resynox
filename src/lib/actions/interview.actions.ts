@@ -288,7 +288,14 @@ export async function createInterview(data: {
 
     // Validate required fields
     if (!userId || !role || !level || !questions.length || !techstack.length) {
-      return { success: false };
+      console.error("Validation failed in createInterview:", {
+        userId: !!userId,
+        role: !!role,
+        level: !!level,
+        questionsLength: questions.length,
+        techstackLength: techstack.length
+      });
+      return { success: false, error: "Missing required fields" };
     }
 
     // If this is a voice interview, check and increment usage
@@ -347,7 +354,7 @@ export async function createInterview(data: {
     };
   } catch (error) {
     console.error("Error creating interview:", error);
-    return { success: false };
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
 

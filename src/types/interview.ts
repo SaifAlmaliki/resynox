@@ -132,8 +132,8 @@ export interface InterviewSession {
   lastActivity?: Date;
 }
 
-// Enhanced error tracking
-export interface VapiError {
+// Enhanced error tracking for voice interviews
+export interface VoiceInterviewError {
   code: string;
   message: string;
   timestamp: Date;

@@ -56,5 +56,5 @@ export const feedbackSchema = {
   ],
 };
 
-// VAPI Assistant ID for the interviewer
-export const VAPI_ASSISTANT_ID = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID || '';
+// ElevenLabs Agent ID for the interviewer
+export const ELEVENLABS_AGENT_ID = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || '';

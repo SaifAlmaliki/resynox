@@ -1,4 +1,4 @@
-import { SubscriptionLevel } from "./subscription";
+import { SubscriptionLevel, getUserSubscriptionLevel } from "./subscription";
 import prisma from "./prisma";
 
 export function canCreateResume(subscriptionLevel: SubscriptionLevel, currentResumeCount: number ) {
@@ -65,9 +65,9 @@ export async function canUseVoiceInterview(userId: string): Promise<{ canUse: bo
       return { canUse: false, used: 0, limit: 0 };
     }
 
-    // Check if this is a Pro Plus subscription
-    const priceId = subscription.stripePriceId.toLowerCase();
-    const isProPlus = priceId.includes('pro_plus') || priceId.includes('proplus');
+    // Use the same subscription level detection logic as the main system
+    const subscriptionLevel = await getUserSubscriptionLevel(userId);
+    const isProPlus = subscriptionLevel === 'pro_plus';
     
     if (!isProPlus) {
       return { canUse: false, used: 0, limit: 0 };

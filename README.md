@@ -19,7 +19,7 @@ Resynox is a comprehensive AI-powered career preparation platform that combines 
 - **Export & Print**: Download or print resumes directly from the app
 
 ### Mock Interview System
-- **AI Voice Interviews**: Conduct realistic mock interviews using VAPI (Voice AI Platform) integration
+- **AI Voice Interviews**: Conduct realistic mock interviews using ElevenLabs Conversational AI integration
 - **Personalized Interview Questions**: Tailored questions based on role, experience level, and tech stack
 - **Real-time Voice Interaction**: Natural conversation flow with AI interviewer
 - **Performance Feedback**: Detailed AI-generated feedback with scoring and improvement suggestions
@@ -55,7 +55,7 @@ Resynox is a comprehensive AI-powered career preparation platform that combines 
 ### AI & Voice Integration
 - **Google AI SDK**: AI content generation and processing
 - **OpenAI API**: Alternative AI provider for content generation
-- **VAPI (Voice AI Platform)**: Real-time voice interview functionality
+- **ElevenLabs Conversational AI**: Real-time voice interview functionality
 - **AI SDK**: Unified AI integration layer
 
 ### Authentication & Payments
@@ -86,7 +86,7 @@ Resynox is a comprehensive AI-powered career preparation platform that combines 
 - Google AI API key or OpenAI API key
 - Clerk authentication credentials
 - Stripe API keys
-- VAPI account and API keys
+- ElevenLabs account and API keys
 - Vercel Blob storage token
 
 ### Installation
@@ -113,9 +113,9 @@ Resynox is a comprehensive AI-powered career preparation platform that combines 
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
    CLERK_SECRET_KEY=your_clerk_secret_key
 
-   # VAPI Configuration
-   NEXT_PUBLIC_VAPI_WEB_TOKEN=your_vapi_web_token
-   NEXT_PUBLIC_VAPI_ASSISTANT_ID=your_vapi_assistant_id
+   # ElevenLabs Configuration
+ELEVENLABS_API_KEY=your_elevenlabs_api_key
+NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your_elevenlabs_agent_id
 
    # Google AI
    GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key
@@ -189,7 +189,7 @@ src/
 │   └── premium/           # Premium feature components
 ├── lib/                   # Utility functions and services
 │   ├── actions/           # Server actions
-│   ├── vapi.*.ts          # VAPI integration files
+│   ├── elevenlabs.*.ts    # ElevenLabs integration files
 │   └── validation.ts      # Schema validation
 ├── hooks/                 # Custom React hooks
 ├── types/                 # TypeScript type definitions
@@ -215,7 +215,7 @@ npm start
 - Ensure all environment variables are properly configured
 - Set up PostgreSQL database (recommended: Neon, Supabase, or Railway)
 - Configure Stripe webhooks for subscription management
-- Set up VAPI workspace and assistant configurations
+- Set up ElevenLabs agent and voice configurations
 
 ---
 
@@ -234,7 +234,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 ---
 
 ## Acknowledgements
-- [VAPI](https://vapi.ai/) - Voice AI Platform for interview functionality
+- [ElevenLabs](https://elevenlabs.io/) - Conversational AI Platform for interview functionality
 - [Google AI](https://ai.google.dev/) - AI content generation
 - [OpenAI](https://openai.com/) - Alternative AI provider
 - [Clerk](https://clerk.com/) - Authentication and user management
