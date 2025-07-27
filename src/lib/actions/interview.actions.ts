@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { generateObject } from "ai";
-import { google, GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
+import { google } from "@ai-sdk/google";
 import prisma from "@/lib/prisma";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -12,18 +12,19 @@ import { interviewAnalytics } from "../interview-analytics";
 
 /**
  * Get the current authenticated user
+ * Note: Name will come from resume, this just provides user ID
  */
 export async function getCurrentUser() {
   const { userId } = await auth();
-
+  
   if (!userId) {
     return null;
   }
 
   return {
     id: userId,
-    name: "", // We'll get the name from the session if needed
-    email: "", // We'll get the email from the session if needed
+    name: "", // Name will be populated from selected resume
+    email: "",
   };
 }
 
@@ -42,16 +43,9 @@ export async function createFeedback(params: CreateFeedbackParams) {
       )
       .join("");
 
-    // Generate AI feedback using Google's Gemini model with thinking capabilities
+    // Generate AI feedback using Google's Gemini model
     const result = await generateObject({
-      model: google("gemini-2.5-flash-preview-04-17"),
-      providerOptions: {
-        google: {
-          thinkingConfig: {
-            thinkingBudget: 2048,
-          },
-        } satisfies GoogleGenerativeAIProviderOptions,
-      },
+      model: google("gemini-1.5-flash"),
       schema: z.object({
         totalScore: z.number().min(0).max(100).describe("Overall score from 0-100"),
         categoryScores: z.array(z.object({
@@ -287,7 +281,9 @@ export async function createInterview(data: {
     const { userId, role, level, questions, techstack, type } = data;
 
     // Validate required fields
-    if (!userId || !role || !level || !questions.length || !techstack.length) {
+    // Voice interviews don't need questions (ElevenLabs generates them dynamically)
+    const requiresQuestions = type !== "voice";
+    if (!userId || !role || !level || (requiresQuestions && !questions.length) || !techstack.length) {
       return { success: false };
     }
 
@@ -351,100 +347,7 @@ export async function createInterview(data: {
   }
 }
 
-// Generates personalized interview questions based on resume data
-async function generatePersonalizedQuestions({ 
-  role, 
-  level, 
-  techstack,
-  resumeData
-}: {
-  role: string;
-  level: string;
-  techstack: string[];
-  resumeData: Record<string, unknown> | null;
-}) {
-  try {
-    // Default questions if personalization fails
-    const defaultQuestions = [
-      `Tell me about your experience with ${techstack.join(', ')}.`,
-      `What challenges have you faced as a ${role}?`,
-      `How do you stay updated with the latest trends in ${techstack[0] || 'technology'}?`,
-      `Describe a project where you used ${techstack[0] || 'your technical skills'}.`,
-      `How do you handle tight deadlines?`
-    ];
 
-    // If no resume data, return default questions
-    if (!resumeData) {
-      console.log("No resume data available, using default questions");
-      return { questions: defaultQuestions };
-    }
-
-    console.log("Generating personalized questions based on resume data");
-    
-    // Create personalized questions based on resume data
-    // Type guard function to check if resumeData has skills property
-    const hasSkills = (data: Record<string, unknown> | null): data is { skills: string[] } => {
-      return !!data && 'skills' in data && Array.isArray((data as Record<string, unknown>).skills);
-    };
-
-    // Type guard function to check if resumeData has jobTitle property
-    const hasJobTitle = (data: Record<string, unknown> | null): data is { jobTitle: string } => {
-      return !!data && 'jobTitle' in data && typeof (data as Record<string, unknown>).jobTitle === 'string';
-    };
-
-    const personalizedQuestions = [
-      // Technical skills questions
-      `Tell me about your experience with ${hasSkills(resumeData) ? resumeData.skills.slice(0, 3).join(', ') : techstack.join(', ')}.`,
-      
-      // Role-specific questions
-      `What challenges have you faced as a ${hasJobTitle(resumeData) ? resumeData.jobTitle : role}?`,
-      
-      // Technology trends question
-      `How do you stay updated with the latest trends in ${hasSkills(resumeData) && resumeData.skills.length > 0 ? resumeData.skills[0] : techstack[0] || 'technology'}?`,
-      
-      // Project experience question
-      `Describe a project where you used ${hasSkills(resumeData) && resumeData.skills.length > 0 ? resumeData.skills[0] : techstack[0] || 'your technical skills'}.`,
-      
-      // Problem-solving question based on role
-      `How do you approach problem-solving in your work as a ${hasJobTitle(resumeData) ? resumeData.jobTitle : role}?`,
-      
-      // Career interest question
-      `What interests you most about this ${role} position?`,
-      
-      // Soft skills question
-      `How do you handle tight deadlines and pressure situations?`
-    ];
-    
-    // Add level-specific questions
-    if (level.toLowerCase().includes('senior') || level.toLowerCase().includes('lead')) {
-      personalizedQuestions.push(
-        `How do you mentor junior developers or team members?`,
-        `Tell me about a time when you had to make a difficult technical decision. How did you approach it?`
-      );
-    } else if (level.toLowerCase().includes('mid')) {
-      personalizedQuestions.push(
-        `How do you balance multiple tasks and priorities in your work?`,
-        `Tell me about a time when you had to learn a new technology quickly for a project.`
-      );
-    } else if (level.toLowerCase().includes('junior')) {
-      personalizedQuestions.push(
-        `How do you approach learning new technologies or frameworks?`,
-        `Tell me about a challenging bug you fixed and how you approached debugging it.`
-      );
-    }
-    
-    return { questions: personalizedQuestions };
-  } catch (error) {
-    console.error("Error in generatePersonalizedQuestions:", error);
-    return { questions: [
-      `Tell me about your experience with ${techstack.join(', ')}.`,
-      `What challenges have you faced as a ${role}?`,
-      `How do you stay updated with the latest trends in technology?`,
-      `Describe a project where you used your technical skills.`,
-      `How do you handle tight deadlines?`
-    ] };
-  }
-}
 
 
 export async function generateInterviewQuestions(params: {
@@ -471,16 +374,9 @@ export async function generateInterviewQuestions(params: {
     const jobTitle = (resumeData.jobTitle as string) || role;
     const summary = (resumeData.summary as string) || "";
     
-    // Use AI to generate personalized interview questions with thinking capabilities
+    // Use AI to generate personalized interview questions
     const result = await generateObject({
-      model: google("gemini-2.5-flash-preview-04-17"),
-      providerOptions: {
-        google: {
-          thinkingConfig: {
-            thinkingBudget: 2048,
-          },
-        } satisfies GoogleGenerativeAIProviderOptions,
-      },
+      model: google("gemini-1.5-flash"),
       output: "no-schema",
       prompt: `
         Generate 20 interview questions for a ${experienceLevel} ${role} position.
@@ -615,16 +511,6 @@ export async function createEnhancedFeedback(params: CreateFeedbackParams & {
       });
 
       if (existingFeedback) {
-                 // Store analytics as JSON metadata to avoid schema conflicts
-         const analyticsData = JSON.stringify({
-           metrics: analytics.metrics,
-           insights: analytics.insights,
-           recommendations: analytics.recommendations,
-           skillsAssessed: analytics.skillsAssessed,
-           behavioralIndicators: analytics.behavioralIndicators,
-           interviewQuality: analytics.interviewQuality
-         });
-
          // Update only the updatedAt field and add analytics as metadata
          // Store analytics in finalAssessment as additional context (non-destructive)
          const enhancedAssessment = `${existingFeedback.finalAssessment}

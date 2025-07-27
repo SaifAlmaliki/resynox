@@ -1,4 +1,5 @@
 import { SubscriptionLevel } from "./subscription";
+import { env } from "@/env";
 import prisma from "./prisma";
 
 export function canCreateResume(subscriptionLevel: SubscriptionLevel, currentResumeCount: number ) {
@@ -53,28 +54,66 @@ export async function canUseVoiceInterview(userId: string): Promise<{ canUse: bo
       where: { userId }
     });
 
+    // For users without subscription (free tier), create a basic record to track usage
     if (!subscription) {
-      return { canUse: false, used: 0, limit: 0 };
+      // Create a basic subscription record for free users to track voice interview usage
+      const now = new Date();
+      const nextMonth = new Date(now);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      
+      await prisma.userSubscription.create({
+        data: {
+          userId,
+          stripeCustomerId: `free_${userId}`, // Placeholder for free users
+          stripeSubscriptionId: `free_sub_${userId}`, // Placeholder for free users
+          stripePriceId: 'free_tier',
+          stripeCurrentPeriodEnd: nextMonth,
+          voiceInterviewsUsed: 0,
+          voiceInterviewsResetDate: now
+        }
+      });
+      
+      return { canUse: true, used: 0, limit: 2 };
     }
 
-    // Check if user has Pro Plus subscription
+    // Check if user has active subscription
     const now = new Date();
     const isActiveSubscription = subscription.stripeCurrentPeriodEnd > now;
     
     if (!isActiveSubscription) {
-      return { canUse: false, used: 0, limit: 0 };
+      // Expired subscription - treat as free tier
+      return { canUse: true, used: 0, limit: 2 };
     }
 
-    // Check if this is a Pro Plus subscription
-    const priceId = subscription.stripePriceId.toLowerCase();
-    const isProPlus = priceId.includes('pro_plus') || priceId.includes('proplus');
+    // Check subscription type and set limits accordingly using environment variables
+    const priceId = subscription.stripePriceId;
     
-    if (!isProPlus) {
-      return { canUse: false, used: 0, limit: 0 };
+    let isProPlus = false;
+    let isPro = false;
+    
+    if (priceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY) {
+      isProPlus = true;
+    } else if (priceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY) {
+      isPro = true;
+    } else {
+      // Fallback: check if it contains identifiable substrings
+      const lowerPriceId = priceId?.toLowerCase() || '';
+      if (lowerPriceId.includes('pro_plus') || lowerPriceId.includes('proplus')) {
+        isProPlus = true;
+      } else if (lowerPriceId.includes('pro')) {
+        isPro = true;
+      }
+    }
+    
+    let limit: number;
+    if (isProPlus) {
+      limit = 5; // Pro Plus users get 5 voice interviews
+    } else if (isPro) {
+      limit = 3; // Pro users get 3 voice interviews
+    } else {
+      limit = 2; // Free/other users get 2 voice interviews
     }
 
-    // Pro Plus users get 5 voice interviews per billing period
-    const limit = 5;
     let used = subscription.voiceInterviewsUsed;
 
     // Check if we need to reset the counter based on billing period
@@ -106,14 +145,40 @@ export async function canUseVoiceInterview(userId: string): Promise<{ canUse: bo
 
 export async function incrementVoiceInterviewUsage(userId: string): Promise<void> {
   try {
-    await prisma.userSubscription.update({
-      where: { userId },
-      data: {
-        voiceInterviewsUsed: {
-          increment: 1
-        }
-      }
+    // First check if user has a subscription record
+    const subscription = await prisma.userSubscription.findUnique({
+      where: { userId }
     });
+    
+    if (subscription) {
+      // Update existing subscription
+      await prisma.userSubscription.update({
+        where: { userId },
+        data: {
+          voiceInterviewsUsed: {
+            increment: 1
+          }
+        }
+      });
+    } else {
+      // This shouldn't happen if canUseVoiceInterview was called first,
+      // but handle it gracefully by creating a record
+      const now = new Date();
+      const nextMonth = new Date(now);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      
+      await prisma.userSubscription.create({
+        data: {
+          userId,
+          stripeCustomerId: `free_${userId}`,
+          stripeSubscriptionId: `free_sub_${userId}`,
+          stripePriceId: 'free_tier',
+          stripeCurrentPeriodEnd: nextMonth,
+          voiceInterviewsUsed: 1, // Start with 1 since we're incrementing
+          voiceInterviewsResetDate: now
+        }
+      });
+    }
   } catch (error) {
     console.error("Error incrementing voice interview usage:", error);
   }

@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useVapiInterview } from "./hooks/useVapiInterview";
-import { useVapiEvents } from "./hooks/useVapiEvents";
+import { useElevenLabsInterview } from "./hooks/useElevenLabsInterview";
 import { InterviewInterface } from "./ui/InterviewInterface";
 import { createFeedback } from "@/lib/actions/interview.actions";
-import { AgentProps, CallStatus, SavedMessage } from "@/types/interview";
+import { AgentProps, CallStatus } from "@/types/interview";
 import { useInterviewSession } from "./hooks/useInterviewSession";
-import { vapiErrorHandler, vapiPerformance } from "@/lib/vapi";
-import { interviewAnalytics } from "@/lib/interview-analytics";
+
 
 export const Agent = ({
   userName,
@@ -17,12 +15,15 @@ export const Agent = ({
   interviewId,
   feedbackId,
   type,
-  questions = [],
+
   role,
   level,
   techstack
 }: AgentProps) => {
   const router = useRouter();
+  
+  // Ref to prevent double interview starts
+  const hasStartedRef = useRef(false);
   
   // Use enhanced session management
   const sessionManager = useInterviewSession({
@@ -32,82 +33,63 @@ export const Agent = ({
     sessionTimeout: 30 * 60 * 1000 // 30 minutes
   });
 
-  // Initialize performance monitoring
-  useEffect(() => {
-    vapiPerformance.startSession();
-    vapiPerformance.optimizeConnection({
-      preloadAssistant: true,
-      warmupConnection: true,
-      priorityQueue: true
-    });
-
-    return () => {
-      // Cleanup on unmount
-      const report = vapiPerformance.getPerformanceReport();
-      console.log('Final performance report:', report);
-    };
-  }, []);
-  
-  // Initialize the VAPI interview hook 
+  // Initialize the ElevenLabs interview hook 
   const {
     callStatus,
     error,
-    createdInterviewId,
-    personalizedRole,
-    personalizedTechstack,
+    messages,
+    isSpeaking,
     startInterview,
-    setCallStatus,
-    setError
-  } = useVapiInterview({
+    endInterview
+  } = useElevenLabsInterview({
     userName,
-    userId,
-    interviewId,
-    type,
-    questions
+    type
   });
+
+  // Track interview state for feedback generation
+  const createdInterviewId = interviewId; // Use provided interview ID
+  const personalizedRole = role;
+  const personalizedTechstack = useMemo(() => techstack || [], [techstack]);
 
   // Enhanced error handling
   useEffect(() => {
     if (error) {
-      const vapiError = vapiErrorHandler.createVapiError(error);
-      vapiErrorHandler.logError(vapiError, {
-        interviewId,
-        userId,
-        type
-      });
-      sessionManager.addError(vapiError);
-      vapiPerformance.recordError();
+      console.error('ElevenLabs interview error:', error);
+      // Simple error logging without session manager for now
     }
-  }, [error, interviewId, userId, type, sessionManager]);
+  }, [error]);
 
   // Enhanced connection status management
   useEffect(() => {
     if (callStatus === CallStatus.CONNECTING) {
       sessionManager.updateStatus(CallStatus.CONNECTING);
-      vapiPerformance.recordConnectionStart();
     } else if (callStatus === CallStatus.ACTIVE) {
       sessionManager.updateStatus(CallStatus.ACTIVE);
-      vapiPerformance.recordConnectionSuccess();
-      vapiPerformance.recordFirstResponse();
     }
   }, [callStatus, sessionManager]);
   
   // Handle generating feedback when the interview is complete
-  const handleGenerateFeedback = useCallback(async (messages: SavedMessage[]) => {
+  const handleGenerateFeedback = useCallback(async (rawMessages: Array<{ role: 'user' | 'assistant'; content: string; timestamp: Date }>) => {
     try {
       if (!interviewId && !createdInterviewId) {
         console.error("No interview ID available for feedback");
-        setError("Failed to generate feedback. Missing interview ID.");
+        console.error("Failed to generate feedback. Missing interview ID.");
         return;
       }
       
       const targetInterviewId = interviewId || createdInterviewId;
       
+      // Convert messages to the expected format for createFeedback
+      const transcript = rawMessages.map(msg => ({
+        role: msg.role === 'assistant' ? 'assistant' : 'user', // Ensure role compatibility
+        content: msg.content
+      }));
+      
       // Create the feedback
       const result = await createFeedback({
         interviewId: targetInterviewId!,
         userId: userId!,
-        transcript: messages,
+        transcript: transcript,
         feedbackId,
         additionalContext: {
           role: personalizedRole || role,
@@ -121,33 +103,31 @@ export const Agent = ({
         router.push(`/interview/${targetInterviewId}/feedback`);
       } else {
         console.error("Failed to create feedback");
-        setError("Failed to generate feedback. Please try again.");
+        console.error("Failed to generate feedback. Please try again.");
       }
     } catch (error) {
       console.error("Error generating feedback:", error);
-      setError("An error occurred while generating feedback.");
+      console.error("An error occurred while generating feedback.");
     }
-  }, [interviewId, createdInterviewId, userId, feedbackId, personalizedRole, personalizedTechstack, role, techstack, level, router, setError]);
+  }, [interviewId, createdInterviewId, userId, feedbackId, personalizedRole, personalizedTechstack, role, techstack, level, router]);
   
-  // Initialize the VAPI events hook
-  const {
-    messages,
-    isSpeaking,
-    lastMessage,
-    handleDisconnect
-  } = useVapiEvents({
-    callStatus,
-    setCallStatus,
-    setError,
-    onCallFinished: handleGenerateFeedback
-  });
-  
-  // Start the interview automatically when the component mounts
+  // Start the interview automatically when the component mounts (only once)
   useEffect(() => {
-    if (callStatus === CallStatus.INACTIVE) {
-      startInterview();
+    if (!hasStartedRef.current) {
+      hasStartedRef.current = true;
+      console.log('🎬 Starting interview (single instance)');
+      
+      startInterview({
+        candidateName: userName || "User",
+        role: role || "Developer",
+        experienceLevel: level || "Mid",
+        techStack: techstack || [],
+        yearsOfExperience: 3, // Default value
+        interviewDuration: 30, // Default 30 minutes
+        interviewType: "Technical Interview"
+      });
     }
-  }, [callStatus, startInterview]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Handle navigation when call is finished
   useEffect(() => {
@@ -177,8 +157,8 @@ export const Agent = ({
       error={error}
       messages={messages}
       isSpeaking={isSpeaking}
-      lastMessage={lastMessage}
-      onDisconnect={handleDisconnect}
+      lastMessage={messages[messages.length - 1]?.content || ''}
+      onDisconnect={endInterview}
     />
   );
 };

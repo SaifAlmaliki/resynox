@@ -5,14 +5,12 @@ import { CallStatus, InterviewSession, VapiError } from "@/types/interview";
 
 interface UseInterviewSessionProps {
   interviewId: string;
-  userId: string;
   maxReconnectAttempts?: number;
   sessionTimeout?: number; // in milliseconds
 }
 
 export function useInterviewSession({
   interviewId,
-  userId,
   maxReconnectAttempts = 3,
   sessionTimeout = 30 * 60 * 1000 // 30 minutes
 }: UseInterviewSessionProps) {
@@ -84,9 +82,14 @@ export function useInterviewSession({
   // Update session status with validation
   const updateStatus = useCallback((newStatus: CallStatus) => {
     setSession(prev => {
+      // Allow same status to prevent warnings on duplicate status updates
+      if (prev.status === newStatus) {
+        return prev;
+      }
+
       // Validate status transitions
       const validTransitions: Record<CallStatus, CallStatus[]> = {
-        [CallStatus.INACTIVE]: [CallStatus.INITIALIZING],
+        [CallStatus.INACTIVE]: [CallStatus.INITIALIZING, CallStatus.CONNECTING],
         [CallStatus.INITIALIZING]: [CallStatus.CONNECTING, CallStatus.ERROR],
         [CallStatus.CONNECTING]: [CallStatus.ACTIVE, CallStatus.ERROR],
         [CallStatus.ACTIVE]: [CallStatus.PAUSED, CallStatus.FINISHING, CallStatus.ERROR],

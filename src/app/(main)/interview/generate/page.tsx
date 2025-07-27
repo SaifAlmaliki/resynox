@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import { getCurrentUser } from "@/lib/actions/interview.actions";
-import { generateInterviewQuestions, createInterview } from "@/lib/actions/interview.actions";
+import { createInterview } from "@/lib/actions/interview.actions";
 
 // Import only the type from resume actions to avoid conflicts
 import { getUserResumes, type Resume } from "../../../../lib/actions/resume.actions";
@@ -95,13 +95,11 @@ const InterviewGeneratePage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState("");
-  const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
+  // Voice interviews don't need resume selection - ElevenLabs handles everything dynamically
   const [targetRole, setTargetRole] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("mid");
   const [techStack, setTechStack] = useState<string[]>([]);
   const [newTech, setNewTech] = useState("");
-  const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [interviewId, setInterviewId] = useState<string | null>(null);
   const [isStartingInterview, setIsStartingInterview] = useState(false);
   const [voiceUsageStatus, setVoiceUsageStatus] = useState<{ canUse: boolean; used: number; limit: number }>({ canUse: false, used: 0, limit: 0 });
@@ -123,6 +121,24 @@ const InterviewGeneratePage = () => {
     };
     checkVoiceUsage();
   }, [hasVoiceAgentAccess]);
+
+  // Load user data and resumes on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const userData = await getCurrentUser();
+        if (userData) {
+          setUser(userData);
+          const resumeData = await getUserResumes(userData.id);
+          setResumes(resumeData);
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Check access and show upgrade prompt if needed
   if (!hasVoiceAgentAccess) {
@@ -176,7 +192,7 @@ const InterviewGeneratePage = () => {
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-red-700 text-lg">
-              You've used all {voiceUsageStatus.limit} voice interviews for this billing period.
+              You&apos;ve used all {voiceUsageStatus.limit} voice interviews for this billing period.
             </p>
             <div className="bg-white/80 rounded-lg p-4 space-y-2">
               <h4 className="font-semibold text-red-800">Usage Summary:</h4>
@@ -200,31 +216,13 @@ const InterviewGeneratePage = () => {
     );
   }
 
-  const steps = ["Select Resume", "Configure Interview", "Generate Questions", "Start Interview"];
-
-  // Load user data and resumes on component mount
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const userData = await getCurrentUser();
-        if (userData) {
-          setUser(userData);
-          const resumeData = await getUserResumes(userData.id);
-          setResumes(resumeData);
-        }
-      } catch (error) {
-        console.error("Error loading data:", error);
-      }
-    };
-
-    loadData();
-  }, []);
+  // Voice interviews skip question generation since ElevenLabs handles questions dynamically
+  const steps = ["Select Resume", "Configure Interview", "Start Interview"];
 
   // Handle resume selection
   const handleResumeSelect = (resumeId: string) => {
     setSelectedResumeId(resumeId);
     const resume = resumes.find(r => r.id === resumeId);
-    setSelectedResume(resume || null);
     
     // Auto-populate fields from resume
     if (resume) {
@@ -248,48 +246,29 @@ const InterviewGeneratePage = () => {
     setTechStack(techStack.filter(t => t !== tech));
   };
 
-     // Generate interview questions
-   const handleGenerateQuestions = async () => {
-     if (!targetRole || techStack.length === 0 || !user) {
-       alert("Please fill in the target role and add at least one technology.");
-       return;
-     }
+  // Voice interviews skip question generation - ElevenLabs handles questions dynamically
 
-     setIsGenerating(true);
-     try {
-       // Prepare resume data for the API call
-       const resumeData = selectedResume ? {
-         jobTitle: selectedResume.jobTitle || "",
-         summary: selectedResume.summary || "",
-         skills: selectedResume.skills || [],
-       } : {};
-
-       const questions = await generateInterviewQuestions({
-         userId: user.id,
-         role: targetRole,
-         level: experienceLevel,
-         techstack: techStack,
-         resumeData: resumeData
-       });
-
-       if (Array.isArray(questions) && questions.length > 0) {
-         setGeneratedQuestions(questions);
-         setActiveStep(3);
-       } else {
-         throw new Error("Failed to generate questions");
-       }
-     } catch (error) {
-       console.error("Error generating questions:", error);
-       alert("Failed to generate questions. Please try again.");
-     } finally {
-       setIsGenerating(false);
-     }
-   };
+  // Get candidate name from selected resume
+  const getCandidateName = () => {
+    const selectedResume = resumes.find(r => r.id === selectedResumeId);
+    const resumeFirstName = selectedResume?.firstName || '';
+    const resumeLastName = selectedResume?.lastName || '';
+    const resumeName = `${resumeFirstName} ${resumeLastName}`.trim();
+    
+    console.log('🔍 Debug - Selected resume:', selectedResume?.title);
+    console.log('🔍 Debug - Resume firstName:', resumeFirstName);
+    console.log('🔍 Debug - Resume lastName:', resumeLastName);
+    console.log('🔍 Debug - Resume full name:', resumeName);
+    
+    const finalName = resumeName || user?.name || "User";
+    console.log('🔍 Debug - Final userName passed to Agent:', finalName);
+    return finalName;
+  };
 
   // Start the interview
   const handleStartInterview = async () => {
-    if (!user || generatedQuestions.length === 0) {
-      alert("Please generate questions first.");
+    if (!user || !targetRole || techStack.length === 0) {
+      alert("Please fill in all required fields.");
       return;
     }
 
@@ -299,7 +278,7 @@ const InterviewGeneratePage = () => {
         userId: user.id,
         role: targetRole,
         level: experienceLevel,
-        questions: generatedQuestions,
+        questions: [], // Voice interviews don't need pre-generated questions
         techstack: techStack,
         type: "voice"
       });
@@ -343,11 +322,10 @@ const InterviewGeneratePage = () => {
       {/* Show Agent component if interview is started */}
       {interviewId && (
         <Agent
-          userName={user?.name || "User"}
+          userName={getCandidateName()}
           userId={user?.id || ""}
           interviewId={interviewId}
           type="interview"
-          questions={generatedQuestions}
           role={targetRole}
           level={experienceLevel}
           techstack={techStack}
@@ -495,10 +473,10 @@ const InterviewGeneratePage = () => {
               </div>
             )}
 
-            {/* Step 3: Generate Questions */}
+            {/* Step 3: Start Interview */}
             {activeStep === 2 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Generate Interview Questions</h3>
+                <h3 className="text-lg font-semibold">Ready to Start Voice Interview</h3>
                 
                 <div className="bg-muted/50 p-4 rounded-lg">
                   <h4 className="font-medium mb-2">Interview Summary</h4>
@@ -507,40 +485,13 @@ const InterviewGeneratePage = () => {
                   <p><strong>Technologies:</strong> {techStack.join(", ")}</p>
                 </div>
 
-                <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setActiveStep(1)}>
-                    Back
-                  </Button>
-                  <Button onClick={handleGenerateQuestions} disabled={isGenerating}>
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      "Generate Questions"
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Start Interview */}
-            {activeStep === 3 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Ready to Start Interview</h3>
-                
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Generated Questions Preview</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
-                    {generatedQuestions.slice(0, 3).map((question, index) => (
-                      <li key={index}>{question}</li>
-                    ))}
-                    {generatedQuestions.length > 3 && (
-                      <li className="text-muted-foreground">
-                        +{generatedQuestions.length - 3} more questions...
-                      </li>
-                    )}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-blue-800">Voice Interview Features</h4>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• AI interviewer generates questions dynamically based on your profile</li>
+                    <li>• Natural conversation flow with follow-up questions</li>
+                    <li>• Real-time voice interaction with ElevenLabs AI</li>
+                    <li>• Comprehensive feedback provided after completion</li>
                   </ul>
                 </div>
 
@@ -555,17 +506,17 @@ const InterviewGeneratePage = () => {
                 </div>
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setActiveStep(2)}>
+                  <Button variant="outline" onClick={() => setActiveStep(1)}>
                     Back
                   </Button>
                   <Button onClick={handleStartInterview} disabled={isStartingInterview}>
                     {isStartingInterview ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Starting...
+                        Starting Interview...
                       </>
                     ) : (
-                      "Start Interview"
+                      "Start Voice Interview"
                     )}
                   </Button>
                 </div>
