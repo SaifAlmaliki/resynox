@@ -180,10 +180,10 @@ export const useElevenLabsInterview = ({
         throw new Error(result.error || 'Failed to start voice interview');
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Failed to start interview:', error);
       updateState({ 
-        error: error.message || 'Failed to start interview',
+        error: error instanceof Error ? error.message : 'Failed to start interview',
         callStatus: CallStatus.ERROR
       });
     }
@@ -213,10 +213,10 @@ export const useElevenLabsInterview = ({
         }
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Error ending interview:', error);
       updateState({ 
-        error: error.message || 'Error ending interview'
+        error: error instanceof Error ? error.message : 'Error ending interview'
       });
     }
   }, [state.createdInterviewId, interviewId, updateState]);
@@ -226,10 +226,10 @@ export const useElevenLabsInterview = ({
     try {
       const interview = await getInterviewById(id);
       return interview;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Failed to get interview data:', error);
       updateState({ 
-        error: error.message || 'Failed to get interview data'
+        error: error instanceof Error ? error.message : 'Failed to get interview data'
       });
       return null;
     }
@@ -247,7 +247,6 @@ export const useElevenLabsInterview = ({
     callStatus: state.callStatus,
     error: state.error,
     createdInterviewId: state.createdInterviewId,
-    personalizedQuestions: state.personalizedQuestions,
     personalizedRole: state.personalizedRole,
     personalizedTechstack: state.personalizedTechstack,
     isSpeaking: state.isSpeaking,
