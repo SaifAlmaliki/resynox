@@ -12,18 +12,19 @@ import { interviewAnalytics } from "../interview-analytics";
 
 /**
  * Get the current authenticated user
+ * Note: Name will come from resume, this just provides user ID
  */
 export async function getCurrentUser() {
   const { userId } = await auth();
-
+  
   if (!userId) {
     return null;
   }
 
   return {
     id: userId,
-    name: "", // We'll get the name from the session if needed
-    email: "", // We'll get the email from the session if needed
+    name: "", // Name will be populated from selected resume
+    email: "",
   };
 }
 
@@ -280,7 +281,9 @@ export async function createInterview(data: {
     const { userId, role, level, questions, techstack, type } = data;
 
     // Validate required fields
-    if (!userId || !role || !level || !questions.length || !techstack.length) {
+    // Voice interviews don't need questions (ElevenLabs generates them dynamically)
+    const requiresQuestions = type !== "voice";
+    if (!userId || !role || !level || (requiresQuestions && !questions.length) || !techstack.length) {
       return { success: false };
     }
 
