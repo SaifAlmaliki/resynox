@@ -28,7 +28,6 @@ export const Agent = ({
   // Use enhanced session management
   const sessionManager = useInterviewSession({
     interviewId: interviewId || 'generated',
-    userId: userId || 'anonymous',
     maxReconnectAttempts: 3,
     sessionTimeout: 30 * 60 * 1000 // 30 minutes
   });
