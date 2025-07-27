@@ -1,4 +1,5 @@
 import { SubscriptionLevel } from "./subscription";
+import { env } from "@/env";
 import prisma from "./prisma";
 
 export function canCreateResume(subscriptionLevel: SubscriptionLevel, currentResumeCount: number ) {
@@ -84,10 +85,25 @@ export async function canUseVoiceInterview(userId: string): Promise<{ canUse: bo
       return { canUse: true, used: 0, limit: 2 };
     }
 
-    // Check subscription type and set limits accordingly
-    const priceId = subscription.stripePriceId.toLowerCase();
-    const isProPlus = priceId.includes('pro_plus') || priceId.includes('proplus');
-    const isPro = priceId.includes('pro') && !isProPlus;
+    // Check subscription type and set limits accordingly using environment variables
+    const priceId = subscription.stripePriceId;
+    
+    let isProPlus = false;
+    let isPro = false;
+    
+    if (priceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY) {
+      isProPlus = true;
+    } else if (priceId === env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY) {
+      isPro = true;
+    } else {
+      // Fallback: check if it contains identifiable substrings
+      const lowerPriceId = priceId?.toLowerCase() || '';
+      if (lowerPriceId.includes('pro_plus') || lowerPriceId.includes('proplus')) {
+        isProPlus = true;
+      } else if (lowerPriceId.includes('pro')) {
+        isPro = true;
+      }
+    }
     
     let limit: number;
     if (isProPlus) {

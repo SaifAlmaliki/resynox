@@ -86,7 +86,7 @@ export function useInterviewSession({
     setSession(prev => {
       // Validate status transitions
       const validTransitions: Record<CallStatus, CallStatus[]> = {
-        [CallStatus.INACTIVE]: [CallStatus.INITIALIZING],
+        [CallStatus.INACTIVE]: [CallStatus.INITIALIZING, CallStatus.CONNECTING],
         [CallStatus.INITIALIZING]: [CallStatus.CONNECTING, CallStatus.ERROR],
         [CallStatus.CONNECTING]: [CallStatus.ACTIVE, CallStatus.ERROR],
         [CallStatus.ACTIVE]: [CallStatus.PAUSED, CallStatus.FINISHING, CallStatus.ERROR],

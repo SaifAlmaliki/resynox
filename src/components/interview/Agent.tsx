@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useElevenLabsInterview } from "./hooks/useElevenLabsInterview";
 import { InterviewInterface } from "./ui/InterviewInterface";
@@ -21,6 +21,9 @@ export const Agent = ({
   techstack
 }: AgentProps) => {
   const router = useRouter();
+  
+  // Ref to prevent double interview starts
+  const hasStartedRef = useRef(false);
   
   // Use enhanced session management
   const sessionManager = useInterviewSession({
@@ -108,10 +111,14 @@ export const Agent = ({
     }
   }, [interviewId, createdInterviewId, userId, feedbackId, personalizedRole, personalizedTechstack, role, techstack, level, router]);
   
-  // Start the interview automatically when the component mounts
+  // Start the interview automatically when the component mounts (only once)
   useEffect(() => {
-    if (callStatus === CallStatus.INACTIVE) {
+    if (!hasStartedRef.current) {
+      hasStartedRef.current = true;
+      console.log('🎬 Starting interview (single instance)');
+      
       startInterview({
+        candidateName: userName || "User",
         role: role || "Developer",
         experienceLevel: level || "Mid",
         techStack: techstack || [],
@@ -120,7 +127,7 @@ export const Agent = ({
         interviewType: "Technical Interview"
       });
     }
-  }, [callStatus, startInterview, role, level, techstack]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Handle navigation when call is finished
   useEffect(() => {

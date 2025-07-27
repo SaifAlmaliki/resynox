@@ -61,8 +61,8 @@ export type ElevenLabsVariables = typeof EXAMPLE_ELEVENLABS_VARIABLES;
 /**
  * Instructions for setting up ElevenLabs agent:
  * 
- * 1. Copy the prompt from elevenlabs-prompt-template.ts to your ElevenLabs agent
- * 2. Configure these variables in your ElevenLabs agent settings
- * 3. Use {{variable_name}} format in your prompt (ElevenLabs will replace these at runtime)
- * 4. The application will pass these variables when starting the conversation
+ * 1. Configure your interview prompt in your ElevenLabs agent settings
+ * 2. Use {{variable_name}} format in your prompt (ElevenLabs will replace these at runtime)
+ * 3. The application will automatically pass these variables when starting the conversation
+ * 4. All variables listed above should be configured as dynamic variables in ElevenLabs
  */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { createInterview, getInterviewById } from "@/lib/actions/interview.actions";
 import { AgentType, CallStatus } from "@/types/interview";
 import ElevenLabsVoiceAgent, { 
@@ -9,30 +9,19 @@ import ElevenLabsVoiceAgent, {
   startElevenLabsTechnicalInterview 
 } from "@/lib/elevenlabs-voice-agent";
 
-// Define a type for resume data to avoid using 'any'
-interface ResumeData {
-  name?: string;
-  skills?: string[];
-  experience?: string[];
-  education?: string[];
-  [key: string]: unknown; // Allow additional properties
-}
+// Voice interviews use ElevenLabs dynamic variables instead of pre-generated questions
 
 interface UseElevenLabsInterviewProps {
   userName: string;
   userId?: string;
   interviewId?: string;
   type: AgentType;
-  questions?: string[];
-  resumeData?: ResumeData; // Resume data for generating interviews
-  feedbackId?: string; // ID for feedback sessions
 }
 
 interface InterviewState {
   callStatus: CallStatus;
   error: string | null;
   createdInterviewId: string | null;
-  personalizedQuestions: string[];
   personalizedRole: string;
   personalizedTechstack: string[];
   isSpeaking: boolean;
@@ -44,17 +33,13 @@ export const useElevenLabsInterview = ({
   userName,
   userId = '',
   interviewId = '',
-  type = 'interview',
-  questions = [],
-  resumeData,
-  feedbackId
+  type = 'interview'
 }: UseElevenLabsInterviewProps) => {
   // State management
   const [state, setState] = useState<InterviewState>({
     callStatus: CallStatus.INACTIVE,
     error: null,
     createdInterviewId: null,
-    personalizedQuestions: [],
     personalizedRole: '',
     personalizedTechstack: [],
     isSpeaking: false,
@@ -70,8 +55,8 @@ export const useElevenLabsInterview = ({
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  // Voice agent callbacks
-  const voiceCallbacks: VoiceAgentCallbacks = {
+  // Voice agent callbacks (memoized to prevent re-creation on every render)
+  const voiceCallbacks: VoiceAgentCallbacks = useMemo(() => ({
     onStatusChange: (status) => {
       console.log('🔄 Voice agent status changed:', status);
       
@@ -103,7 +88,8 @@ export const useElevenLabsInterview = ({
 
     onMessage: (message) => {
       console.log('💬 New message:', message);
-      updateState(prev => ({
+      setState(prev => ({
+        ...prev,
         messages: [...prev.messages, message],
         lastMessage: message.role === 'assistant' ? message.content : prev.lastMessage
       }));
@@ -121,10 +107,11 @@ export const useElevenLabsInterview = ({
       console.log('📝 Transcript:', { transcript, isFinal });
       // You can add real-time transcript handling here if needed
     }
-  };
+  }), [updateState, setState]);
 
   // Start interview function
   const startInterview = useCallback(async (interviewParams: {
+    candidateName?: string;
     role: string;
     experienceLevel: string;
     techStack: string[];
@@ -147,11 +134,15 @@ export const useElevenLabsInterview = ({
         try {
           const newInterview = await createInterview({
             userId: userId || '',
-            type: type,
-            questions: questions,
-            status: 'in_progress'
+            role: interviewParams.role,
+            level: interviewParams.experienceLevel,
+            questions: [], // Voice interviews don't need pre-generated questions
+            techstack: interviewParams.techStack,
+            type: type
           });
-          finalInterviewId = newInterview.id;
+          if (newInterview.success && newInterview.interviewId) {
+            finalInterviewId = newInterview.interviewId;
+          }
           updateState({ createdInterviewId: finalInterviewId });
         } catch (dbError) {
           console.error('❌ Failed to create interview record:', dbError);
@@ -162,7 +153,7 @@ export const useElevenLabsInterview = ({
       // Prepare technical interview parameters
       const technicalParams: TechnicalInterviewParams = {
         interviewId: finalInterviewId || `temp_${Date.now()}`,
-        candidateName: userName,
+        candidateName: interviewParams.candidateName || userName,
         role: interviewParams.role,
         experienceLevel: interviewParams.experienceLevel,
         techStack: interviewParams.techStack,
@@ -182,8 +173,8 @@ export const useElevenLabsInterview = ({
         // Store personalized data for display
         updateState({
           personalizedRole: interviewParams.role,
-          personalizedTechstack: interviewParams.techStack,
-          personalizedQuestions: questions
+          personalizedTechstack: interviewParams.techStack
+          // Note: Questions are generated dynamically by ElevenLabs, not pre-generated
         });
       } else {
         throw new Error(result.error || 'Failed to start voice interview');
@@ -196,7 +187,7 @@ export const useElevenLabsInterview = ({
         callStatus: CallStatus.ERROR
       });
     }
-  }, [userName, userId, interviewId, type, questions, voiceCallbacks, updateState]);
+  }, [userName, userId, interviewId, type, voiceCallbacks, updateState]);
 
   // End interview function
   const endInterview = useCallback(async () => {
@@ -244,19 +235,12 @@ export const useElevenLabsInterview = ({
     }
   }, [updateState]);
 
-  // Send message function (if needed for manual input)
+  // Send message function (voice-only interface - messages are handled via voice)
   const sendMessage = useCallback(async (message: string) => {
-    try {
-      if (voiceAgentRef.current && voiceAgentRef.current.isActive()) {
-        await voiceAgentRef.current.sendMessage(message);
-      }
-    } catch (error: any) {
-      console.error('❌ Failed to send message:', error);
-      updateState({ 
-        error: error.message || 'Failed to send message'
-      });
-    }
-  }, [updateState]);
+    console.log('💬 Note: ElevenLabs uses voice-only interface. Message would be:', message);
+    // ElevenLabs voice agent doesn't support text message sending
+    // All communication happens through voice interaction
+  }, []);
 
   return {
     // State
