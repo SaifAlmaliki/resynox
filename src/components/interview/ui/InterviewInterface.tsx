@@ -4,7 +4,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { CallStatus, SavedMessage } from "@/types/interview";
 import { Button } from "@/components/ui/button";
-import VapiDebugPanel from './VapiDebugPanel';
+
 
 interface InterviewInterfaceProps {
   callStatus: CallStatus;
@@ -25,9 +25,7 @@ export function InterviewInterface({
 }: InterviewInterfaceProps) {
   return (
     <div className="flex flex-col h-full">
-      {/* Debug Panel - only visible in development */}
-      <VapiDebugPanel />
-      
+
       {/* Error message display */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
