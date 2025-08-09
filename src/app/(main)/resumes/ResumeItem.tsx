@@ -23,7 +23,6 @@ import { ResumeServerData } from "@/lib/types";
 import { mapToResumeValues } from "@/lib/utils";
 import { formatDate } from "date-fns";
 import { MoreVertical, Printer, Download, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -35,34 +34,45 @@ interface ResumeItemProps {
 
 export default function ResumeItem({ resume }: ResumeItemProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const reactToPrintFn = useReactToPrint({
     contentRef,
-    documentTitle: resume.title || "Resume",
+    // Prefer candidate name over resume title to avoid exposing job title in browser headers
+    documentTitle: [resume.firstName, resume.lastName].filter(Boolean).join(" ") || "Resume",
     pageStyle: `
       @page {
         size: A4;
-        margin: 0.75in;
+        /* Keep content margins inside the printable area */
+        margin: 0.5in;
       }
       @media print {
         body {
           font-size: 12pt;
           line-height: 1.4;
           color: #000;
-          background: white;
+          background: #fff;
         }
       }
     `,
   });
 
   const handleDownloadPDF = () => {
-    // Enhanced print trigger that opens browser's print dialog
-    // User can then choose "Save as PDF" or print directly
+    // Notify user to disable browser headers/footers for a clean PDF
+    toast({
+      description:
+        "Tip: In the print dialog, uncheck 'Headers and footers' to remove the date, title, and URL from the PDF.",
+    });
+    // Open browser's print dialog; user can choose 'Save as PDF'
     reactToPrintFn();
   };
 
   const handleDirectPrint = () => {
-    // Same function but with clearer intent for direct printing
+    // Same function; also remind about headers/footers
+    toast({
+      description:
+        "Tip: In the print dialog, uncheck 'Headers and footers' for a professional print.",
+    });
     reactToPrintFn();
   };
 

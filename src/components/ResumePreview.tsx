@@ -42,7 +42,6 @@ export default function ResumePreview({ resumeData, contentRef, className }: Res
         <WorkExperienceSection resumeData={resumeData} />
         <EducationSection resumeData={resumeData} />
         <LanguageSkillsSection resumeData={resumeData} />
-        <SkillsSection resumeData={resumeData} />
       </div>
     </div>
   );
@@ -53,7 +52,7 @@ interface ResumeSectionProps {
 }
 
 function PersonalInfoHeader({ resumeData }: ResumeSectionProps) {
-  const { photo, firstName, lastName, jobTitle, city, country, phone, email, colorHex, borderStyle } = resumeData;
+  const { photo, firstName, lastName, jobTitle, city, country, phone, email, colorHex, borderStyle, skills } = resumeData;
 
   const [photoSrc, setPhotoSrc] = useState(photo instanceof File ? "" : photo);
 
@@ -100,6 +99,16 @@ function PersonalInfoHeader({ resumeData }: ResumeSectionProps) {
           {(city || country) && (phone || email) ? " • " : ""}
           {[phone, email].filter(Boolean).join(" • ")}
         </p>
+
+        {skills?.length ? (
+          <div className="mt-2 flex flex-wrap gap-2 print:gap-1">
+            {skills.map((skill, i) => (
+              <Badge key={i} variant="secondary" className="print:text-[10pt] print:px-2 print:py-0.5">
+                {skill}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -225,26 +234,4 @@ function LanguageSkillsSection({ resumeData }: ResumeSectionProps) {
   );
 }
 
-function SkillsSection({ resumeData }: ResumeSectionProps) {
-  const { skills, colorHex } = resumeData;
-
-  if (!skills?.length) return null;
-
-  return (
-    <>
-      <hr className="border-2 print:border-1" style={{ borderColor: colorHex }} />
-      <div className="break-inside-avoid space-y-3 print:space-y-2">
-        <p className="text-lg font-semibold print:text-base print:font-semibold" style={{ color: colorHex }}>
-          Skills
-        </p>
-        <div className="flex flex-wrap gap-2 print:gap-1">
-          {skills.map((skill, index) => (
-            <Badge key={index} variant="secondary" className="print:text-xs print:px-2 print:py-1">
-              {skill}
-            </Badge>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-}
+// Removed bottom SkillsSection; skills are now displayed under the header
