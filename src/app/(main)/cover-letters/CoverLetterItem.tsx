@@ -204,7 +204,7 @@ function DeleteConfirmationDialog({
         <DialogHeader>
           <DialogTitle>Delete cover letter?</DialogTitle>
           <DialogDescription>
-            This will permanently delete "{title}". This action cannot be undone.
+            This will permanently delete &quot;{title}&quot;. This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
