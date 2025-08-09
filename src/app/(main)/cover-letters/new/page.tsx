@@ -11,6 +11,8 @@ import { getUserResumes } from "@/lib/actions/resume.actions";
 import { getCurrentUser } from "@/lib/actions/interview.actions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import usePremiumModal from "@/hooks/usePremiumModal";
+import PremiumModal from "@/components/premium/PremiumModal";
 
 interface BasicInfo {
   firstName: string;
@@ -27,6 +29,7 @@ interface BasicInfo {
 export default function NewCoverLetterPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const premiumModal = usePremiumModal();
   const [step, setStep] = useState(1);
   const [selectedResume, setSelectedResume] = useState<string | null>(null);
   const [useResume, setUseResume] = useState<boolean | null>(null);
@@ -44,12 +47,33 @@ export default function NewCoverLetterPage() {
   const [jobDescription, setJobDescription] = useState("");
   const [jobDescriptionError, setJobDescriptionError] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
-  const [resumes, setResumes] = useState<any[]>([]);
+  const [resumes, setResumes] = useState<Array<{ id: string; [k: string]: unknown }>>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
   const [generatingCoverLetter, setGeneratingCoverLetter] = useState(false);
-  const [enhancingParagraph, setEnhancingParagraph] = useState<number | null>(null);
+  const [, setEnhancingParagraph] = useState<number | null>(null);
+  const [aiAllowed, setAiAllowed] = useState<boolean | null>(null);
 
+  // Check AI permission once on mount and show paywall if needed
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    async function checkAiPermission() {
+      try {
+        const res = await fetch("/api/permissions/ai-tools", { method: "GET" });
+        if (res.status === 401) {
+          setAiAllowed(false);
+          premiumModal.setOpen(true);
+          return;
+        }
+        const data = await res.json();
+        setAiAllowed(!!data.canUse);
+        if (!data.canUse) premiumModal.setOpen(true);
+      } catch {
+        setAiAllowed(false);
+        premiumModal.setOpen(true);
+      }
+    }
+    checkAiPermission();
+
     async function fetchResumes() {
       setLoadingResumes(true);
       try {
@@ -92,7 +116,7 @@ export default function NewCoverLetterPage() {
       }
       if (!/\S+@\S+\.\S+/.test(basicInfo.email)) {
         toast({
-          variant: "destructive", 
+          variant: "destructive",
           title: "Invalid Email",
           description: "Please enter a valid email address."
         });
@@ -124,6 +148,10 @@ export default function NewCoverLetterPage() {
   };
 
   const handleNext = () => {
+    if (aiAllowed === false) {
+      premiumModal.setOpen(true);
+      return;
+    }
     const totalSteps = getTotalSteps();
     
     // Validation based on current step and path
@@ -190,7 +218,7 @@ export default function NewCoverLetterPage() {
     }
 
     try {
-      const requestBody: any = {
+      const requestBody: Record<string, unknown> = {
         jobDescription,
         content: coverLetter,
         title: basicInfo.coverLetterTitle,
@@ -272,10 +300,14 @@ export default function NewCoverLetterPage() {
   };
 
   const generateCoverLetter = async () => {
+    if (aiAllowed === false) {
+      premiumModal.setOpen(true);
+      return;
+    }
     if ((!useResume && !validateBasicInfo()) || !jobDescription) return;
     setGeneratingCoverLetter(true);
     try {
-      const requestBody: any = {
+      const requestBody: Record<string, unknown> = {
         jobDescription,
       };
 
@@ -317,11 +349,16 @@ export default function NewCoverLetterPage() {
     } catch (error) {
       console.error("Error generating cover letter:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate cover letter. Please try again.";
-      toast({
-        variant: "destructive",
-        title: "Generation Failed",
-        description: errorMessage
-      });
+      // If subscription blocks AI usage, open the Premium modal instead of toasting
+      if (typeof errorMessage === "string" && errorMessage.toLowerCase().includes("upgrade")) {
+        premiumModal.setOpen(true);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Generation Failed",
+          description: errorMessage
+        });
+      }
     } finally {
       setGeneratingCoverLetter(false);
     }
@@ -431,7 +468,7 @@ export default function NewCoverLetterPage() {
             variant="outline"
             className="min-w-[150px]"
           >
-            {generatingCoverLetter ? "Regenerating..." : "🔄 Regenerate"}
+            {generatingCoverLetter ? "Regenerating..." : " Regenerate"}
           </Button>
         </div>
       </div>
@@ -736,6 +773,8 @@ export default function NewCoverLetterPage() {
           </div>
         </Card>
       </div>
+      {/* Premium modal mount */}
+      <PremiumModal />
     </div>
   );
-} 
+}
