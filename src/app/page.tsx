@@ -2,7 +2,6 @@
 
 import {
   HeroSection,
-  StatsSection,
   HowItWorksSection,
   SuccessStoriesSection,
   FAQSection,
@@ -14,7 +13,6 @@ import { Footer } from '@/components/ui/footer';
 
 import {
   heroData,
-  statsData,
   howItWorksData,
   successStoriesData,
   faqData,
@@ -31,7 +29,6 @@ export default function Home() {
       <main>
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 pt-24">
           <HeroSection {...heroData} />
-          <StatsSection stats={statsData} />
           <HowItWorksSection {...howItWorksData} />
           <SuccessStoriesSection {...successStoriesData} />
           <FAQSection {...faqData} />

@@ -52,6 +52,7 @@ export default function Footer({ currentStep, setCurrentStep, showSmResumePrevie
           title={
             showSmResumePreview ? "Show input form" : "Show resume preview"
           }
+          className="md:hidden" // Show only on mobile; hide on md and larger
         >
           {showSmResumePreview ? <PenLineIcon /> : <FileUserIcon />}
         </Button>

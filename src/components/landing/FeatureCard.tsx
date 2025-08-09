@@ -9,7 +9,7 @@ interface FeatureCardProps {
 
 export function FeatureCard({ icon: Icon, title, description, step }: FeatureCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-md border border-gray-200 dark:border-gray-700 text-center hover:shadow-lg transition-shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-md border border-gray-200 dark:border-gray-700 text-center hover:shadow-lg transition-shadow h-full flex flex-col">
       <div className="h-16 w-16 rounded-full bg-green-900/10 dark:bg-green-900/30 flex items-center justify-center mb-4 mx-auto border border-green-800/20">
         <Icon className="h-8 w-8 text-green-800 dark:text-green-100" />
       </div>
@@ -21,4 +21,4 @@ export function FeatureCard({ icon: Icon, title, description, step }: FeatureCar
       </p>
     </div>
   );
-} 
+}

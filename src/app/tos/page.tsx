@@ -28,7 +28,7 @@ export default function Page() {
       {/* Page Header */}
       <h1 className="text-center text-2xl font-bold">Terms of Service</h1>
       <p className="text-center text-sm text-muted-foreground">
-        Effective Date: Oct 31, 2024
+        Effective Date: Oct 31, 2025
       </p>
 
       {/* Introduction */}

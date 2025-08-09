@@ -162,7 +162,7 @@ export const footerData: FooterData = {
     { label: "Terms of Service", href: "/tos" },
     { label: "Cookies", href: "/cookies" }
   ],
-  copyright: "© 2024 RESYNOX. All rights reserved.",
+  copyright: "© 2025 RESYNOX. All rights reserved.",
   variant: "simple" as const
 };
 
@@ -172,9 +172,8 @@ export const simpleFooterData: FooterData = {
   bottomLinks: [
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/tos" },
-    { label: "Support", href: "/contact" },
     { label: "Contact", href: "/contact" }
   ],
-  copyright: "© 2024 RESYNOX. All rights reserved.",
+  copyright: "© 2025 RESYNOX. All rights reserved.",
   variant: "simple" as const
 };

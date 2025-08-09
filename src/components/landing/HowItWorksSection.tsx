@@ -1,3 +1,4 @@
+import React from "react";
 import { LucideIcon } from "lucide-react";
 import { FeatureCard } from "./FeatureCard";
 
@@ -24,18 +25,22 @@ export function HowItWorksSection({ title, subtitle, steps }: HowItWorksSectionP
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 stagger-container">
-        {steps.map((step, index) => (
-          <div key={index} className="stagger-item" style={{ '--item-index': index } as any}>
-            <FeatureCard
-              icon={step.icon}
-              title={step.title}
-              description={step.description}
-              step={step.step}
-            />
-          </div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch stagger-container">
+        {steps.map((step, index) => {
+          type CSSWithVar = React.CSSProperties & { ['--item-index']?: number };
+          const itemStyle: CSSWithVar = { ['--item-index']: index };
+          return (
+            <div key={index} className="stagger-item h-full" style={itemStyle}>
+              <FeatureCard
+                icon={step.icon}
+                title={step.title}
+                description={step.description}
+                step={step.step}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
-} 
+}

@@ -61,8 +61,26 @@ export async function saveResume(values: ResumeValues) {
 
   // Check if the user is attempting to use customizations (e.g., borderStyle, custom colors)
   // and ensure that their subscription level permits it.
-  const hasCustomizations = (resumeValues.borderStyle && resumeValues.borderStyle !== existingResume?.borderStyle) ||
-    (resumeValues.colorHex && resumeValues.colorHex !== existingResume?.colorHex);
+  // Note:
+  // - On initial creation (no existing resume), allow default values without treating them as customizations.
+  //   Defaults are: borderStyle = "squircle", colorHex = "#000000".
+  // - Only treat as customization on create if user deviates from these defaults.
+  // - On update, compare against existing stored values.
+  const DEFAULT_BORDER_STYLE = "squircle";
+  const DEFAULT_COLOR_HEX = "#000000";
+
+  const hasCustomizations = (() => {
+    if (!existingResume) {
+      // Creating a new resume
+      const borderChangedFromDefault = !!resumeValues.borderStyle && resumeValues.borderStyle !== DEFAULT_BORDER_STYLE;
+      const colorChangedFromDefault = !!resumeValues.colorHex && resumeValues.colorHex !== DEFAULT_COLOR_HEX;
+      return borderChangedFromDefault || colorChangedFromDefault;
+    }
+    // Updating an existing resume
+    const borderChanged = !!resumeValues.borderStyle && resumeValues.borderStyle !== existingResume.borderStyle;
+    const colorChanged = !!resumeValues.colorHex && resumeValues.colorHex !== existingResume.colorHex;
+    return borderChanged || colorChanged;
+  })();
 
   if (hasCustomizations && !canUseCustomizations(subscriptionLevel)) {
     throw new Error("Customizations not allowed for this subscription level");

@@ -47,14 +47,14 @@ export default function ContactPage() {
               </p>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                 <a 
-                  href="mailto:resynox24@gmail.com"
+                  href="mailto:support@idraq.com"
                   className="text-green-800 dark:text-green-100 font-semibold text-lg hover:text-green-900 dark:hover:text-white transition-colors"
                 >
-                  resynox24@gmail.com
+                  support@idraq.com
                 </a>
               </div>
               <a
-                href="mailto:resynox24@gmail.com"
+                href="mailto:support@idraq.com"
                 className="inline-flex items-center gap-2 bg-green-800 hover:bg-green-900 text-white px-6 py-3 rounded-lg font-medium transition-colors"
               >
                 <Mail className="h-4 w-4" />

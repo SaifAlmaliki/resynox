@@ -1,14 +1,14 @@
 import { BriefcaseIcon, FileText, Mic, TrendingUp, User } from "lucide-react";
 
 export const heroData = {
-  title: "Your Complete Career Preparation Platform",
-  subtitle: "Create professional resumes and practice interviews with our AI-powered tools. Stand out from the crowd with personalized content and feedback.",
+  title: "Build. Tailor. Practice. Get Hired.",
+  subtitle: "Resynox is your AI career co‑pilot. Create a standout resume, generate tailored cover letters, and practice real voice interviews—with instant, actionable feedback.",
   primaryCTA: {
-    text: "Get Started",
+    text: "Start Free",
     href: "#cta-section"
   },
   secondaryCTA: {
-    text: "How It Works",
+    text: "See How It Works",
     href: "#how-it-works"
   },
   splineScene: "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
@@ -22,31 +22,31 @@ export const statsData = [
 ];
 
 export const howItWorksData = {
-  title: "How It Works",
-  subtitle: "Our platform simplifies your job search preparation with a few easy steps",
+  title: "Everything you need:end to end",
+  subtitle: "Go from a blank page to interview‑ready in minutes, not weeks.",
   steps: [
     {
       icon: FileText,
       title: "Create Your Resume",
-      description: "Build a professional resume with our AI-powered tools and templates",
+      description: "AI drafting for summaries and experience bullets. Beautiful, customizable templates with drag‑and‑drop sections.",
       step: 1
     },
     {
       icon: FileText,
       title: "Generate Cover Letter",
-      description: "Create tailored cover letters based on your resume and job descriptions",
+      description: "Instant, role‑specific cover letters tailored to your resume and target job description.",
       step: 2
     },
     {
       icon: Mic,
       title: "Practice Interviews",
-      description: "Prepare for real interviews with our AI-powered mock interviews",
+      description: "Realistic voice interviews powered by ElevenLabs. Natural back‑and‑forth conversation.",
       step: 3
     },
     {
       icon: TrendingUp,
       title: "Get Feedback",
-      description: "Receive detailed feedback and improve your performance",
+      description: "Structured scoring and clear next steps. Track progress across sessions and improve fast.",
       step: 4
     }
   ]
@@ -108,27 +108,27 @@ export const faqData = {
 };
 
 export const ctaData = {
-  title: "Ready to Boost Your Career?",
-  subtitle: "Join thousands of professionals who have transformed their job search with our platform. Get started today and take the first step toward your dream career.",
+  title: "Ready to get more interviews?",
+  subtitle: "Join professionals who turned applications into offers with AI‑powered resumes, tailored cover letters, and real voice interview practice.",
   ctas: [
     {
       icon: FileText,
       title: "Resume Builder",
-      description: "Create a professional resume in minutes with our AI-powered tools. Choose from modern templates and get personalized content suggestions.",
+      description: "Create a professional resume in minutes. AI writing assistance, modern templates, color & layout controls.",
       buttonText: "Build Resume",
       href: "/resumes"
     },
     {
       icon: FileText,
       title: "Cover Letter Generator",
-      description: "Generate tailored cover letters based on your resume and job descriptions. Create compelling cover letters that stand out to employers.",
+      description: "One‑click, tailored cover letters aligned with your resume and the job you want.",
       buttonText: "Create Cover Letter",
       href: "/cover-letters"
     },
     {
       icon: Mic,
       title: "Mock Interviews",
-      description: "Practice with AI-powered interviews and get instant feedback. Improve your interview skills with realistic voice-based mock interviews.",
+      description: "Practice realistic voice interviews and get actionable feedback with clear scores.",
       buttonText: "Start Interview",
       href: "/interview/generate"
     }
