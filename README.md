@@ -19,7 +19,7 @@ Resynox is a comprehensive AI-powered career preparation platform that combines 
 - **Export & Print**: Download or print resumes directly from the app
 
 ### Mock Interview System
-- **AI Voice Interviews**: Conduct realistic mock interviews using VAPI (Voice AI Platform) integration
+- **AI Voice Interviews**: Conduct realistic mock interviews using ElevenLabs Voice Agent integration
 - **Personalized Interview Questions**: Tailored questions based on role, experience level, and tech stack
 - **Real-time Voice Interaction**: Natural conversation flow with AI interviewer
 - **Performance Feedback**: Detailed AI-generated feedback with scoring and improvement suggestions
@@ -55,7 +55,7 @@ Resynox is a comprehensive AI-powered career preparation platform that combines 
 ### AI & Voice Integration
 - **Google AI SDK**: AI content generation and processing
 - **OpenAI API**: Alternative AI provider for content generation
-- **VAPI (Voice AI Platform)**: Real-time voice interview functionality
+- **ElevenLabs Voice Agent**: Real-time voice interview functionality with dynamic variables
 - **AI SDK**: Unified AI integration layer
 
 ### Authentication & Payments
@@ -86,7 +86,7 @@ Resynox is a comprehensive AI-powered career preparation platform that combines 
 - Google AI API key or OpenAI API key
 - Clerk authentication credentials
 - Stripe API keys
-- VAPI account and API keys
+- ElevenLabs Agent ID (see `ELEVENLABS_SETUP_INSTRUCTIONS.md`)
 - Vercel Blob storage token
 
 ### Installation
@@ -106,30 +106,38 @@ Resynox is a comprehensive AI-powered career preparation platform that combines 
 3. **Configure environment variables:**
    Create a `.env` file with the following variables:
    ```env
-   # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/your_database"
+   # === Database (PostgreSQL) ===
+   POSTGRES_URL="postgresql://username:password@localhost:5432/your_database"
+   POSTGRES_PRISMA_URL="postgresql://username:password@localhost:5432/your_database?pgbouncer=true&connection_limit=1"
+   POSTGRES_USER="username"
+   POSTGRES_HOST="localhost"
+   POSTGRES_PASSWORD="password"
+   POSTGRES_DATABASE="your_database"
 
-   # Clerk Authentication
+   # === Clerk Authentication ===
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
    CLERK_SECRET_KEY=your_clerk_secret_key
 
-   # VAPI Configuration
-   NEXT_PUBLIC_VAPI_WEB_TOKEN=your_vapi_web_token
-   NEXT_PUBLIC_VAPI_ASSISTANT_ID=your_vapi_assistant_id
-
-   # Google AI
+   # === AI Providers ===
+   OPENAI_API_KEY=your_openai_api_key
    GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key
 
-   # Payments (Stripe)
+   # === Payments (Stripe) ===
    STRIPE_SECRET_KEY=your_stripe_secret_key
    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-   NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY=your_stripe_price_id
+   NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_MONTHLY=price_id_pro
+   NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_PLUS_MONTHLY=price_id_pro_plus
 
-   # Storage
+   # === Storage ===
    BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
 
-   # App Configuration
+   # === Voice Interviews (ElevenLabs) ===
+   NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your_elevenlabs_agent_id
+
+   # === App Configuration ===
    NEXT_PUBLIC_BASE_URL=http://localhost:3000
    ```
 
@@ -189,11 +197,16 @@ src/
 │   └── premium/           # Premium feature components
 ├── lib/                   # Utility functions and services
 │   ├── actions/           # Server actions
-│   ├── vapi.*.ts          # VAPI integration files
+│   ├── elevenlabs-voice-agent.ts  # ElevenLabs voice agent wrapper
+│   ├── elevenlabs-variables.ts    # Dynamic variables passed to ElevenLabs
 │   └── validation.ts      # Schema validation
 ├── hooks/                 # Custom React hooks
 ├── types/                 # TypeScript type definitions
 └── constants/             # Application constants
+
+prisma/
+├── schema.prisma          # Prisma schema (uses POSTGRES_URL)
+└── migrations/            # Prisma migrations
 ```
 
 ---
@@ -215,7 +228,7 @@ npm start
 - Ensure all environment variables are properly configured
 - Set up PostgreSQL database (recommended: Neon, Supabase, or Railway)
 - Configure Stripe webhooks for subscription management
-- Set up VAPI workspace and assistant configurations
+- Set up ElevenLabs agent with variables per `ELEVENLABS_SETUP_INSTRUCTIONS.md`
 
 ---
 
@@ -234,7 +247,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 ---
 
 ## Acknowledgements
-- [VAPI](https://vapi.ai/) - Voice AI Platform for interview functionality
+- [ElevenLabs](https://elevenlabs.io/) - Voice AI Platform for interview functionality
 - [Google AI](https://ai.google.dev/) - AI content generation
 - [OpenAI](https://openai.com/) - Alternative AI provider
 - [Clerk](https://clerk.com/) - Authentication and user management
@@ -243,6 +256,12 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 - [Prisma](https://www.prisma.io/) - Database ORM
 - [Tailwind CSS](https://tailwindcss.com/) - CSS framework
 - [Vercel](https://vercel.com/) - Deployment and blob storage
+
+---
+
+## Notes
+* __Prisma Client Initialization__: The project uses a Next.js-friendly Prisma client pattern in `src/lib/prisma.ts` to avoid connection exhaustion during development.
+* __Voice Interview Limits__: See `src/lib/permissions.ts`. Defaults: Free 2/month, Pro 3/month, Pro Plus 5/month. Usage auto-tracks via `user_subscriptions`.
 
 ---
 
