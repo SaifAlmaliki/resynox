@@ -103,6 +103,7 @@ const InterviewGeneratePage = () => {
   const [interviewId, setInterviewId] = useState<string | null>(null);
   const [isStartingInterview, setIsStartingInterview] = useState(false);
   const [voiceUsageStatus, setVoiceUsageStatus] = useState<{ canUse: boolean; used: number; limit: number }>({ canUse: false, used: 0, limit: 0 });
+  const [isLoadingResumes, setIsLoadingResumes] = useState(true);
 
   // Check voice interview usage status
   useEffect(() => {
@@ -126,6 +127,7 @@ const InterviewGeneratePage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        setIsLoadingResumes(true);
         const userData = await getCurrentUser();
         if (userData) {
           setUser(userData);
@@ -134,6 +136,8 @@ const InterviewGeneratePage = () => {
         }
       } catch (error) {
         console.error("Error loading data:", error);
+      } finally {
+        setIsLoadingResumes(false);
       }
     };
 
@@ -246,10 +250,6 @@ const InterviewGeneratePage = () => {
     setTechStack(techStack.filter(t => t !== tech));
   };
 
-  // Voice interviews skip question generation - ElevenLabs handles questions dynamically
-
-  // Voice interviews skip question generation - ElevenLabs handles questions dynamically
-
   // Start the interview
   const handleStartInterview = async () => {
     if (!user || !targetRole || techStack.length === 0) {
@@ -335,39 +335,70 @@ const InterviewGeneratePage = () => {
                 <p className="text-sm text-muted-foreground">
                   Choose a resume to auto-populate interview details, or skip to configure manually.
                 </p>
+                {isLoadingResumes && (
+                  <div className="flex items-center text-sm text-muted-foreground gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading your resumes...
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {resumes.map((resume) => (
-                    <Card 
-                      key={resume.id} 
-                      className={cn(
-                        "cursor-pointer transition-colors hover:bg-muted/50",
-                        selectedResumeId === resume.id && "ring-2 ring-primary"
-                      )}
-                      onClick={() => handleResumeSelect(resume.id)}
-                    >
-                      <CardContent className="pt-4">
-                        <h4 className="font-medium">{resume.title || "Untitled Resume"}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {resume.jobTitle || "No job title"}
-                        </p>
-                        {resume.skills && resume.skills.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {resume.skills.slice(0, 3).map((skill) => (
-                              <Badge key={skill} variant="secondary" className="text-xs">
-                                {skill}
-                              </Badge>
-                            ))}
-                            {resume.skills.length > 3 && (
-                              <Badge variant="secondary" className="text-xs">
-                                +{resume.skills.length - 3} more
-                              </Badge>
+                  {isLoadingResumes ? (
+                    <>
+                      {[0,1].map((i) => (
+                        <Card key={i} className="animate-pulse">
+                          <CardContent className="pt-4">
+                            <div className="h-5 w-1/2 bg-muted rounded mb-2" />
+                            <div className="h-4 w-1/3 bg-muted rounded mb-3" />
+                            <div className="flex gap-2">
+                              <div className="h-5 w-16 bg-muted rounded" />
+                              <div className="h-5 w-14 bg-muted rounded" />
+                              <div className="h-5 w-12 bg-muted rounded" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      {resumes.map((resume) => (
+                        <Card 
+                          key={resume.id} 
+                          className={cn(
+                            "cursor-pointer transition-colors hover:bg-muted/50",
+                            selectedResumeId === resume.id && "ring-2 ring-primary"
+                          )}
+                          onClick={() => handleResumeSelect(resume.id)}
+                        >
+                          <CardContent className="pt-4">
+                            <h4 className="font-medium">{resume.title || "Untitled Resume"}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {resume.jobTitle || "No job title"}
+                            </p>
+                            {resume.skills && resume.skills.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {resume.skills.slice(0, 3).map((skill) => (
+                                  <Badge key={skill} variant="secondary" className="text-xs">
+                                    {skill}
+                                  </Badge>
+                                ))}
+                                {resume.skills.length > 3 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{resume.skills.length - 3} more
+                                  </Badge>
+                                )}
+                              </div>
                             )}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                          </CardContent>
+                        </Card>
+                      ))}
+                      {!isLoadingResumes && resumes.length === 0 && (
+                        <div className="col-span-full text-sm text-muted-foreground">
+                          No resumes found. You can skip and configure manually.
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <div className="flex justify-between">
@@ -376,7 +407,7 @@ const InterviewGeneratePage = () => {
                   </Button>
                   <Button 
                     onClick={() => setActiveStep(1)}
-                    disabled={!selectedResumeId}
+                    disabled={isLoadingResumes || !selectedResumeId}
                   >
                     Continue with Selected Resume
                   </Button>

@@ -10,14 +10,11 @@ const MIN_INTERVIEW_DURATION_MINUTES = 5;
 // In Next.js 15, params is a Promise
 async function FeedbackPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   // Await the params Promise to get the actual values
   const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
   const user = await getCurrentUser();
   
   if (!user) {
@@ -64,7 +61,7 @@ async function FeedbackPage({
   }
 
   return (
-    <div className="container py-8 max-w-4xl mx-auto">
+    <div className="container py-8 px-4 sm:px-6 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Interview Feedback</h1>
         <div className="flex flex-wrap gap-2 mb-4">
