@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { useElevenLabsInterview } from "./hooks/useElevenLabsInterview";
 import { InterviewInterface } from "./ui/InterviewInterface";
 import { createFeedback } from "@/lib/actions/interview.actions";
@@ -21,6 +22,7 @@ export const Agent = ({
   techstack
 }: AgentProps) => {
   const router = useRouter();
+  const { user } = useUser();
   
   // Ref to prevent double interview starts
   const hasStartedRef = useRef(false);
@@ -41,7 +43,13 @@ export const Agent = ({
     startInterview,
     endInterview
   } = useElevenLabsInterview({
-    userName,
+    userName: useMemo(() => (
+      userName ||
+      user?.fullName ||
+      user?.username ||
+      user?.primaryEmailAddress?.emailAddress ||
+      "User"
+    ), [userName, user]),
     type
   });
 
@@ -117,7 +125,7 @@ export const Agent = ({
       console.log('🎬 Starting interview (single instance)');
       
       startInterview({
-        candidateName: userName || "User",
+        // Do not pass candidateName here. The hook will resolve to the actual logged-in name.
         role: role || "Developer",
         experienceLevel: level || "Mid",
         techStack: techstack || [],

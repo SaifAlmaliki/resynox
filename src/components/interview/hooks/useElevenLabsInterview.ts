@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useMemo } from "react";
+import { useUser } from "@clerk/nextjs";
 import { createInterview, getInterviewById } from "@/lib/actions/interview.actions";
 import { AgentType, CallStatus } from "@/types/interview";
 import ElevenLabsVoiceAgent, { 
@@ -35,6 +36,17 @@ export const useElevenLabsInterview = ({
   interviewId = '',
   type = 'interview'
 }: UseElevenLabsInterviewProps) => {
+  // Pull logged-in user as a fallback for candidateName if resume isn't selected
+  const { user } = useUser();
+  const effectiveUserName = useMemo(() => {
+    return (
+      userName ||
+      user?.fullName ||
+      user?.username ||
+      user?.primaryEmailAddress?.emailAddress ||
+      "User"
+    );
+  }, [userName, user]);
   // State management
   const [state, setState] = useState<InterviewState>({
     callStatus: CallStatus.INACTIVE,
@@ -151,9 +163,15 @@ export const useElevenLabsInterview = ({
       }
 
       // Prepare technical interview parameters
+      // Prefer a meaningful name: if param is missing or equals the generic fallback "User",
+      // use the logged-in name (effectiveUserName)
+      const resolvedCandidateName = (
+        interviewParams.candidateName && interviewParams.candidateName !== "User"
+      ) ? interviewParams.candidateName : effectiveUserName;
+
       const technicalParams: TechnicalInterviewParams = {
         interviewId: finalInterviewId || `temp_${Date.now()}`,
-        candidateName: interviewParams.candidateName || userName,
+        candidateName: resolvedCandidateName,
         role: interviewParams.role,
         experienceLevel: interviewParams.experienceLevel,
         techStack: interviewParams.techStack,
@@ -187,7 +205,7 @@ export const useElevenLabsInterview = ({
         callStatus: CallStatus.ERROR
       });
     }
-  }, [userName, userId, interviewId, type, voiceCallbacks, updateState]);
+  }, [effectiveUserName, userId, interviewId, type, voiceCallbacks, updateState]);
 
   // End interview function
   const endInterview = useCallback(async () => {

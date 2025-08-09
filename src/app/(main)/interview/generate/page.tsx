@@ -248,22 +248,7 @@ const InterviewGeneratePage = () => {
 
   // Voice interviews skip question generation - ElevenLabs handles questions dynamically
 
-  // Get candidate name from selected resume
-  const getCandidateName = () => {
-    const selectedResume = resumes.find(r => r.id === selectedResumeId);
-    const resumeFirstName = selectedResume?.firstName || '';
-    const resumeLastName = selectedResume?.lastName || '';
-    const resumeName = `${resumeFirstName} ${resumeLastName}`.trim();
-    
-    console.log('🔍 Debug - Selected resume:', selectedResume?.title);
-    console.log('🔍 Debug - Resume firstName:', resumeFirstName);
-    console.log('🔍 Debug - Resume lastName:', resumeLastName);
-    console.log('🔍 Debug - Resume full name:', resumeName);
-    
-    const finalName = resumeName || user?.name || "User";
-    console.log('🔍 Debug - Final userName passed to Agent:', finalName);
-    return finalName;
-  };
+  // Voice interviews skip question generation - ElevenLabs handles questions dynamically
 
   // Start the interview
   const handleStartInterview = async () => {
@@ -322,7 +307,6 @@ const InterviewGeneratePage = () => {
       {/* Show Agent component if interview is started */}
       {interviewId && (
         <Agent
-          userName={getCandidateName()}
           userId={user?.id || ""}
           interviewId={interviewId}
           type="interview"

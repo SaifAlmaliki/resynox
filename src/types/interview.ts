@@ -50,7 +50,7 @@ export interface InterviewCardProps {
 }
 
 export interface AgentProps {
-  userName: string;
+  userName?: string;
   userId?: string;
   interviewId?: string;
   feedbackId?: string;
