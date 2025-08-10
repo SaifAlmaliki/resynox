@@ -50,7 +50,6 @@ export default function NewCoverLetterPage() {
   const [resumes, setResumes] = useState<Array<{ id: string; [k: string]: unknown }>>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
   const [generatingCoverLetter, setGeneratingCoverLetter] = useState(false);
-  const [, setEnhancingParagraph] = useState<number | null>(null);
   const [aiAllowed, setAiAllowed] = useState<boolean | null>(null);
 
   // Check AI permission once on mount and show paywall if needed
@@ -370,46 +369,6 @@ export default function NewCoverLetterPage() {
 
 
 
-  const enhanceParagraph = async (paragraphIndex: number) => {
-    if (!coverLetter?.trim()) return;
-    
-    setEnhancingParagraph(paragraphIndex);
-    try {
-      const response = await fetch("/api/cover-letters/enhance", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          paragraph: coverLetter.trim(),
-          jobDescription,
-          context: useResume ? 'resume-based' : 'standalone'
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to enhance cover letter");
-      }
-      
-      const data = await response.json();
-      setCoverLetter(data.enhancedParagraph);
-      
-      toast({
-        title: "Enhanced!",
-        description: "Your cover letter has been enhanced with AI suggestions."
-      });
-    } catch (error) {
-      console.error("Error enhancing cover letter:", error);
-      toast({
-        variant: "destructive",
-        title: "Enhancement Failed",
-        description: "Failed to enhance cover letter. Please try again."
-      });
-    } finally {
-      setEnhancingParagraph(null);
-    }
-  };
-
   useEffect(() => {
     const totalSteps = getTotalSteps();
     if (step === totalSteps) {
@@ -705,7 +664,7 @@ export default function NewCoverLetterPage() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Job Description & Cover Letter Title</h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Give your cover letter a title and paste the job description for the position you're applying to
+                Give your cover letter a title and paste the job description for the position you&apos;re applying to
               </p>
               
               {/* Cover Letter Title for Resume Users */}
@@ -747,7 +706,7 @@ export default function NewCoverLetterPage() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Your Cover Letter</h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Review and edit your cover letter. Use the "Enhance" buttons to improve individual paragraphs with AI.
+                Review and edit your cover letter. Use the &quot;Enhance&quot; buttons to improve individual paragraphs with AI.
               </p>
               {generatingCoverLetter ? (
                 <div className="text-center py-8">
