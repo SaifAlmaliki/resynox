@@ -545,9 +545,15 @@ export default function NewCoverLetterPage() {
                                 }`}
                                 onClick={() => setSelectedResume(resume.id)}
                               >
-                                <div className="font-medium text-sm">{resume.title || "No title"}</div>
+                                <div className="font-medium text-sm">
+                                  {typeof resume.title === "string" && resume.title.trim().length > 0
+                                    ? resume.title
+                                    : "No title"}
+                                </div>
                                 <div className="text-xs text-gray-500">
-                                  {resume.description || "No description"}
+                                  {typeof resume.description === "string" && resume.description.trim().length > 0
+                                    ? resume.description
+                                    : "No description"}
                                 </div>
                               </div>
                             ))}

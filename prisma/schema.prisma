@@ -119,11 +119,29 @@ model UserSubscription {
   voiceInterviewsUsed     Int      @default(0)          // Number of voice interviews used in current billing period
   voiceInterviewsResetDate DateTime?                    // Date when voice interview count was last reset (matches billing period)
 
+  // Points-based billing
+  pointsBalance           Int      @default(0)          // Current available points (rollover supported)
+  pointsAllowance         Int      @default(0)          // Monthly allowance added on each renewal (e.g., 40 or 80)
+  starterPointsGrantedAt  DateTime?                     // Timestamp when one-time starter points were granted
+
   // Timestamps.
   createdAt DateTime @default(now()) // Automatically set when created.
   updatedAt DateTime @updatedAt      // Automatically updated on modification.
 
   @@map("user_subscriptions") // Maps this model to the `user_subscriptions` table in the database.
+}
+
+// PointsTransaction model: audit log of all point balance changes
+model PointsTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  delta     Int                              // Positive for credit, negative for deduction
+  reason    String                           // e.g., "monthly_allowance", "cover_letter", "voice_session_start", "ai_refund", "starter_bonus"
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@map("points_transactions")
+  @@index([userId, createdAt])
 }
 
 // Interview model: Represents mock interviews created by users

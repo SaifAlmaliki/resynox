@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import openai from "@/lib/openai";
 import { getUserSubscriptionLevel } from "@/lib/subscription";
 import { canUseAITools } from "@/lib/permissions";
+import { POINT_COSTS, hasPoints, deductPoints, creditPoints } from "@/lib/points";
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Check subscription level for AI tools
+    // Check subscription level for AI tools (legacy gating retained for now)
     const subscriptionLevel = await getUserSubscriptionLevel(userId);
     if (!canUseAITools(subscriptionLevel)) {
       return new NextResponse("Please upgrade your subscription to use AI tools", { status: 403 });
@@ -54,6 +55,19 @@ export async function POST(req: Request) {
       if (!userInfo.firstName || !userInfo.lastName || !userInfo.email) {
         return new NextResponse("First name, last name, and email are required", { status: 400 });
       }
+    }
+
+    // Points gating: require at least 5 points
+    const cost = POINT_COSTS.cover_letter;
+    const sufficient = await hasPoints(userId, cost);
+    if (!sufficient) {
+      return new NextResponse("Insufficient points. Cover letter generation requires 5 points.", { status: 402 });
+    }
+
+    // Deduct points up front; refund on failure
+    const deduct = await deductPoints(userId, cost, "cover_letter_generate", { resumeId: resumeId ?? null });
+    if (!deduct.ok) {
+      return new NextResponse(deduct.message || "Insufficient points", { status: 402 });
     }
 
     // AI-powered job description analysis using OpenAI
@@ -327,10 +341,18 @@ ${applicantName}${resume?.email ? `\n${resume.email}` : userInfo?.email ? `\n${u
       }
     };
 
-    const coverLetter = await generateTailoredCoverLetter(jobAnalysis, resume, userInfo);
+    let coverLetter = "";
+    try {
+      coverLetter = await generateTailoredCoverLetter(jobAnalysis, resume, userInfo);
+    } catch (err) {
+      // Refund points on AI failure
+      await creditPoints(userId, cost, "refund_cover_letter_failure");
+      throw err;
+    }
 
     if (!coverLetter || coverLetter.trim().length === 0) {
       console.error("Empty cover letter generated");
+      await creditPoints(userId, cost, "refund_cover_letter_empty_output");
       return new NextResponse("Failed to generate cover letter content", { status: 500 });
     }
 

@@ -66,7 +66,8 @@ export async function canUseVoiceInterview(userId: string): Promise<{ canUse: bo
           userId,
           stripeCustomerId: `free_${userId}`, // Placeholder for free users
           stripeSubscriptionId: `free_sub_${userId}`, // Placeholder for free users
-          stripePriceId: 'free_tier',
+          // Empty string signifies no paid price; do not call Stripe with this
+          stripePriceId: '',
           stripeCurrentPeriodEnd: nextMonth,
           voiceInterviewsUsed: 0,
           voiceInterviewsResetDate: now
@@ -172,7 +173,8 @@ export async function incrementVoiceInterviewUsage(userId: string): Promise<void
           userId,
           stripeCustomerId: `free_${userId}`,
           stripeSubscriptionId: `free_sub_${userId}`,
-          stripePriceId: 'free_tier',
+          // Empty string signifies no paid price; do not call Stripe with this
+          stripePriceId: '',
           stripeCurrentPeriodEnd: nextMonth,
           voiceInterviewsUsed: 1, // Start with 1 since we're incrementing
           voiceInterviewsResetDate: now

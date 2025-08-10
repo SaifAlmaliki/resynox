@@ -2,11 +2,11 @@
 
 import { NavLink } from "./nav-link";
 import { Button } from "./button";
-import { Menu, X, FileText, Mic, CreditCard, Mail } from "lucide-react";
+import { Menu, X, FileText, Mic, CreditCard, Mail, Tag } from "lucide-react";
+
 import { useState } from "react";
 import Link from "next/link";
 import Image, { StaticImageData } from "next/image";
-import logo from "@/assets/logo.png";
 
 // Icon mapping for string-based icons
 const iconMap = {
@@ -14,6 +14,7 @@ const iconMap = {
   Mic,
   CreditCard,
   Mail,
+  Tag,
 } as const;
 
 interface NavItem {

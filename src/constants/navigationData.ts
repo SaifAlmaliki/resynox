@@ -2,7 +2,7 @@ import logo from "@/assets/logo.png";
 import { StaticImageData } from "next/image";
 
 // Icon types matching the FloatingHeader component
-type IconType = "FileText" | "Mic" | "CreditCard" | "Mail";
+type IconType = "FileText" | "Mic" | "CreditCard" | "Mail" | "Tag";
 
 // Type definitions
 interface NavItem {
@@ -92,7 +92,7 @@ export const floatingHeaderData: FloatingHeaderData = {
     {
       label: "Pricing",
       href: "/pricing",
-      icon: "CreditCard"
+      icon: "Tag"
     }
   ],
   ctaButton: {

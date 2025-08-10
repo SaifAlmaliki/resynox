@@ -5,6 +5,7 @@
 import openai from "@/lib/openai";
 import { canUseAITools } from "@/lib/permissions";
 import { getUserSubscriptionLevel } from "@/lib/subscription";
+import { POINT_COSTS, hasPoints, deductPoints, creditPoints } from "@/lib/points";
 import {
   GenerateSummaryInput,
   generateSummarySchema,
@@ -28,6 +29,17 @@ export async function generateSummary(input: GenerateSummaryInput) {
 
   if (!canUseAITools(subscriptionLevel)) {
     throw new Error("Upgrade your subscription to use this feature");
+  }
+
+  // Points gating and deduction for resume summary
+  const cost = POINT_COSTS.resume_summary;
+  const sufficient = await hasPoints(userId, cost);
+  if (!sufficient) {
+    throw new Error("Insufficient points. Generating a resume summary requires 4 points.");
+  }
+  const deducted = await deductPoints(userId, cost, "resume_summary_generate");
+  if (!deducted.ok) {
+    throw new Error(deducted.message || "Insufficient points");
   }
 
   const { jobTitle, workExperiences, educations, skills } = generateSummarySchema.parse(input);
@@ -71,19 +83,26 @@ export async function generateSummary(input: GenerateSummaryInput) {
   console.log("userMessage", userMessage);
 
   // Call the OpenAI API to generate a summary
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
-    messages: [
-      { role: "system", content: systemMessage },
-      { role: "user", content: userMessage },
-    ],
-    temperature: 0.7, // Slightly creative but still professional
-    max_tokens: 1500, // Allow for a comprehensive cover letter
-  });
+  let completion;
+  try {
+    completion = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        { role: "system", content: systemMessage },
+        { role: "user", content: userMessage },
+      ],
+      temperature: 0.7,
+      max_tokens: 1500,
+    });
+  } catch (e) {
+    await creditPoints(userId, cost, "refund_resume_summary_failure");
+    throw e;
+  }
 
   const aiResponse = completion.choices[0].message.content;
 
   if (!aiResponse) {
+    await creditPoints(userId, cost, "refund_resume_summary_empty_output");
     throw new Error("Failed to generate AI response");
   }
 
@@ -102,6 +121,17 @@ export async function generateWorkExperience(input: GenerateWorkExperienceInput)
 
   if (!canUseAITools(subscriptionLevel)) {
     throw new Error("Upgrade your subscription to use this feature");
+  }
+
+  // Points gating and deduction for enhance experience
+  const cost = POINT_COSTS.enhance_experience;
+  const sufficient = await hasPoints(userId, cost);
+  if (!sufficient) {
+    throw new Error("Insufficient points. Smart fill requires 2 points.");
+  }
+  const deducted = await deductPoints(userId, cost, "enhance_experience_generate");
+  if (!deducted.ok) {
+    throw new Error(deducted.message || "Insufficient points");
   }
 
   const { description } = generateWorkExperienceSchema.parse(input);
@@ -123,19 +153,26 @@ export async function generateWorkExperience(input: GenerateWorkExperienceInput)
   `;
 
   // Call the OpenAI API to generate a work experience entry
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
-    messages: [
-      { role: "system", content: systemMessage },
-      { role: "user", content: userMessage },
-    ],
-    temperature: 0.7, // Slightly creative but still professional
-    max_tokens: 1500, // Allow for a comprehensive cover letter
-  });
+  let completion;
+  try {
+    completion = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        { role: "system", content: systemMessage },
+        { role: "user", content: userMessage },
+      ],
+      temperature: 0.7, // Slightly creative but still professional
+      max_tokens: 1500, // Allow for a comprehensive cover letter
+    });
+  } catch (e) {
+    await creditPoints(userId, cost, "refund_enhance_experience_failure");
+    throw e;
+  }
 
   const aiResponse = completion.choices[0].message.content;
 
   if (!aiResponse) {
+    await creditPoints(userId, cost, "refund_enhance_experience_empty_output");
     throw new Error("Failed to generate AI response");
   }
 

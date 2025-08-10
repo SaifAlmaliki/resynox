@@ -24,10 +24,36 @@ const getUserButtonAppearance = (theme: string | undefined) => ({
 export default function Navbar() {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [points, setPoints] = useState<number>(0);
 
   // Prevent hydration mismatch by only rendering theme-dependent content after mount
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Fetch points balance on mount
+  useEffect(() => {
+    let active = true;
+    const fetchPoints = async () => {
+      try {
+        const res = await fetch('/api/points/balance', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (active) setPoints(typeof data.points === 'number' ? data.points : 0);
+      } catch {
+        if (active) setPoints(0);
+      }
+    };
+
+    // initial fetch
+    fetchPoints();
+
+    // refetch on focus/visibility change
+    const onFocus = () => fetchPoints();
+    const onVisibility = () => { if (document.visibilityState === 'visible') fetchPoints(); };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { active = false; };
   }, []);
 
   return (
@@ -81,6 +107,10 @@ export default function Navbar() {
             
             {/* Right Side Actions */}
             <div className="flex items-center gap-3">
+              {/* Points badge (always visible) */}
+              <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 text-green-900 text-sm font-medium border border-green-100 shadow-sm">
+                <span>Points: {points}</span>
+              </div>
               {/* Theme Toggle with dark green styling */}
               <div className="p-1 rounded-full hover:bg-green-800/50 transition-colors">
                 <ThemeToggle />

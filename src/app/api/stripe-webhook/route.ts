@@ -1,6 +1,7 @@
 import { env } from "@/env";
 import prisma from "@/lib/prisma";
 import stripe from "@/lib/stripe";
+import { applyMonthlyAllowance } from "@/lib/points";
 import { clerkClient } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import Stripe from "stripe";
@@ -45,6 +46,19 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.updated":
         // Handle new subscriptions and subscription updates
         await handleSubscriptionCreatedOrUpdated(event.data.object.id);
+        // On creation/update, also ensure allowance value is stored; initial grant happens on 'created'
+        if (event.type === "customer.subscription.created") {
+          const subscription = event.data.object as Stripe.Subscription;
+          const userId = subscription.metadata?.userId as string | undefined;
+          if (userId) {
+            // Credit monthly allowance immediately on subscription creation
+            await applyMonthlyAllowance(userId);
+          }
+        }
+        break;
+      case "invoice.payment_succeeded":
+        // Add monthly allowance on successful invoice payment (renewal)
+        await handleInvoicePaid(event.data.object as Stripe.Invoice);
         break;
       case "customer.subscription.deleted":
         // Handle subscription cancellations
@@ -60,6 +74,22 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error(error);
     return new Response("Internal server error", { status: 500 });
+  }
+}
+
+// Handler for successful invoice payments (renewals)
+async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  try {
+    // Get the subscription to access metadata (userId)
+    const subscriptionId = invoice.subscription as string | undefined;
+    if (!subscriptionId) return;
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const userId = subscription.metadata?.userId as string | undefined;
+    if (!userId) return;
+    // Credit monthly allowance with rollover
+    await applyMonthlyAllowance(userId);
+  } catch (err) {
+    console.error("Failed to process invoice.payment_succeeded for points allowance:", err);
   }
 }
 
