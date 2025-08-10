@@ -346,6 +346,10 @@ export default function NewCoverLetterPage() {
         throw new Error("No content received from AI service");
       }
       setCoverLetter(data.content);
+      // Notify navbar to refresh points after successful generation
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('points:update'));
+      }
     } catch (error) {
       console.error("Error generating cover letter:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate cover letter. Please try again.";

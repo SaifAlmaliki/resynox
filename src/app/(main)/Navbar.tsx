@@ -31,7 +31,7 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
-  // Fetch points balance on mount
+  // Fetch points balance on mount and on custom events
   useEffect(() => {
     let active = true;
     const fetchPoints = async () => {
@@ -51,9 +51,16 @@ export default function Navbar() {
     // refetch on focus/visibility change
     const onFocus = () => fetchPoints();
     const onVisibility = () => { if (document.visibilityState === 'visible') fetchPoints(); };
+    const onPointsUpdate = () => fetchPoints();
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onVisibility);
-    return () => { active = false; };
+    window.addEventListener('points:update', onPointsUpdate as EventListener);
+    return () => {
+      active = false;
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('points:update', onPointsUpdate as EventListener);
+    };
   }, []);
 
   return (
