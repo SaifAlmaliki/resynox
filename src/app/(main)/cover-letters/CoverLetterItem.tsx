@@ -1,6 +1,7 @@
 "use client";
 
 import LoadingButton from "@/components/LoadingButton";
+import CoverLetterPreview from "@/components/CoverLetterPreview";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,9 +19,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "date-fns";
-import { FileText, MoreVertical, Download, Trash2 } from "lucide-react";
+import { FileText, MoreVertical, Download, Trash2, Printer } from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 
 interface CoverLetterItemProps {
   coverLetter: {
@@ -30,10 +32,32 @@ interface CoverLetterItemProps {
     content: string;
     createdAt: Date;
     updatedAt: Date;
+    resume?: {
+      id: string;
+      title: string | null;
+      firstName: string | null;
+      lastName: string | null;
+      email: string | null;
+      phone: string | null;
+      city: string | null;
+      country: string | null;
+    } | null;
+    parsedMetadata?: {
+      basicInfo?: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string;
+        city?: string;
+        country?: string;
+      };
+    };
   };
 }
 
 export default function CoverLetterItem({ coverLetter }: CoverLetterItemProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   const wasUpdated = coverLetter.updatedAt.getTime() !== coverLetter.createdAt.getTime();
 
   const getTitle = () => {
@@ -47,13 +71,47 @@ export default function CoverLetterItem({ coverLetter }: CoverLetterItemProps) {
     return firstLine || 'Untitled Cover Letter';
   };
 
-  const getDescription = () => {
-    // Get first few words of job description as description
-    const words = coverLetter.jobDescription.split(' ').slice(0, 12);
-    return words.length >= 12 ? words.join(' ') + '...' : words.join(' ');
+  const reactToPrintFn = useReactToPrint({
+    contentRef,
+    documentTitle: getTitle(),
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 0.5in;
+      }
+      @media print {
+        body {
+          font-size: 12pt;
+          line-height: 1.4;
+          color: #000;
+          background: #fff;
+        }
+      }
+    `,
+  });
+
+
+
+  const handleDownloadPDF = () => {
+    // Notify user to disable browser headers/footers for a clean PDF
+    toast({
+      description:
+        "Tip: In the print dialog, uncheck 'Headers and footers' to remove the date, title, and URL from the PDF.",
+    });
+    // Open browser's print dialog; user can choose 'Save as PDF'
+    reactToPrintFn();
   };
 
-  const handleDownload = () => {
+  const handleDirectPrint = () => {
+    // Same function; also remind about headers/footers
+    toast({
+      description:
+        "Tip: In the print dialog, uncheck 'Headers and footers' for a professional print.",
+    });
+    reactToPrintFn();
+  };
+
+  const handleDownloadTXT = () => {
     // Create a downloadable text file
     const element = document.createElement('a');
     const file = new Blob([coverLetter.content], { type: 'text/plain' });
@@ -72,29 +130,27 @@ export default function CoverLetterItem({ coverLetter }: CoverLetterItemProps) {
           className="inline-block w-full text-center"
         >
           <p className="line-clamp-1 font-semibold">{getTitle()}</p>
-          <p className="line-clamp-2 text-sm">{getDescription()}</p>
           <p className="text-xs text-muted-foreground">
             {wasUpdated ? "Updated" : "Created"} on{" "}
             {formatDate(coverLetter.updatedAt, "MMM d, yyyy h:mm a")}
           </p>
         </Link>
 
-        <Link
-          href={`/cover-letters/edit/${coverLetter.id}`}
-          className="relative inline-block w-full"
-        >
-          <div className="flex h-32 items-center justify-center rounded border bg-white shadow-sm transition-shadow group-hover:shadow-lg">
-            <div className="text-center">
-              <FileText className="mx-auto h-8 w-8 text-green-600 mb-2" />
-              <p className="text-xs text-muted-foreground">Cover Letter</p>
-            </div>
-          </div>
-        </Link>
+        <div className="relative inline-block w-full">
+          <CoverLetterPreview
+            coverLetter={coverLetter}
+            contentRef={contentRef}
+            className="overflow-hidden shadow-sm transition-shadow group-hover:shadow-lg"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
+        </div>
       </div>
 
       <MoreMenu 
         coverLetterId={coverLetter.id} 
-        onDownloadClick={handleDownload}
+        onDownloadPDFClick={handleDownloadPDF}
+        onPrintClick={handleDirectPrint}
+        onDownloadTXTClick={handleDownloadTXT}
         title={getTitle()}
       />
     </div>
@@ -103,11 +159,13 @@ export default function CoverLetterItem({ coverLetter }: CoverLetterItemProps) {
 
 interface MoreMenuProps {
   coverLetterId: string;
-  onDownloadClick: () => void;
+  onDownloadPDFClick: () => void;
+  onPrintClick: () => void;
+  onDownloadTXTClick: () => void;
   title: string;
 }
 
-function MoreMenu({ coverLetterId, onDownloadClick, title }: MoreMenuProps) {
+function MoreMenu({ coverLetterId, onDownloadPDFClick, onPrintClick, onDownloadTXTClick, title }: MoreMenuProps) {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   return (
@@ -126,18 +184,34 @@ function MoreMenu({ coverLetterId, onDownloadClick, title }: MoreMenuProps) {
         <DropdownMenuContent>
           <DropdownMenuItem
             className="flex items-center gap-2"
-            onClick={() => setShowDeleteConfirmation(true)}
+            onClick={onDownloadPDFClick}
           >
-            <Trash2 className="size-4" />
-            Delete
+            <Download className="size-4" />
+            Download PDF
           </DropdownMenuItem>
 
           <DropdownMenuItem
             className="flex items-center gap-2"
-            onClick={onDownloadClick}
+            onClick={onPrintClick}
           >
-            <Download className="size-4" />
-            Download
+            <Printer className="size-4" />
+            Print Cover Letter
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="flex items-center gap-2"
+            onClick={onDownloadTXTClick}
+          >
+            <FileText className="size-4" />
+            Download TXT
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="flex items-center gap-2"
+            onClick={() => setShowDeleteConfirmation(true)}
+          >
+            <Trash2 className="size-4" />
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

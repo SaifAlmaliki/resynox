@@ -392,6 +392,83 @@ body {
   }
 }
 
+/* Enhanced Print Styles for A4 Cover Letter */
+@media print {
+  /* Hide everything except the cover letter content */
+  body * {
+    visibility: hidden;
+  }
+
+  #coverLetterPreviewContent,
+  #coverLetterPreviewContent * {
+    visibility: visible;
+  }
+
+  #coverLetterPreviewContent {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    zoom: 1 !important;
+    scale: 1 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+
+  /* Optimize text sizes for print */
+  #coverLetterPreviewContent h1,
+  #coverLetterPreviewContent .text-2xl {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+    margin-bottom: 8pt !important;
+  }
+
+  #coverLetterPreviewContent h2,
+  #coverLetterPreviewContent .text-xl {
+    font-size: 16pt !important;
+    font-weight: bold !important;
+    margin-bottom: 6pt !important;
+  }
+
+  #coverLetterPreviewContent .text-sm {
+    font-size: 10pt !important;
+  }
+
+  /* Optimize spacing for print */
+  #coverLetterPreviewContent .space-y-6 > * + * {
+    margin-top: 16pt !important;
+  }
+
+  #coverLetterPreviewContent .space-y-4 > * + * {
+    margin-top: 12pt !important;
+  }
+
+  #coverLetterPreviewContent .space-y-2 > * + * {
+    margin-top: 4pt !important;
+  }
+
+  /* Optimize padding for print */
+  #coverLetterPreviewContent .p-6 {
+    padding: 0 !important;
+  }
+
+  #coverLetterPreviewContent .pt-4 {
+    padding-top: 8pt !important;
+  }
+
+  /* Page breaks */
+  #coverLetterPreviewContent {
+    page-break-inside: avoid;
+  }
+}
+
 #resumePreviewContent {
   transform-origin: top left;
   overflow: visible !important;

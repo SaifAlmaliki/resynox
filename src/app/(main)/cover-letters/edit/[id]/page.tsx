@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+
 interface CoverLetter {
   id: string;
   title: string | null;
@@ -168,7 +169,21 @@ export default function EditCoverLetterPage() {
       });
       
       if (!response.ok) {
-        throw new Error("Failed to enhance cover letter");
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || "Failed to enhance cover letter";
+        
+        // Handle specific error cases
+        if (response.status === 402) {
+          // Insufficient points
+          toast({
+            variant: "destructive",
+            title: "Insufficient Points",
+            description: errorMessage
+          });
+        } else {
+          throw new Error(errorMessage);
+        }
+        return;
       }
       
       const data = await response.json();
@@ -178,6 +193,11 @@ export default function EditCoverLetterPage() {
         title: "Enhanced!",
         description: "Your cover letter has been enhanced with AI suggestions."
       });
+      
+      // Notify navbar to refresh points after successful enhancement
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('points:update'));
+      }
     } catch (error) {
       console.error("Error enhancing cover letter:", error);
       toast({
@@ -201,7 +221,7 @@ export default function EditCoverLetterPage() {
             placeholder="Your cover letter content will appear here..."
           />
         </div>
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center space-y-2">
           <Button
             onClick={() => enhanceParagraph(0)}
             disabled={enhancingParagraph === 0 || !content.trim()}
@@ -210,6 +230,9 @@ export default function EditCoverLetterPage() {
           >
             {enhancingParagraph === 0 ? "Enhancing..." : "✨ Enhance with AI"}
           </Button>
+          <p className="text-xs text-muted-foreground">
+            Cost: 5 points
+          </p>
         </div>
       </div>
     );
@@ -217,13 +240,12 @@ export default function EditCoverLetterPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const year = date.getFullYear();
+    const month = date.toLocaleDateString('en-US', { month: 'long' });
+    const day = date.getDate();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${month} ${day}, ${year} at ${hours}:${minutes}`;
   };
 
   const getCreatorInfo = () => {

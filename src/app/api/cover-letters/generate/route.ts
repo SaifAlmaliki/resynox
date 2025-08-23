@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import openai from "@/lib/openai";
-import { getUserSubscriptionLevel } from "@/lib/subscription";
-import { canUseAITools } from "@/lib/permissions";
+
 import { POINT_COSTS, hasPoints, deductPoints, creditPoints } from "@/lib/points";
 
 export async function POST(req: Request) {
@@ -13,11 +12,7 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Check subscription level for AI tools (legacy gating retained for now)
-    const subscriptionLevel = await getUserSubscriptionLevel(userId);
-    if (!canUseAITools(subscriptionLevel)) {
-      return new NextResponse("Please upgrade your subscription to use AI tools", { status: 403 });
-    }
+
 
     const body = await req.json();
     const { resumeId, jobDescription, basicInfo } = body;

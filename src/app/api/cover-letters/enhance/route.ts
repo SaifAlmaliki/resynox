@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import openai from "@/lib/openai";
+import { POINT_COSTS, hasPoints, deductPoints } from "@/lib/points";
 
 export async function POST(req: Request) {
   try {
@@ -9,11 +10,26 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+
+
     const body = await req.json();
     const { paragraph, jobDescription, context } = body;
 
     if (!paragraph || !jobDescription) {
       return new NextResponse("Paragraph and job description are required", { status: 400 });
+    }
+
+    // Points gating: require at least 5 points for enhancement
+    const cost = POINT_COSTS.cover_letter_enhance;
+    const sufficient = await hasPoints(userId, cost);
+    if (!sufficient) {
+      return new NextResponse("Insufficient points. Cover letter enhancement requires 5 points.", { status: 402 });
+    }
+
+    // Deduct points up front; refund on failure
+    const deduct = await deductPoints(userId, cost, "cover_letter_enhance");
+    if (!deduct.ok) {
+      return new NextResponse(deduct.message || "Insufficient points", { status: 402 });
     }
 
     // AI-powered enhancement using OpenAI
