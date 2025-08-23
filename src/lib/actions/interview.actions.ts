@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { CreateFeedbackParams, GetFeedbackByInterviewIdParams, GetLatestInterviewsParams, SavedMessage } from "@/types/interview";
 import { z } from "zod";
 import { interviewAnalytics } from "../interview-analytics";
+import { POINT_COSTS, hasPoints, deductPoints } from "@/lib/points";
 
 /**
  * Get the current authenticated user
@@ -287,8 +288,55 @@ export async function createInterview(data: {
       return { success: false };
     }
 
-    // If this is a voice interview, check and increment usage
+    // For voice interviews: perform only a cheap points sufficiency check before creation
     if (type === "voice") {
+      const cost = POINT_COSTS.voice_session_start;
+      const sufficient = await hasPoints(userId, cost);
+      if (!sufficient) {
+        return { success: false };
+      }
+    }
+
+    // Create the interview
+    let interview;
+    try {
+      interview = await (prisma as PrismaClient).interview.create({
+        data: {
+          userId,
+          role,
+          level,
+          questions,
+          techstack,
+          type,
+          finalized: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+    } catch (err) {
+      // No deduction occurred yet, so no refund needed here
+      throw err;
+    }
+
+    // After interview is created: deduct points for voice and increment legacy usage
+    if (type === "voice") {
+      const cost = POINT_COSTS.voice_session_start;
+      const deducted = await deductPoints(userId, cost, "voice_session_start", {
+        interviewId: interview.id,
+        role,
+        experienceLevel: level,
+        interviewType: type,
+        techStack: techstack,
+        userId,
+        requestedQuestions: Array.isArray(questions) ? questions.length : 0,
+      });
+      if (!deducted.ok) {
+        // Roll back the created interview if payment failed
+        await (prisma as PrismaClient).interview.delete({ where: { id: interview.id } });
+        return { success: false };
+      }
+
+      // Legacy usage increment after successful deduction
       const subscription = await (prisma as PrismaClient).userSubscription.findUnique({
         where: { userId }
       });
@@ -296,8 +344,7 @@ export async function createInterview(data: {
       if (subscription) {
         const now = new Date();
         const periodEnd = new Date(subscription.stripeCurrentPeriodEnd);
-        
-        // Check if we need to reset the counter (new billing period)
+
         if (now > periodEnd) {
           await (prisma as PrismaClient).userSubscription.update({
             where: { userId },
@@ -307,7 +354,6 @@ export async function createInterview(data: {
             }
           });
         } else {
-          // Increment the usage count
           await (prisma as PrismaClient).userSubscription.update({
             where: { userId },
             data: {
@@ -317,21 +363,6 @@ export async function createInterview(data: {
         }
       }
     }
-
-    // Create the interview
-    const interview = await (prisma as PrismaClient).interview.create({
-      data: {
-        userId,
-        role,
-        level,
-        questions,
-        techstack,
-        type,
-        finalized: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
 
     revalidatePath("/interview");
     return { 

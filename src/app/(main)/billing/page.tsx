@@ -26,11 +26,16 @@ export default async function Page() {
     where: { userId },
   });
 
-  const priceInfo = subscription
-    ? await stripe.prices.retrieve(subscription.stripePriceId, {
-        expand: ["product"],
-      })
-    : null;
+  // Safely resolve Stripe price info. Avoid calling Stripe for placeholder/free tiers.
+  let priceInfo: Stripe.Price | null = null;
+  const priceId = subscription?.stripePriceId;
+  if (priceId && priceId !== "free_tier") {
+    try {
+      priceInfo = await stripe.prices.retrieve(priceId, { expand: ["product"] });
+    } catch {
+      priceInfo = null;
+    }
+  }
 
 
   return (

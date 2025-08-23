@@ -10,11 +10,18 @@ export type SubscriptionLevel = "free" | "pro" | "pro_plus";
 export const getUserSubscriptionLevel = cache(
   async (userId: string): Promise<SubscriptionLevel> => {
     // Fetch the user's subscription from the database
-    const subscription = await prisma.userSubscription.findUnique({
-      where: {
-        userId, // Filter by user ID
-      },
-    });
+    let subscription: Awaited<ReturnType<typeof prisma.userSubscription.findUnique>> | null = null;
+    try {
+      subscription = await prisma.userSubscription.findUnique({
+        where: {
+          userId, // Filter by user ID
+        },
+      });
+    } catch (err) {
+      // If DB is unreachable (e.g., local dev without DB), default to free to avoid crashing the app
+      console.warn("getUserSubscriptionLevel: prisma error, defaulting to 'free'", err);
+      return "free";
+    }
 
     // If no subscription exists or it has expired, default to "free"
     if (!subscription || !subscription.stripeCurrentPeriodEnd || subscription.stripeCurrentPeriodEnd < new Date()) {
@@ -36,6 +43,11 @@ export const getUserSubscriptionLevel = cache(
       // Check if it contains identifiable substrings
       const priceId = subscription.stripePriceId.toLowerCase();
       
+      // Explicitly treat any free markers as free tier
+      if (priceId.includes('free')) {
+        return 'free';
+      }
+
       // Check for Pro Plus subscription based on naming pattern
       if (priceId.includes('pro_plus') || priceId.includes('proplus')) {
         return 'pro_plus';
@@ -48,8 +60,7 @@ export const getUserSubscriptionLevel = cache(
     // Log the invalid subscription for debugging
     console.log("Invalid subscription with price ID:", subscription.stripePriceId);
     
-    // Default to "pro" instead of throwing an error
-    // This ensures the app doesn't crash if a subscription can't be identified
-    return "pro";
+    // Default to "free" to avoid granting unintended access when price ID is unknown
+    return "free";
   }
 );

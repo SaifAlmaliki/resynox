@@ -44,19 +44,19 @@ export default async function PricingPage() {
                   <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-green-800"></div>
                   </div>
-                  <span>1 resume</span>
+                  <span>Create resumes — 0pts required</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-green-800"></div>
+                  </div>
+                  <span>Customize layout & colors — 0pts</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-green-800"></div>
                   </div>
                   <span>1 cover letter (manual only)</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-green-900/20 dark:bg-green-900/40 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-green-800"></div>
-                  </div>
-                  <span>ATS-friendly resume format</span>
                 </li>
               </ul>
               <div className="mt-auto">
@@ -89,31 +89,7 @@ export default async function PricingPage() {
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>Unlimited resumes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white"></div>
-                  </div>
-                  <span>3 cover letters</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white"></div>
-                  </div>
-                  <span>AI-powered resume enhancement</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white"></div>
-                  </div>
-                  <span>AI cover letters matching job descriptions</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white"></div>
-                  </div>
-                  <span>Format and coloring customizations</span>
+                  <span>40 points / month (rollover)</span>
                 </li>
               </ul>
               <div className="mt-auto">
@@ -137,25 +113,7 @@ export default async function PricingPage() {
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-white"></div>
                   </div>
-                  <span>Everything in Pro</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white"></div>
-                  </div>
-                  <span>10 cover letters</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white"></div>
-                  </div>
-                  <span>5 voice agent interviews per month</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-white"></div>
-                  </div>
-                  <span>AI interview feedback & analysis</span>
+                  <span>80 points / month (rollover)</span>
                 </li>
               </ul>
               <div className="mt-auto">
@@ -164,6 +122,39 @@ export default async function PricingPage() {
                   currentSubscription={subscriptionLevel}
                   isAuthenticated={!!userId}
                 />
+              </div>
+            </div>
+          </div>
+          {/* Generic points cost section */}
+          <div className="max-w-4xl mx-auto mt-14">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700">
+              <h2 className="text-2xl font-semibold mb-4 text-center">Points cost for AI actions</h2>
+              <p className="text-center text-gray-600 dark:text-gray-400 mb-6">Applies to all plans. Unused points roll over.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-blue-900/10 dark:bg-blue-900/30 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-blue-800"></div>
+                  </div>
+                  <span>Cover letter generation — 5 pts</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-blue-900/10 dark:bg-blue-900/30 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-blue-800"></div>
+                  </div>
+                  <span>Resume summary — 4 pts</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-blue-900/10 dark:bg-blue-900/30 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-blue-800"></div>
+                  </div>
+                  <span>Enhance work experience — 2 pts</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-blue-900/10 dark:bg-blue-900/30 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-blue-800"></div>
+                  </div>
+                  <span>Start voice interview session — 10 pts</span>
+                </div>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { BriefcaseIcon, FileText, Mic, TrendingUp, User } from "lucide-react";
+import { BriefcaseIcon, FileText, Mail, Mic, TrendingUp, User } from "lucide-react";
 
 export const heroData = {
   title: "Build. Tailor. Practice. Get Hired.",
@@ -32,7 +32,7 @@ export const howItWorksData = {
       step: 1
     },
     {
-      icon: FileText,
+      icon: Mail,
       title: "Generate Cover Letter",
       description: "Instant, role‑specific cover letters tailored to your resume and target job description.",
       step: 2
@@ -119,7 +119,7 @@ export const ctaData = {
       href: "/resumes"
     },
     {
-      icon: FileText,
+      icon: Mail,
       title: "Cover Letter Generator",
       description: "One‑click, tailored cover letters aligned with your resume and the job you want.",
       buttonText: "Create Cover Letter",
