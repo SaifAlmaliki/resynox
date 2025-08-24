@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { applyMonthlyAllowanceIfNeeded, getPointBalance } from "@/lib/points";
+import { applyMonthlyAllowanceIfNeeded, getPointBalance, ensureUserSubscriptionAndStarterPoints } from "@/lib/points";
 
 export async function GET() {
   try {
@@ -10,7 +10,15 @@ export async function GET() {
     }
 
     let points = 0;
+    let isNewUser = false;
+    let pointsGranted = 0;
+    
     try {
+      // Ensure new users have subscription and starter points
+      const { isNewUser: newUser, pointsGranted: granted } = await ensureUserSubscriptionAndStarterPoints(userId);
+      isNewUser = newUser;
+      pointsGranted = granted;
+      
       // Ensure monthly allowance is applied for the current period
       await applyMonthlyAllowanceIfNeeded(userId);
       // Read current balance
@@ -20,7 +28,12 @@ export async function GET() {
       points = 0;
     }
 
-    return NextResponse.json({ points });
+    return NextResponse.json({ 
+      points, 
+      isNewUser, 
+      pointsGranted,
+      message: isNewUser && pointsGranted > 0 ? "Welcome! You've received 30 starter points." : undefined
+    });
   } catch {
     return NextResponse.json({ points: 0 }, { status: 500 });
   }

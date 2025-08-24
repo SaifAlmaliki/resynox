@@ -10,12 +10,13 @@ import { useEffect, useState } from "react";
 import logo from "@/assets/logo.png";
 import ThemeToggle from "@/components/ThemeToggle";
 import { NavLink } from "@/components/ui/nav-link";
-
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function Navbar() {
   const { theme } = useTheme();
   const [points, setPoints] = useState<number>(0);
+  const { toast } = useToast();
 
   // Fetch points balance on mount and on custom events
   useEffect(() => {
@@ -25,7 +26,18 @@ export default function Navbar() {
         const res = await fetch('/api/points/balance', { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
-        if (active) setPoints(typeof data.points === 'number' ? data.points : 0);
+        if (active) {
+          setPoints(typeof data.points === 'number' ? data.points : 0);
+          
+          // Show welcome toast for new users who received starter points
+          if (data.isNewUser && data.pointsGranted > 0 && data.message) {
+            toast({
+              title: "Welcome to RESYNOX! 🎉",
+              description: data.message,
+              duration: 5000,
+            });
+          }
+        }
       } catch {
         if (active) setPoints(0);
       }
@@ -47,7 +59,7 @@ export default function Navbar() {
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('points:update', onPointsUpdate as EventListener);
     };
-  }, []);
+  }, [toast]);
 
   return (
     <header className="sticky top-0 z-40 w-full">

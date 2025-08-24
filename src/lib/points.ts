@@ -80,6 +80,51 @@ export async function grantStarterPointsIfNeeded(userId: string) {
   ]);
 }
 
+// Ensure new users have subscription record and starter points
+export async function ensureUserSubscriptionAndStarterPoints(userId: string): Promise<{ isNewUser: boolean; pointsGranted: number }> {
+  let sub = await prisma.userSubscription.findUnique({ where: { userId } });
+  let isNewUser = false;
+  let pointsGranted = 0;
+
+  // If no subscription exists, create one for free users
+  if (!sub) {
+    const now = new Date();
+    const nextMonth = new Date(now);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    
+    sub = await prisma.userSubscription.create({
+      data: {
+        userId,
+        stripeCustomerId: `free_${userId}`, // Placeholder for free users
+        stripeSubscriptionId: `free_sub_${userId}`, // Placeholder for free users
+        stripePriceId: '', // Empty string signifies no paid price
+        stripeCurrentPeriodEnd: nextMonth,
+        pointsBalance: 0,
+        pointsAllowance: 0,
+        voiceInterviewsUsed: 0,
+        voiceInterviewsResetDate: now
+      }
+    });
+    isNewUser = true;
+  }
+
+  // Grant starter points if not already granted
+  if (!sub.starterPointsGrantedAt) {
+    await prisma.$transaction([
+      prisma.userSubscription.update({
+        where: { userId },
+        data: { starterPointsGrantedAt: new Date(), pointsBalance: { increment: 30 } },
+      }),
+      prisma.pointsTransaction.create({
+        data: { userId, delta: 30, reason: "starter_bonus" },
+      }),
+    ]);
+    pointsGranted = 30;
+  }
+
+  return { isNewUser, pointsGranted };
+}
+
 // Apply monthly allowance with rollover
 export async function applyMonthlyAllowance(userId: string): Promise<number> {
   const sub = await prisma.userSubscription.findUnique({ where: { userId } });
