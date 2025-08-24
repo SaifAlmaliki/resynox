@@ -136,6 +136,7 @@ export const POINT_COSTS = {
   enhance_experience: 2,
   resume_summary: 4,
   cover_letter: 5,
+  cover_letter_enhance: 5,
   voice_session_start: 10,
   feedback: 0,
 } as const;

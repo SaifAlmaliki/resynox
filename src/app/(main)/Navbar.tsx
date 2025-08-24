@@ -1,7 +1,7 @@
 "use client";
 import { UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import { CreditCard } from "lucide-react";
+import { CreditCard, FileText, Mail, Mic } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,25 +11,11 @@ import logo from "@/assets/logo.png";
 import ThemeToggle from "@/components/ThemeToggle";
 import { NavLink } from "@/components/ui/nav-link";
 
-const getUserButtonAppearance = (theme: string | undefined) => ({
-  baseTheme: theme === "dark" ? dark : undefined,
-  elements: {
-    avatarBox: {
-      width: 35,
-      height: 35,
-    },
-  },
-});
+
 
 export default function Navbar() {
   const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [points, setPoints] = useState<number>(0);
-
-  // Prevent hydration mismatch by only rendering theme-dependent content after mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Fetch points balance on mount and on custom events
   useEffect(() => {
@@ -88,26 +74,30 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-1">
               <NavLink 
                 href="/resumes" 
-                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200 flex items-center gap-2"
               >
+                <FileText className="h-4 w-4" />
                 Resumes
               </NavLink>
               <NavLink 
                 href="/cover-letters" 
-                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200 flex items-center gap-2"
               >
+                <Mail className="h-4 w-4" />
                 Cover Letters
               </NavLink>
               <NavLink 
                 href="/interview" 
-                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200 flex items-center gap-2"
               >
+                <Mic className="h-4 w-4" />
                 Interviews
               </NavLink>
               <NavLink 
                 href="/billing" 
-                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200 flex items-center gap-2"
               >
+                <CreditCard className="h-4 w-4" />
                 Billing
               </NavLink>
             </div>
@@ -123,49 +113,26 @@ export default function Navbar() {
                 <ThemeToggle />
               </div>
 
-              {/* User Button - only render theme-dependent appearance after mount */}
-              {mounted ? (
-                <UserButton 
-                  appearance={{
-                    ...getUserButtonAppearance(theme),
-                    elements: {
-                      ...getUserButtonAppearance(theme).elements,
-                      avatarBox: {
-                        ...getUserButtonAppearance(theme).elements?.avatarBox,
-                        border: '2px solid rgba(255, 255, 255, 0.2)',
-                      },
+              {/* User Button - simplified to prevent hydration issues */}
+              <UserButton 
+                appearance={{
+                  elements: {
+                    avatarBox: {
+                      width: 35,
+                      height: 35,
+                      border: '2px solid rgba(255, 255, 255, 0.2)',
                     },
-                  }}
-                >
-                  <UserButton.MenuItems>
-                    <UserButton.Link
-                      label="Billing"
-                      labelIcon={<CreditCard className="size-4" />}
-                      href="/billing"
-                    />
-                  </UserButton.MenuItems>
-                </UserButton>
-              ) : (
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: {
-                        width: 35,
-                        height: 35,
-                        border: '2px solid rgba(255, 255, 255, 0.2)',
-                      },
-                    },
-                  }}
-                >
-                  <UserButton.MenuItems>
-                    <UserButton.Link
-                      label="Billing"
-                      labelIcon={<CreditCard className="size-4" />}
-                      href="/billing"
-                    />
-                  </UserButton.MenuItems>
-                </UserButton>
-              )}
+                  },
+                }}
+              >
+                <UserButton.MenuItems>
+                  <UserButton.Link
+                    label="Billing"
+                    labelIcon={<CreditCard className="size-4" />}
+                    href="/billing"
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             </div>
           </div>
         </nav>
