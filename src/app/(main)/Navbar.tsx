@@ -1,7 +1,7 @@
 "use client";
 import { UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import { CreditCard } from "lucide-react";
+import { CreditCard, FileText, Mail, Mic } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
@@ -74,26 +74,30 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-1">
               <NavLink 
                 href="/resumes" 
-                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200 flex items-center gap-2"
               >
+                <FileText className="h-4 w-4" />
                 Resumes
               </NavLink>
               <NavLink 
                 href="/cover-letters" 
-                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200 flex items-center gap-2"
               >
+                <Mail className="h-4 w-4" />
                 Cover Letters
               </NavLink>
               <NavLink 
                 href="/interview" 
-                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200 flex items-center gap-2"
               >
+                <Mic className="h-4 w-4" />
                 Interviews
               </NavLink>
               <NavLink 
                 href="/billing" 
-                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200"
+                className="px-3 py-1.5 rounded-full text-sm font-medium text-green-100 hover:text-white hover:bg-green-800/50 transition-all duration-200 flex items-center gap-2"
               >
+                <CreditCard className="h-4 w-4" />
                 Billing
               </NavLink>
             </div>

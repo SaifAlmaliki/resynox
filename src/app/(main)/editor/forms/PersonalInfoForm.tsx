@@ -96,7 +96,7 @@ export default function PersonalInfoForm({resumeData, setResumeData}: EditorForm
                             }}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Remove
+                            <span>Remove</span>
                           </Button>
                         </div>
                       </div>

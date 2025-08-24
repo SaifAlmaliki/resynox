@@ -88,91 +88,103 @@ export default function LanguageSkillsForm({
   }, [form, resumeData, setResumeData]);
 
   return (
-    <Form {...form}>
-      <form className="space-y-4 py-2 pb-4">
-        <div className="space-y-4">
-          {fields.map((field, index) => (
-            <div
-              key={field.id}
-              className="flex items-end gap-2 rounded-lg border p-4"
-            >
-              <FormField
-                control={form.control}
-                name={`languages.${index}.language`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Language</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a language" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {languages.map((lang) => (
-                            <SelectItem key={lang} value={lang}>
-                              {lang}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`languages.${index}.level`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Proficiency Level</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {proficiencyLevels.map((level) => (
-                            <SelectItem key={level.value} value={level.value}>
-                              {level.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="self-end"
-                onClick={() => remove(index)}
+    <div className="mx-auto max-w-xl space-y-6">
+      {/* Form header section with a title and description */}
+      <div className="space-y-1.5 text-center">
+        <h2 className="text-2xl font-semibold">Language Skills</h2>
+        <p className="text-sm text-muted-foreground">
+          Add the languages you know and your proficiency level.
+        </p>
+      </div>
+      
+      <Form {...form}>
+        <form className="space-y-4 py-2 pb-4">
+          <div className="space-y-4">
+            {fields.map((field, index) => (
+              <div
+                key={field.id}
+                className="flex items-end gap-2 rounded-lg border p-4"
               >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="mt-2"
-          onClick={() => append({ language: "", level: "beginner" })}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Language
-        </Button>
-      </form>
-    </Form>
+                <FormField
+                  control={form.control}
+                  name={`languages.${index}.language`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Language</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {languages.map((lang) => (
+                              <SelectItem key={lang} value={lang}>
+                                {lang}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`languages.${index}.level`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Proficiency Level</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {proficiencyLevels.map((level) => (
+                              <SelectItem key={level.value} value={level.value}>
+                                {level.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="self-end"
+                  onClick={() => remove(index)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => append({ language: "", level: "beginner" })}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Language
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }

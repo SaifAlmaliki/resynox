@@ -69,9 +69,9 @@ function PersonalInfoHeader({ resumeData }: ResumeSectionProps) {
         <Image
           src={photoSrc}
           width={100}
-          height={100}
+          height={140}
           alt="Author photo"
-          className="aspect-square object-cover print:w-20 print:h-20"
+          className="aspect-[5/7] object-cover print:w-20 print:h-28"
           style={{
             borderRadius:
               borderStyle === BorderStyles.SQUARE
