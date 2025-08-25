@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, WandSparklesIcon } from "lucide-react";
 import Link from "next/link";
 
 
@@ -228,7 +228,14 @@ export default function EditCoverLetterPage() {
             variant="outline"
             className="min-w-[150px]"
           >
-            {enhancingParagraph === 0 ? "Enhancing..." : "✨ Enhance with AI"}
+            {enhancingParagraph === 0 ? (
+              "Enhancing..."
+            ) : (
+              <>
+                <WandSparklesIcon className="size-4 mr-2" />
+                Enhance with AI
+              </>
+            )}
           </Button>
           <p className="text-xs text-muted-foreground">
             Cost: 5 points

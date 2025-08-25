@@ -68,15 +68,20 @@ export default function GenerateSummaryButton({
   }
 
   return (
-    <LoadingButton
-      variant="outline"
-      type="button"
-      onClick={handleClick}
-      loading={loading}
-    >
-      {/*WandSparklesIcon is a decorative icon representing magic/AI generation.*/}
-      <WandSparklesIcon className="size-4" />
-      Generate (AI)
-    </LoadingButton>
+    <div className="flex flex-col items-center space-y-2">
+      <LoadingButton
+        variant="outline"
+        type="button"
+        onClick={handleClick}
+        loading={loading}
+      >
+        {/*WandSparklesIcon is a decorative icon representing magic/AI generation.*/}
+        <WandSparklesIcon className="size-4" />
+        Generate (AI)
+      </LoadingButton>
+      <p className="text-xs text-muted-foreground">
+        Cost: 4 points
+      </p>
+    </div>
   );
 }

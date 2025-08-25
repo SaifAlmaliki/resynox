@@ -52,14 +52,19 @@ export default function GenerateCoverLetterButton({
   }
 
   return (
-    <LoadingButton
-      variant="outline"
-      type="button"
-      onClick={handleClick}
-      loading={loading}
-    >
-      <WandSparklesIcon className="size-4" />
-      Generate Cover Letter (AI)
-    </LoadingButton>
+    <div className="flex flex-col items-center space-y-2">
+      <LoadingButton
+        variant="outline"
+        type="button"
+        onClick={handleClick}
+        loading={loading}
+      >
+        <WandSparklesIcon className="size-4" />
+        Generate Cover Letter (AI)
+      </LoadingButton>
+      <p className="text-xs text-muted-foreground">
+        Cost: 5 points
+      </p>
+    </div>
   );
 }
