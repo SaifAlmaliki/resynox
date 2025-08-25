@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { SplineScene } from "@/components/ui/spline-scene";
 import { Spotlight } from "@/components/ui/spotlight";
 import { ArrowRight, CheckCircle } from "lucide-react";
 
@@ -14,15 +13,13 @@ interface HeroSectionProps {
     text: string;
     href: string;
   };
-  splineScene: string;
 }
 
 export function HeroSection({ 
   title, 
   subtitle, 
   primaryCTA, 
-  secondaryCTA, 
-  splineScene 
+  secondaryCTA 
 }: HeroSectionProps) {
   return (
     <div className="w-full bg-black/[0.96] relative overflow-hidden rounded-xl shadow-2xl border-0 mb-16 animate-fade-in-up">
@@ -31,8 +28,8 @@ export function HeroSection({
         fill="white"
       />
       
-      <div className="flex flex-col md:flex-row min-h-[600px] md:min-h-[700px]">
-        <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center pt-8 md:pt-12 pb-8 md:pb-12">
+      <div className="flex flex-col min-h-[600px] md:min-h-[700px]">
+        <div className="flex-1 p-8 md:p-12 relative z-10 flex flex-col justify-center items-center text-center pt-8 md:pt-12 pb-8 md:pb-12">
           <div className="mb-6">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-900/20 text-green-100 border border-green-800/30">
               <CheckCircle className="w-4 h-4 mr-2" />
@@ -103,12 +100,7 @@ export function HeroSection({
           </div>
         </div>
 
-        <div className="hidden md:block flex-1 relative order-first md:order-last mb-0 md:mb-0 h-[350px] md:h-full">
-          <SplineScene 
-            scene={splineScene}
-            className="w-full h-full scale-125 md:scale-100"
-          />
-        </div>
+
       </div>
     </div>
   );

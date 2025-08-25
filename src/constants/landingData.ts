@@ -10,8 +10,7 @@ export const heroData = {
   secondaryCTA: {
     text: "See How It Works",
     href: "#how-it-works"
-  },
-  splineScene: "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+  }
 };
 
 export const statsData = [
