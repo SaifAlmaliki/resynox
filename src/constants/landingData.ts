@@ -1,10 +1,10 @@
-import { BriefcaseIcon, FileText, Mail, Mic, TrendingUp, User } from "lucide-react";
+import { BriefcaseIcon, FileText, Mail, Mic, TrendingUp, User, Target, Zap, Shield, Award, Clock, Users } from "lucide-react";
 
 export const heroData = {
-  title: "Build. Tailor. Practice. Get Hired.",
-  subtitle: "Resynox is your AI career co‑pilot. Create a standout resume, generate tailored cover letters, and practice real voice interviews—with instant, actionable feedback.",
+  title: "Stop Sending Resumes Into The Void",
+  subtitle: "Join 500+ professionals who've transformed their job search with AI-powered resumes that actually get past ATS systems, cover letters that hiring managers love, and interview practice that builds real confidence.",
   primaryCTA: {
-    text: "Start Free",
+    text: "Start Building Your ATS-Friendly Resume",
     href: "#cta-section"
   },
   secondaryCTA: {
@@ -15,65 +15,65 @@ export const heroData = {
 };
 
 export const statsData = [
-  { value: "500+", label: "Users" },
-  { value: "1,200+", label: "Resumes Created" },
-  { value: "800+", label: "Mock Interviews" },
-  { value: "92%", label: "Success Rate" }
+  { value: "500+", label: "Professionals Hired" },
+  { value: "1,200+", label: "ATS-Friendly Resumes" },
+  { value: "800+", label: "Successful Interviews" },
+  { value: "92%", label: "Interview Success Rate" }
 ];
 
 export const howItWorksData = {
-  title: "Everything you need:end to end",
-  subtitle: "Go from a blank page to interview‑ready in minutes, not weeks.",
+  title: "Your Complete Career Success System",
+  subtitle: "From resume creation to job offer - everything you need to stand out in today's competitive job market.",
   steps: [
     {
       icon: FileText,
-      title: "Create Your Resume",
-      description: "AI drafting for summaries and experience bullets. Beautiful, customizable templates with drag‑and‑drop sections.",
+      title: "Create ATS-Optimized Resumes",
+      description: "AI-powered resume builder that ensures your resume gets past Applicant Tracking Systems. Professional templates with keyword optimization and industry-specific formatting.",
       step: 1
     },
     {
       icon: Mail,
-      title: "Generate Cover Letter",
-      description: "Instant, role‑specific cover letters tailored to your resume and target job description.",
+      title: "Generate Tailored Cover Letters",
+      description: "One-click cover letters that perfectly align your experience with job requirements. AI analyzes job descriptions and creates compelling narratives that hiring managers notice.",
       step: 2
     },
     {
       icon: Mic,
-      title: "Practice Interviews",
-      description: "Realistic voice interviews powered by ElevenLabs. Natural back‑and‑forth conversation.",
+      title: "Practice Real Voice Interviews",
+      description: "Realistic AI-powered voice interviews that prepare you for actual job interviews. Get instant feedback on your responses, body language, and communication skills.",
       step: 3
     },
     {
       icon: TrendingUp,
-      title: "Get Feedback",
-      description: "Structured scoring and clear next steps. Track progress across sessions and improve fast.",
+      title: "Track Progress & Improve",
+      description: "Comprehensive analytics and feedback to track your improvement. See your interview scores, resume performance, and get actionable insights to accelerate your career growth.",
       step: 4
     }
   ]
 };
 
 export const successStoriesData = {
-  title: "Success Stories",
-  subtitle: "See how our platform has helped job seekers land their dream roles",
+  title: "Real People, Real Results",
+  subtitle: "See how professionals like you have transformed their careers and landed dream jobs",
   testimonials: [
     {
       name: "Sarah Johnson",
       role: "Software Engineer at Google",
-      content: "After practicing with ResynoX's mock interviews, I felt so much more confident during my actual interviews. The feedback was incredibly helpful and I landed my dream job at Google!",
+      content: "I was sending out 50+ applications with no responses. After using Resynox's ATS-optimized resume builder, I got 8 interviews in 2 weeks and landed my dream job at Google!",
       rating: 5,
       icon: User
     },
     {
       name: "Michael Chen",
       role: "Product Manager at Amazon",
-      content: "The resume builder helped me create a standout resume that got me multiple interviews. The templates are modern and professional, and the AI suggestions were spot on.",
+      content: "The AI cover letter generator is incredible. It perfectly matched my experience to each job description. I went from 0% response rate to getting interviews at top tech companies.",
       rating: 5,
       icon: User
     },
     {
       name: "Jessica Park",
       role: "UX Designer at Meta",
-      content: "I used the resume builder for my career change and it helped me highlight my transferable skills perfectly. I received compliments on my resume in every interview and landed my dream job!",
+      content: "The voice interview practice gave me the confidence I needed. I practiced with the AI until I felt comfortable, and it showed in my real interviews. I received multiple offers!",
       rating: 5,
       icon: BriefcaseIcon
     }
@@ -82,55 +82,101 @@ export const successStoriesData = {
 
 export const faqData = {
   title: "Frequently Asked Questions",
-  subtitle: "Find answers to common questions about our platform",
+  subtitle: "Everything you need to know about transforming your job search with AI",
   faqs: [
     {
-      question: "How does the AI-powered interview practice work?",
-      answer: "Our AI-powered interview practice simulates real interview scenarios based on the job role you select. You'll receive questions tailored to your experience level and industry, and get detailed feedback on your responses, including suggestions for improvement."
+      question: "How does Resynox ensure my resume gets past ATS systems?",
+      answer: "Our AI analyzes thousands of successful resumes and job descriptions to identify the exact keywords, formatting, and structure that ATS systems look for. We optimize your resume for maximum visibility and ensure it ranks high in applicant tracking systems."
     },
     {
-      question: "Can I customize my resume template?",
-      answer: "Yes! Our resume builder offers multiple customization options. You can choose from various templates, color schemes, fonts, and layouts to create a resume that matches your personal style while maintaining professional standards."
+      question: "Can the AI really create personalized cover letters?",
+      answer: "Yes! Our AI analyzes both your resume and the specific job description to create cover letters that highlight relevant experience, match company culture, and address specific requirements. Each cover letter is unique and tailored to the position."
     },
     {
-      question: "Is there a limit to how many mock interviews I can do?",
-      answer: "Free users can access a limited number of mock interviews per month. Premium subscribers get unlimited access to all interview types and receive more detailed feedback and analysis."
+      question: "How realistic are the voice interview simulations?",
+      answer: "Our AI-powered interviews use advanced natural language processing and realistic voice synthesis to create authentic interview experiences. You'll face real questions, get natural follow-ups, and receive detailed feedback on your responses, communication style, and confidence."
     },
     {
-      question: "How secure is my personal information?",
-      answer: "We take data security very seriously. All your personal information and resume data are encrypted and stored securely. We never share your information with third parties without your explicit consent."
+      question: "What makes Resynox different from other resume builders?",
+      answer: "Unlike basic resume builders, Resynox combines ATS optimization, AI-powered content generation, and realistic interview practice in one platform. We focus on getting you hired, not just creating pretty documents."
     },
     {
-      question: "Can I download my resume in different formats?",
-      answer: "Yes, you can download your resume in PDF, DOCX, and other formats to ensure compatibility with various application systems."
+      question: "How quickly can I see results?",
+      answer: "Most users see immediate improvements in their application response rates within 1-2 weeks of using our ATS-optimized resumes and tailored cover letters. Interview confidence typically improves after just 2-3 practice sessions."
     }
   ]
 };
 
 export const ctaData = {
-  title: "Ready to get more interviews?",
-  subtitle: "Join professionals who turned applications into offers with AI‑powered resumes, tailored cover letters, and real voice interview practice.",
+  title: "Ready to Stop Being Ignored by ATS Systems?",
+  subtitle: "Join professionals who've transformed their job search from frustrating to successful. Get the tools you need to stand out and get hired.",
   ctas: [
     {
       icon: FileText,
-      title: "Resume Builder",
-      description: "Create a professional resume in minutes. AI writing assistance, modern templates, color & layout controls.",
-      buttonText: "Build Resume",
+      title: "ATS-Optimized Resume Builder",
+      description: "Create resumes that actually get past Applicant Tracking Systems. AI-powered content, professional templates, and keyword optimization.",
+      buttonText: "Build Your Resume",
       href: "/resumes"
     },
     {
       icon: Mail,
-      title: "Cover Letter Generator",
-      description: "One‑click, tailored cover letters aligned with your resume and the job you want.",
+      title: "AI Cover Letter Generator",
+      description: "Generate compelling cover letters that match your resume to job requirements. Stand out from generic applications.",
       buttonText: "Create Cover Letter",
       href: "/cover-letters"
     },
     {
       icon: Mic,
-      title: "Mock Interviews",
-      description: "Practice realistic voice interviews and get actionable feedback with clear scores.",
-      buttonText: "Start Interview",
+      title: "Voice Interview Practice",
+      description: "Practice with realistic AI interviews. Build confidence and get detailed feedback to ace your real interviews.",
+      buttonText: "Start Practicing",
       href: "/interview/generate"
     }
+  ]
+};
+
+// New section for key benefits
+export const benefitsData = {
+  title: "Why Resynox Works When Others Don't",
+  subtitle: "The science behind our success rate",
+  benefits: [
+    {
+      icon: Target,
+      title: "ATS Optimization",
+      description: "Our AI ensures your resume gets past Applicant Tracking Systems with the right keywords, formatting, and structure.",
+      stat: "94% ATS Pass Rate"
+    },
+    {
+      icon: Zap,
+      title: "AI-Powered Content",
+      description: "Generate professional content that highlights your achievements and matches job requirements perfectly.",
+      stat: "3x More Interviews"
+    },
+    {
+      icon: Shield,
+      title: "Interview Confidence",
+      description: "Practice with realistic AI interviews until you feel confident and prepared for any question.",
+      stat: "92% Success Rate"
+    },
+    {
+      icon: Clock,
+      title: "Time-Saving",
+      description: "Create professional resumes and cover letters in minutes, not hours. Focus on what matters most.",
+      stat: "80% Time Saved"
+    }
+  ]
+};
+
+// New section for social proof
+export const socialProofData = {
+  title: "Trusted by Professionals Worldwide",
+  subtitle: "Join thousands of successful job seekers",
+  logos: [
+    "Google", "Amazon", "Meta", "Microsoft", "Apple", "Netflix"
+  ],
+  stats: [
+    { value: "10,000+", label: "Resumes Created" },
+    { value: "5,000+", label: "Interviews Practiced" },
+    { value: "2,500+", label: "Jobs Landed" }
   ]
 };

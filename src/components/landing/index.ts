@@ -7,4 +7,6 @@ export { SuccessStoriesSection } from './SuccessStoriesSection';
 export { FAQItem } from './FAQItem';
 export { FAQSection } from './FAQSection';
 export { CTACard } from './CTACard';
-export { CTASection } from './CTASection'; 
+export { CTASection } from './CTASection';
+export { BenefitsSection } from './BenefitsSection';
+export { SocialProofSection } from './SocialProofSection'; 
