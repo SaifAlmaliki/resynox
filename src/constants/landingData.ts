@@ -167,6 +167,13 @@ export const benefitsData = {
   ]
 };
 
+// Video section data
+export const videoData = {
+  title: "See Resynox in Action",
+  subtitle: "",
+  videoUrl: "https://youtu.be/jDOFzCE-eYI"
+};
+
 // New section for social proof
 export const socialProofData = {
   title: "Trusted by Professionals Worldwide",

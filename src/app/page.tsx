@@ -2,6 +2,7 @@
 
 import {
   HeroSection,
+  VideoSection,
   HowItWorksSection,
   SuccessStoriesSection,
   FAQSection,
@@ -14,6 +15,7 @@ import { Footer } from '@/components/ui/footer';
 
 import {
   heroData,
+  videoData,
   howItWorksData,
   successStoriesData,
   faqData,
@@ -31,6 +33,7 @@ export default function Home() {
       <main>
         <div className="max-w-7xl mx-auto py-8 md:py-12 px-4 sm:px-6 lg:px-8 pt-20 md:pt-24">
           <HeroSection {...heroData} />
+          <VideoSection {...videoData} />
           <HowItWorksSection {...howItWorksData} />
           <BenefitsSection {...benefitsData} />
           <SuccessStoriesSection {...successStoriesData} />

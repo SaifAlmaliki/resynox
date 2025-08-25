@@ -9,4 +9,5 @@ export { FAQSection } from './FAQSection';
 export { CTACard } from './CTACard';
 export { CTASection } from './CTASection';
 export { BenefitsSection } from './BenefitsSection';
-export { SocialProofSection } from './SocialProofSection'; 
+export { SocialProofSection } from './SocialProofSection';
+export { VideoSection } from './VideoSection'; 
