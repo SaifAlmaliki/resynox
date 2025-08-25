@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 // Inline Stepper component implementation
 import { cn } from "@/lib/utils";
-import { X, Plus, Loader2, Lock, ArrowRight } from "lucide-react";
+import { X, Plus, Loader2, Lock, ArrowRight, WandSparklesIcon } from "lucide-react";
 import { Agent } from "@/components/interview/Agent";
 import { useSubscriptionLevel } from "../../SubscriptionLevelProvider";
 import { canUseVoiceAgent } from "@/lib/permissions";
@@ -524,16 +524,24 @@ const InterviewGeneratePage = () => {
                   <Button variant="outline" onClick={() => setActiveStep(1)}>
                     Back
                   </Button>
-                  <Button onClick={handleStartInterview} disabled={isStartingInterview}>
-                    {isStartingInterview ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Starting Interview...
-                      </>
-                    ) : (
-                      "Start Voice Interview"
-                    )}
-                  </Button>
+                  <div className="flex flex-col items-center space-y-2">
+                    <Button onClick={handleStartInterview} disabled={isStartingInterview}>
+                      {isStartingInterview ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Starting Interview...
+                        </>
+                      ) : (
+                        <>
+                          <WandSparklesIcon className="h-4 w-4 mr-2" />
+                          Start Voice Interview
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Cost: 10 points
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

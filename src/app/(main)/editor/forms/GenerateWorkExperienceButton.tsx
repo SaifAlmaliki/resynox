@@ -52,22 +52,27 @@ export default function GenerateWorkExperienceButton({ onWorkExperienceGenerated
 
   return (
     <>
-      <Button
-        variant="outline"
-        type="button"
-        onClick={() => {
-          // If user cannot use AI tools, show premium modal and return early
-          if (!canUseAITools(subscriptionLevel)) {
-            premiumModal.setOpen(true);
-            return;
-          }
-          // Otherwise, show the dialog to input work experience description
-          setShowInputDialog(true);
-        }}
-      >
-        <WandSparklesIcon className="size-4" />
-        Smart fill (AI)
-      </Button>
+      <div className="flex flex-col items-center space-y-2">
+        <Button
+          variant="outline"
+          type="button"
+          onClick={() => {
+            // If user cannot use AI tools, show premium modal and return early
+            if (!canUseAITools(subscriptionLevel)) {
+              premiumModal.setOpen(true);
+              return;
+            }
+            // Otherwise, show the dialog to input work experience description
+            setShowInputDialog(true);
+          }}
+        >
+          <WandSparklesIcon className="size-4" />
+          Smart fill (AI)
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          Cost: 2 points
+        </p>
+      </div>
 
       {/* The input dialog for the user to provide a description, which will be used to generate the work experience */}
       <InputDialog
